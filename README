@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------
-the FNPCT package v 0.1
+the FNPCT package v0.1
 
   messing with footnote kerning
 
@@ -29,29 +29,4 @@ The fnpct package consists of the files
 --------------------------------------------------------------------------
 If you have any ideas, questions, suggestions or bugs to report, please
 feel free to contact me.
---------------------------------------------------------------------------
-DISCLAIMER
-no testing has been made to ensure functionality together with other footnote
-packages. Footnotes produced by \footcite and similar citing commands are not
-affected.
---------------------------------------------------------------------------
-USAGE:
-
-Use \footnote the usual way. If a dot (.) or a comma (,) follows the footnote
-like ``\footnote{some text}.'' the package will reverse the order of footnote
-and punctuation character and skip the footnote back by a small space which can
-be changed using a package option:
-\usepackage[after-dot-space = -.08em]{fnpct}
-In other cases a small space is inserted between last word and footnote.
-
-Options are:
-  after-dot-space (initially -.06em)
-  after-comma-space (initially -.06em)
-  after-punct-space (set both spaces)
-  before-dot-space (initially -.15em)
-  before-comma-space (initially -.15em)
-  before-punct-space (set both spaces)
-  before-footnote-space (initially .06em)
-  punct-after (boolean switch; if true the dot/comma is inserted after the
-    footnote instead of before)
 --------------------------------------------------------------------------
