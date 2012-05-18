@@ -116,10 +116,10 @@ Now, let's see some action:
 \end{beispiel}
 
 To ensure that the kerning is set the right way the footnote \emph{must} be placed
-before the dot or the comma. The command can look ahead but not look back. This means
-if you place the \cmd{footnote} command after a dot or a comma it is treated as if
-followed a word, \ie a thin space is inserted: effectivly the opposite of the
-desired behaviour.
+\emph{before} the dot or the comma. The command can look ahead but not look back.
+This means if you place the \cmd{footnote} command after a dot or a comma it is
+treated as if following a word, \ie a thin space is inserted: effectivly the opposite 
+of the desired behaviour.
 
 The order-switching can be prevented using a package option since not all countries
 and languages have the same typographic conventions.
@@ -310,6 +310,7 @@ If you want you can turn all footnotes into \cmd{multfootnote}s.
 \end{beispiel}
 \secidx*{multiple footnotes}
 
+\newpage
 \section{Footcites}\secidx{footcites}
 Preliminary testing suggests that \fnpct seems to be compatible with the
 \cmd{footcite} and \cmd{footfullcite} commands provided by the \paket{biblatex}
