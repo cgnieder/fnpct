@@ -181,7 +181,7 @@
     \int_zero:N \l_tmpa_int
     \seq_map_inline:Nn \l_fnpct_multiple_footnotes_seq
       {
-        \fnpct_read_footnote_with_option:n { ##1 }
+        \fnpct_read_footnote_with_option:w ##1 \q_stop
         \int_incr:N \l_tmpa_int
         \int_compare:nNnT
           { \l_tmpa_int }
@@ -192,22 +192,38 @@
   }
 
 \cs_generate_variant:Nn \tl_if_eq:nnTF { fnTF }
-\cs_new:Npn \fnpct_read_footnote_with_option:n #1
-  { 
-    \tl_if_eq:fnTF { \tl_head:n { #1 } } { [ }
-      { \fnpct_read_footnote_with_option_aux:w #1 \q_stop }
-      { \fnpct_orig_footnote:w { #1 } }
+
+% this shouldn't be a document command but is an easy to make biblatex's
+% \footcite et.al. compatible with the `multiple' option
+\NewDocumentCommand \fnpct_read_footnote_with_option:w { ou{\q_stop} }
+  {
+    \IfNoValueTF { #1 }
+      { \fnpct_orig_footnote:w { #2 } }
+      { \fnpct_orig_footnote:w [ #1 ] { #2 } }
   }
 
-\cs_new:Npn \fnpct_read_footnote_with_option_aux:w [#1]#2 \q_stop
-  { \fnpct_orig_footnote:w [ #1 ] { #2 } }
+% --------------------------------------------------------------------------
+% manual kerning:
+\cs_new:Npn \kfp
+  {
+    \bool_if:NTF \l_fnpct_punct_after_bool
+      { \skip_horizontal:N \l_fnpct_before_dot_dim }
+      { \skip_horizontal:N \l_fnpct_after_dot_dim }
+  }
+\cs_new:Npn \kfc
+  {
+    \bool_if:NTF \l_fnpct_punct_after_bool
+      { \skip_horizontal:N \l_fnpct_before_comma_dim }
+      { \skip_horizontal:N \l_fnpct_after_comma_dim }
+  }
+
 % --------------------------------------------------------------------------
 % do the redefining:
 \AtBeginDocument
   {
     % save definition of \footnote
-    \cs_new_eq:NN \fnpct_orig_footnote:w \footnote
-    \cs_new_eq:NN \fnpct_orig_footnotemark:w \footnotemark
+    \cs_set_eq:NN \fnpct_orig_footnote:w \footnote
+    \cs_set_eq:NN \fnpct_orig_footnotemark:w \footnotemark
     % redefine \footnote
     \bool_if:NTF \l_fnpct_multiple_default_bool
       { \cs_set_eq:NN \footnote \multfootnote }
@@ -252,4 +268,5 @@ HISTORY
 
 % --------------------------------------------------------------------------
 % TODO:
-- what about \footcite{}, \footfullcite{} and the kind?
+- what about \footcite{}, \footfullcite{} and the kind? => needs another way
+  to store the \footnote commands
