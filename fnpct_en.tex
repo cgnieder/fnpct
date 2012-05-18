@@ -80,6 +80,7 @@ It has the status \enquote{maintained}.
 \paket{l3packages} bundle.
 
 \section{What's it all about?}
+\subsection{Basics}
 The \fnpct package basically does two things to footnotes: if footnote marks are
 followed by a comma or a dot the order of footnote and punctuation mark is reversed
 and the kerning gets adjusted.
@@ -99,7 +100,14 @@ Now, let's see some action:
  \end{minipage}
 \end{beispiel}
 
-The order-switching can be prevented using a package option
+To ensure that the kerning is set the right way the footnote \emph{must} be placed
+before the dot or the comma. The command can look ahead but not look back. This means
+if you place the \cmd{footnote} command after a dot or a comma it is treated as if
+followed a word, \ie a thin space is inserted: effectivly the opposite of the
+desired behaviour.
+
+The order-switching can be prevented using a package option since not all countries
+and languages have the same typographic conventions.
 \begin{beschreibung}
  \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
  will be placed \emph{after} the footnote.
@@ -109,7 +117,6 @@ which like all options can also be set using the setup command.
  \befehl{setfnpct}{<options>} set up options. Can be used anywhere in the document.
  Some options can only be set in the preamble, though.
 \end{beschreibung}
-
 \begin{beispiel}
  \setfnpct{punct-after}
  \begin{minipage}{.4\linewidth}
@@ -120,12 +127,31 @@ which like all options can also be set using the setup command.
  \end{minipage}
 \end{beispiel}
 
+\subsection{Temporarily disable switching}
+One maybe want to put some footnote marks \emph{before} the punctuation and some
+after, for example because the first one describes a single word but the second
+one a whole sentence. For this purpose \fnpct adds a \code{*} argument to \cmd{footnote}
+and \cmd{footnotemark}:
+\begin{beschreibung}
+ \befehl[footnotea]{footnote}*[<num>]{<footnote text>} new \code{*} argument added.
+ \befehl[footnotemarka]{footnotemark}*[<num>] new \code{*} argument added.
+\end{beschreibung}
+This argument temporarily turns off the punctuation/footnote switching.
+\begin{beispiel}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote*{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}.
+ \end{minipage}
+\end{beispiel}
+
 \achtung{Please be aware that this package is in an experimental state and there
 hasn't been extensive testing with other footnote behaviour changing packages!}
 
-\newpage
 \section{Options}
-Besides the \enquote{order switching} you can also adjust the kerning:
+All package options are listed below. They all can be set as a package option or
+with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
 \begin{beschreibung}
  \option{after-dot-space}{<dim>} space to be inserted after a dot and before the
  footnote mark. Default = \code{-.06em}
@@ -142,10 +168,14 @@ Besides the \enquote{order switching} you can also adjust the kerning:
  \option{before-footnote-space}{<dim>} space to be inserted between a word and the
  following footnote mark. Default = \code{.06em}
  \option{multiple}{\default{true}/false} lets \cmd{footnote} be equal to
- \cmd{multfootnote} 
+ \cmd{multfootnote}
+ \option{mult-fn-delim}{<delimiter>} sets the delimiter for the \cmd{multfootnote}
+ command.
+ \option{mult-fn-sep}{<separator>} sets the separator between multiple footnote
+ marks.
 \end{beschreibung}
 
-Let's take a look at an example:
+Let's take a look at an example with some ridiculous settings:
 \begin{beispiel}
  % some ridiculous settings:
  \setfnpct{after-punct-space=2pt,before-footnote-space=2pt}
@@ -173,11 +203,12 @@ Some of the options are explained in a bit more detail in the next sections.
 
 \section{Multiple footnotes}
 \subsection{Basics}
-Since multiple footnotes have to be treated differently\multfootnote{see this;as an example},
+Since multiple footnotes have to be treated differently\footnote{see these footnotes;for an example},
 \fnpct provides an extra command for that:
 \begin{beschreibung}
- \befehl{multfootnote}{<list>;<of>;<footnotes>} different footnotes are separated
- with a semicolon.
+ \befehl{multfootnote}*{<list>;<of>;<footnotes>} different footnotes are separated
+ with a semicolon. The \code{*} turns the footnote/punctuation switching temporarily
+ off.
 \end{beschreibung}
 \begin{beispiel}
  \begin{minipage}{.4\linewidth}
@@ -201,7 +232,7 @@ argument of \cmd{footnote}:
  \end{minipage}
 \end{beispiel}
 
-\subsection{The delimiter}
+\subsection{The delimiter and separator}
 Since the semicolon might be part of the footnote text you might have some trouble.
 But there are ways around. Maybe try enclosing it with braces:
 \begin{beispiel}
@@ -214,19 +245,31 @@ But there are ways around. Maybe try enclosing it with braces:
  \end{minipage}
 \end{beispiel}
 
-There is an option which lets you choose the delimiter:
+There are options which lets you choose the (input) delimiter and the (output)
+separator:
 \begin{beschreibung}
  \option{mult-fn-delim}{<delimiter>} choose delimiter for the \cmd{multfootnote}.
  Default = \code{;}
+ \option{mult-fn-sep}{<separator>} choose the separator that is put between footnote
+ marks. Default = \code{,}
 \end{beschreibung}
 \begin{beispiel}
- \setfnpct{mult-fn-delim=//}
- \begin{minipage}{.4\linewidth}
+ \setfnpct{mult-fn-delim=//,mult-fn-sep=;}
+ \begin{minipage}[t]{.4\linewidth}
   \noindent The three little pigs built their houses
   out of straw\footnote{not to be confused with hay},
   sticks\footnote{or lumber according to some sources}
   and bricks\multfootnote{probably fired clay bricks;
   or something else//what do I know}.
+ \end{minipage}
+ \setfnpct{mult-fn-delim=;,mult-fn-sep=}
+ \renewcommand*\thempfootnote{\fnsymbol{mpfootnote}}
+ \begin{minipage}[t]{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\multfootnote{probably fired clay bricks;
+  or something else}.
  \end{minipage}
 \end{beispiel}
 
@@ -238,6 +281,7 @@ If you want you can turn all footnotes into \cmd{multfootnote}s.
 \end{beschreibung}
 \begin{beispiel}
  % in preamble: \setfnpct{multiple}
+ % or \usepackage[multiple]{fnpct}
  \begin{minipage}{.4\linewidth}
   \noindent The three little pigs built their houses
   out of straw\footnote{not to be confused with hay},
@@ -305,6 +349,12 @@ In case of \key{punct-after}{true}:
   companion has nothing on this topic\footfullcite{companion}\kfp.
  \end{minipage}
 \end{beispiel}
+
+\section{Other notes}
+\subsection{endnotes}
+
+\subsection{parnotes}
+
 
 \appendix
 \printbibliography
