@@ -1,0 +1,273 @@
+\documentclass[toc=index,toc=bib]{cnpkgdoc}
+\docsetup{
+  pkg      = fnpct ,
+  code-box = {
+    skipbelow = .5\baselineskip ,
+    skipabove = .5\baselineskip ,
+  }
+}
+\addcmds{arabic,kfc,kfp,multfootnote,setfnpct,thempfootnote}
+\setfnpct{multiple}
+
+\renewcommand\thempfootnote{\arabic{mpfootnote}}
+
+\usepackage[backend=biber]{biblatex}
+\addbibresource{biblatex-examples.bib}
+
+\begin{filecontents}{fnpct_en.ist}
+ preamble "\\begin{theindex}\n Section titles are indicated \\textbf{bold},
+ packages \\textsf{sans serif}, commands \\code{\\textbackslash\\textcolor{code}{brown}}
+ and options \\textcolor{key}{\\code{green}}.\\newline\n\n"
+ heading_prefix "{\\bfseries "
+ heading_suffix "\\hfil}\\nopagebreak\n"
+ headings_flag  1
+ delim_0 "\\dotfill "
+ delim_1 "\\dotfill "
+ delim_2 "\\dotfill "
+ delim_r "\\textendash"
+ suffix_2p "\\nohyperpage{\\,f.}"
+ suffix_3p "\\nohyperpage{\\,ff.}"
+\end{filecontents}
+
+\makeindex
+\begin{document}
+
+\section{License and Requirements}
+\fnpct is placed under the terms of the LaTeX Project Public License,
+version 1.3 or later (\url{http://www.latex-project.org/lppl.txt}).
+It has the status \enquote{maintained}.
+
+\fnpct depends on the \paket{l3kernel} and \paket*{xparse} which is part of the
+\paket{l3packages} bundle.
+
+\section{What's it all about?}
+The \fnpct package basically does two things to footnotes: if footnote marks are
+followed by a comma or a dot the order of footnote and punctuation mark is reversed
+and the kerning gets adjusted.
+
+All examples in this documentation use
+\begin{beispiel}[code only]
+ \renewcommand\thempfootnote{\arabic{mpfootnote}}
+\end{beispiel}
+
+Now, let's see some action:
+\begin{beispiel}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}.
+ \end{minipage}
+\end{beispiel}
+
+The order-switching can be prevented using a package option
+\begin{beschreibung}
+ \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
+ will be placed \emph{after} the footnote.
+\end{beschreibung}
+which like all options can also be set using the setup command.
+\begin{beschreibung}
+ \befehl{setfnpct}{<options>} set up options. Can be used anywhere in the document.
+ Some options can only be set in the preamble, though.
+\end{beschreibung}
+
+\begin{beispiel}
+ \setfnpct{punct-after}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}.
+ \end{minipage}
+\end{beispiel}
+
+\achtung{Please be aware that this package is in an experimental state and there
+hasn't been extensive testing with other footnote behaviour changing packages!}
+
+\newpage
+\section{Options}
+Besides the \enquote{order switching} you can also adjust the kerning:
+\begin{beschreibung}
+ \option{after-dot-space}{<dim>} space to be inserted after a dot and before the
+ footnote mark. Default = \code{-.06em}
+ \option{after-comma-space}{<dim>} space to be inserted after a comma and before
+ the footnote mark. Default = \code{-.06em}
+ \option{after-punct-space}{<dim>} set both spaces.
+ \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
+ will be placed \emph{after} the footnote.
+ \option{before-dot-space}{<dim>} space to be inserted before a dot and after the
+ footnote mark, \ie with \key{punct-after}{true}. Default = \code{-.15em}
+ \option{before-comma-space}{<dim>} space to be inserted before a comma and after
+ the footnote mark, \ie with \key{punct-after}{true}. Default = \code{-.15em}
+ \option{before-punct-space}{<dim>} set both spaces.
+ \option{before-footnote-space}{<dim>} space to be inserted between a word and the
+ following footnote mark. Default = \code{.06em}
+ \option{multiple}{\default{true}/false} lets \cmd{footnote} be equal to
+ \cmd{multfootnote} 
+\end{beschreibung}
+
+Let's take a look at an example:
+\begin{beispiel}
+ % some ridiculous settings:
+ \setfnpct{after-punct-space=2pt,before-footnote-space=2pt}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}.
+ \end{minipage}
+\end{beispiel}
+
+And now the same with switched order:
+\begin{beispiel}
+ % some ridiculous settings:
+ \setfnpct{punct-after,before-punct-space=2pt,before-footnote-space=2pt}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}.
+ \end{minipage}
+\end{beispiel}
+
+Some of the options are explained in a bit more detail in the next sections.
+
+\section{Multiple footnotes}
+\subsection{Basics}
+Since multiple footnotes have to be treated differently\multfootnote{see this;as an example},
+\fnpct provides an extra command for that:
+\begin{beschreibung}
+ \befehl{multfootnote}{<list>;<of>;<footnotes>} different footnotes are separated
+ with a semicolon.
+\end{beschreibung}
+\begin{beispiel}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\multfootnote{probably fired clay bricks;or
+  something else}.
+ \end{minipage}
+\end{beispiel}
+
+Every of the items of the list has an optional argument equivalent to the optional
+argument of \cmd{footnote}:
+\begin{beispiel}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\multfootnote{probably fired clay bricks;[5]or
+  something else}.
+ \end{minipage}
+\end{beispiel}
+
+\subsection{The delimiter}
+Since the semicolon might be part of the footnote text you might have some trouble.
+But there are ways around. Maybe try enclosing it with braces:
+\begin{beispiel}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\multfootnote{probably fired clay bricks{;}
+  or something else;what do I know}.
+ \end{minipage}
+\end{beispiel}
+
+There is an option which lets you choose the delimiter:
+\begin{beschreibung}
+ \option{mult-fn-delim}{<delimiter>} choose delimiter for the \cmd{multfootnote}.
+ Default = \code{;}
+\end{beschreibung}
+\begin{beispiel}
+ \setfnpct{mult-fn-delim=//}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\multfootnote{probably fired clay bricks;
+  or something else//what do I know}.
+ \end{minipage}
+\end{beispiel}
+
+\subsection{Automagic}
+If you want you can turn all footnotes into \cmd{multfootnote}s.
+\begin{beschreibung}
+ \option{multiple}{\default{true}/false} let \cmd{footnote} behave like \cmd{multfootnote}.
+ \emph{This option can only be set in the preamble}. Default = \code{false}
+\end{beschreibung}
+\begin{beispiel}
+ % in preamble: \setfnpct{multiple}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks;or
+  something else}.
+ \end{minipage}
+\end{beispiel}
+
+\section{Footcites}
+Preliminary testing suggests that \fnpct seems to be compatible with the
+\cmd{footcite} and \cmd{footfullcite} commands provided by the \paket{biblatex}
+package. However, the punctuation switching does not apply to them.
+
+The kerning works \ldots
+\begin{beispiel}
+ \setfnpct{before-footnote-space=2pt}
+ \begin{minipage}{.5\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}. The
+  companion\footfullcite{companion} has nothing on this
+  topic.
+ \end{minipage}
+\end{beispiel}
+
+\ldots\ but the punctuation switching doesn't:
+\begin{beispiel}
+ \begin{minipage}{.5\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}. The
+  companion has nothing on this topic\footfullcite{companion}.
+ \end{minipage}
+\end{beispiel}
+
+One can simulate that behaviour by actively setting one of these commands:
+\begin{beschreibung}
+ \befehl{kfp} insert the \key{after-dot-space} or (if \key{punct-after}{true})
+ the \key{before-dot-space}.
+ \befehl{kfc} insert the \key{after-comma-space} or (if \key{punct-after}{true})
+ the \key{before-comma-space}.
+\end{beschreibung}
+\begin{beispiel}
+ \setfnpct{after-punct-space=-.15em}
+ \begin{minipage}{.5\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}. The
+  companion has nothing on this topic.\kfp\footfullcite{companion}
+ \end{minipage}
+\end{beispiel}
+
+In case of \key{punct-after}{true}:
+\begin{beispiel}
+ \setfnpct{punct-after}
+ \begin{minipage}{.5\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}. The
+  companion has nothing on this topic\footfullcite{companion}\kfp.
+ \end{minipage}
+\end{beispiel}
+
+\appendix
+\printbibliography
+\printindex
+\end{document}
