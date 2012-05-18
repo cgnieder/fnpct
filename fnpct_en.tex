@@ -45,8 +45,23 @@
     skipabove = .5\baselineskip ,
   }
 }
-\addcmds{arabic,kfc,kfp,multfootnote,setfnpct,thempfootnote}
+\addcmds{
+  arabic,
+  endnote,
+  kfc,
+  kfp,
+  multendnote,
+  multfootnote,
+  multparnote,
+  parnote,
+  parnotes,
+  setfnpct,
+  theendnotes,
+  thempfootnote
+}
 \setfnpct{multiple}
+\usepackage{endnotes}
+\usepackage{parnotes}
 
 \renewcommand\thempfootnote{\arabic{mpfootnote}}
 
@@ -80,7 +95,7 @@ It has the status \enquote{maintained}.
 \paket{l3packages} bundle.
 
 \section{What's it all about?}
-\subsection{Basics}
+\subsection{Basics}\secidx{basics}
 The \fnpct package basically does two things to footnotes: if footnote marks are
 followed by a comma or a dot the order of footnote and punctuation mark is reversed
 and the kerning gets adjusted.
@@ -126,8 +141,9 @@ which like all options can also be set using the setup command.
   and bricks\footnote{probably fired clay bricks}.
  \end{minipage}
 \end{beispiel}
+\secidx*{basics}
 
-\subsection{Temporarily disable switching}
+\subsection{Temporarily disable switching}\secidx{disable switching}
 One maybe want to put some footnote marks \emph{before} the punctuation and some
 after, for example because the first one describes a single word but the second
 one a whole sentence. For this purpose \fnpct adds a \code{*} argument to \cmd{footnote}
@@ -148,8 +164,9 @@ This argument temporarily turns off the punctuation/footnote switching.
 
 \achtung{Please be aware that this package is in an experimental state and there
 hasn't been extensive testing with other footnote behaviour changing packages!}
+\secidx*{disable switching}
 
-\section{Options}
+\section{Options}\secidx{options}
 All package options are listed below. They all can be set as a package option or
 with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
 \begin{beschreibung}
@@ -200,9 +217,10 @@ And now the same with switched order:
 \end{beispiel}
 
 Some of the options are explained in a bit more detail in the next sections.
+\secidx*{options}
 
-\section{Multiple footnotes}
-\subsection{Basics}
+\section{Multiple footnotes}\secidx{multiple footnotes}
+\subsection{Basics}\secidx[basics]{multiple footnotes}
 Since multiple footnotes have to be treated differently\footnote{see these footnotes;for an example},
 \fnpct provides an extra command for that:
 \begin{beschreibung}
@@ -232,7 +250,7 @@ argument of \cmd{footnote}:
  \end{minipage}
 \end{beispiel}
 
-\subsection{The delimiter and separator}
+\subsection{The delimiter and separator}\secidx[delimiter]{multiple footnotes}\secidx[separator]{multiple footnotes}
 Since the semicolon might be part of the footnote text you might have some trouble.
 But there are ways around. Maybe try enclosing it with braces:
 \begin{beispiel}
@@ -261,7 +279,7 @@ separator:
   sticks\footnote{or lumber according to some sources}
   and bricks\multfootnote{probably fired clay bricks;
   or something else//what do I know}.
- \end{minipage}
+ \end{minipage}\hfil
  \setfnpct{mult-fn-delim=;,mult-fn-sep=}
  \renewcommand*\thempfootnote{\fnsymbol{mpfootnote}}
  \begin{minipage}[t]{.4\linewidth}
@@ -273,7 +291,7 @@ separator:
  \end{minipage}
 \end{beispiel}
 
-\subsection{Automagic}
+\subsection{Automagic}\secidx[automagic]{multiple footnotes}
 If you want you can turn all footnotes into \cmd{multfootnote}s.
 \begin{beschreibung}
  \option{multiple}{\default{true}/false} let \cmd{footnote} behave like \cmd{multfootnote}.
@@ -290,8 +308,9 @@ If you want you can turn all footnotes into \cmd{multfootnote}s.
   something else}.
  \end{minipage}
 \end{beispiel}
+\secidx*{multiple footnotes}
 
-\section{Footcites}
+\section{Footcites}\secidx{footcites}
 Preliminary testing suggests that \fnpct seems to be compatible with the
 \cmd{footcite} and \cmd{footfullcite} commands provided by the \paket{biblatex}
 package. However, the punctuation switching does not apply to them.
@@ -349,12 +368,68 @@ In case of \key{punct-after}{true}:
   companion has nothing on this topic\footfullcite{companion}\kfp.
  \end{minipage}
 \end{beispiel}
+\secidx*{footcites}
 
+\newpage
 \section{Other notes}
-\subsection{endnotes}
+\fnpct currently supports two packages which provide similar notes.
+\subsection{endnotes}\secidx{endnotes}
+The \paket{endnotes} package povides the commands \cmd{endnote} and \cmd{endnotemark}
+which can be used to output all notes at the end of a chapter, say.
 
-\subsection{parnotes}
+If the package is loaded \fnpct extends its functionality to these commands in
+the same way it does with footnotes. For example an according \cmd{multendnote}
+is defined. With the package option \key{multiple} all \cmd{endnote}s are turned
+into \cmd{multendnote}s.
+\begin{beispiel}
+ \begin{minipage}[t]{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\endnote{not to be confused with hay},
+  sticks\endnote{or lumber according to some sources}
+  and bricks\endnote{probably fired clay bricks}.
+  
+  \theendnotes
+ \end{minipage}\hfil
+ \begin{minipage}[t]{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\endnote*{not to be confused with hay},
+  sticks\endnote{or lumber according to some sources}
+  and bricks\multendnote{probably fired clay bricks;or
+  something else}.
+  
+  \theendnotes
+ \end{minipage}
+\end{beispiel}
+\secidx*{endnotes}
 
+\newpage
+\subsection{parnotes}\secidx{parnotes}
+The \paket{parnotes} package does something similar to the \paket{endnotes}
+package. If \paket{parnotes} is loaded \fnpct extends its functionality analogous
+to the one of \paket{endnotes}.
+
+Again the \key{multiple} option turns all \cmd{parnote}s into \cmd{multparnote}s.
+\begin{beispiel}
+ \begin{minipage}[t]{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\parnote{not to be confused with hay},
+  sticks\parnote{or lumber according to some sources}
+  and bricks\parnote{probably fired clay bricks}.
+  
+  \parnotes
+ \end{minipage}\hfil
+ \begin{minipage}[t]{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\parnote*{not to be confused with hay},
+  sticks\parnote{or lumber according to some sources}
+  and bricks\multparnote{probably fired clay bricks;or
+  something else}.
+  
+  \parnotes
+ \end{minipage}
+\end{beispiel}
+
+\secidx*{parnotes}
 
 \appendix
 \printbibliography
