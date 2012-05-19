@@ -231,6 +231,10 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  command.
  \option{mult-fn-sep}{<separator>} sets the separator between multiple footnote
  marks.
+ \option{normal-marks}{\default{true}/false} sets the footnote marks in the foot
+ not as superscripts but as normal font. If you're not using a \paket[koma-script]{KOMA-Script}
+ class this option will load the package \paket*{scrextend}. \emph{This option can
+ only be set in the preamble}. Default = \code{false}
 \end{beschreibung}
 
 Let's take a look at an example with some ridiculous settings:

@@ -45,7 +45,7 @@
 % this is plain's \nobreak:
 \cs_new:Npn \fnpct_no_break: { \tex_penalty:D \c_ten_thousand }
 
-% basic dimensions:
+% rigid lengths:
 \dim_new:N \l_fnpct_after_comma_dim
 \dim_set:Nn \l_fnpct_after_comma_dim { -.06em }
 \dim_new:N \l_fnpct_after_dot_dim
@@ -56,6 +56,12 @@
 \dim_set:Nn \l_fnpct_before_dot_dim { -.16em }
 \dim_new:N \l_fnpct_before_footnote_dim
 \dim_set:Nn \l_fnpct_before_footnote_dim { .06em }
+\dim_new:N \l_fnpct_normal_mark_indent_dim
+\dim_set:Nn \l_fnpct_normal_mark_indent_dim { 1em }
+\dim_new:N \l_fnpct_normal_indent_dim
+\dim_set:Nn \l_fnpct_normal_indent_dim { 1.5em }
+\dim_new:N \l_fnpct_normal_parindent_dim
+\dim_set:Nn \l_fnpct_normal_parindent_dim { 1em }
 
 % multiple footnote input and output variables:
 \tl_new:N \l_fnpct_multiple_footnotes_delimiter_tl
@@ -72,7 +78,7 @@
 \bool_new:N \l_fnpct_multiple_footnotes_bool
 \bool_new:N \l_fnpct_dont_switch_bool
 \bool_new:N \l_fnpct_bigfoot_default_top_bool
-% \bool_set_true:N \l_fnpct_bigfoot_default_top_bool
+\bool_new:N \l_fnpct_normal_marks_bool
 
 % options:
 \keys_define:nn { fnpct }
@@ -95,7 +101,12 @@
     multiple              .bool_set:N = \l_fnpct_multiple_default_bool ,
     multiple              .default:n  = true ,
     bigfoot-default-top   .bool_set:N = \l_fnpct_bigfoot_default_top_bool ,
-    bigfoot-default-top   .default:n  = true
+    bigfoot-default-top   .default:n  = true ,
+    normal-marks          .bool_set:N = \l_fnpct_normal_marks_bool ,
+    normal-marks          .default:n  = true ,
+    normal-mark-indent    .dim_set:N  = \l_fnpct_normal_mark_indent_dim ,
+    normal-indent         .dim_set:N  = \l_fnpct_normal_indent_dim ,
+    normal-parindent      .dim_set:N  = \l_fnpct_normal_parindent_dim
   }
 
 \ProcessKeysOptions { fnpct }
@@ -264,6 +275,22 @@
   }
 
 % --------------------------------------------------------------------------
+% NORMAL MARKS:
+\AtBeginDocument
+  {
+    \bool_if:NT \l_fnpct_normal_marks_bool
+      {
+        \cs_if_exist:NF \KOMAoption
+          { \RequirePackage { scrextend } }
+        \deffootnote
+          [ \l_fnpct_normal_mark_indent_dim ]
+          { \l_fnpct_normal_indent_dim }
+          { \l_fnpct_normal_parindent_dim }
+          { \thefootnotemark . \enskip }
+      }
+  }
+
+% --------------------------------------------------------------------------
 % DO THE REDEFINING:
 \AtBeginDocument
   {
@@ -320,13 +347,14 @@
       {
         \prop_map_inline:Nn \l_fnpct_footnote_class_prop
           {
-            % TODO: catch all footnote types, copy and redefine them,
-            % each with a \mult<> variant
+            % store each footnote command
             \cs_set_eq:cc { fnpct_orig_footnote#2:w } { footnote#2 }
             \cs_set_eq:cc { fnpct_orig_footnotemark#2:w } { footnotemark#2 }
-            % this is the 2e way: how do I do that with expl3?
+            % then define a suiting \mult... command
+            % (this is the 2e way: how do I do that with expl3?)
             \exp_after:wN \NewDocumentCommand \cs:w multfootnote#2 \cs_end: { s+m }
               { \fnpct_mult_note:cnn { fnpct_orig_footnote#2:w } { ##1 } { ##2 } }
+            % and redefine each command depending on `multiple'
             \bool_if:NTF \l_fnpct_multiple_default_bool
               { \cs_set_eq:cc { footnote#2 } { multfootnote#2 } }
               {
@@ -336,6 +364,7 @@
             \exp_after:wN \RenewDocumentCommand \cs:w footnotemark#2 \cs_end: { so }
               { \fnpct_dot_or_comma:cnnn { fnpct_orig_footnotemark#2:w } { ##2 } { } { } }
           }
+        % re-set basics:
         \cs_set_eq:NN \footnote \footnotedefault
         \cs_set_eq:NN \footnotemark \footnotemarkdefault
         \cs_set_eq:NN \multfootnote \multfootnotedefault
@@ -384,3 +413,4 @@
 
 % --------------------------------------------------------------------------
 % TODO:
+- option: bigfoot-perpage?
