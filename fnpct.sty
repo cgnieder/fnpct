@@ -148,6 +148,7 @@
             \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
               { \skip_horizontal:N \l_fnpct_before_comma_dim \fnpct_no_break: , }
             \bool_set_false:N \l_fnpct_dont_switch_bool
+%             \tl_show:n { I'm~in }
           }
           {
             % else insert space and then note
@@ -289,7 +290,7 @@
           { \fnpct_dot_or_comma:Nnnn \fnpct_orig_footnote:w { #2 } { #3 } { #1 } }
       }
     \RenewDocumentCommand \footnotemark { so }
-      { \fnpct_dot_or_comma:Nnnn \fnpct_orig_footnotemark:w { #2 } { } { } }
+      { \fnpct_dot_or_comma:Nnnn \fnpct_orig_footnotemark:w { #2 } { } { #1 } }
     %% the `endnotes' package:
     \@ifpackageloaded { endnotes }
       {
@@ -303,10 +304,10 @@
           { \cs_set_eq:NN \endnote \multendnote }
           {
             \RenewDocumentCommand \endnote { so+m }
-              { \fnpct_dot_or_comma:Nnnn \fnpct_orig_endnote:w { #2 } { #3 } { } }
+              { \fnpct_dot_or_comma:Nnnn \fnpct_orig_endnote:w { #2 } { #3 } { #1 } }
           }
         \RenewDocumentCommand \endnotemark { so }
-          { \fnpct_dot_or_comma:Nnnn \fnpct_orig_endnotemark:w { #2 } { } { } }
+          { \fnpct_dot_or_comma:Nnnn \fnpct_orig_endnotemark:w { #2 } { } { #1 } }
       }
       { }
     %% the `parnotes' package:
@@ -321,7 +322,7 @@
           { \cs_set_eq:NN \parnote \multparnote }
           {
             \RenewDocumentCommand \parnote { so+m }
-              { \fnpct_dot_or_comma:Nnnn \fnpct_orig_parnote:w { #2 } { #3 } { } }
+              { \fnpct_dot_or_comma:Nnnn \fnpct_orig_parnote:w { #2 } { #3 } { #1 } }
           }
       }
       { }
@@ -341,15 +342,25 @@
               { \cs_set_eq:cc { footnote#2 } { multfootnote#2 } }
               {
                 \exp_after:wN \RenewDocumentCommand \cs:w footnote#2 \cs_end: { so+m }
-                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_footnote#2:w} { ##2 } { ##3 } { ##1 } }
+                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_footnote#2:w } { ##2 } { ##3 } { ##1 } }
               }
             \exp_after:wN \RenewDocumentCommand \cs:w footnotemark#2 \cs_end: { so }
-              { \fnpct_dot_or_comma:cnnn { fnpct_orig_footnotemark#2:w } { ##2 } { } { } }
+              { \fnpct_dot_or_comma:cnnn { fnpct_orig_footnotemark#2:w } { ##2 } { } { ##1 } }
           }
         % re-set basics:
         \cs_set_eq:NN \footnote \footnotedefault
         \cs_set_eq:NN \footnotemark \footnotemarkdefault
         \cs_set_eq:NN \multfootnote \multfootnotedefault
+      }
+      { }
+    \@ifpackageloaded { fixfoot }
+      {
+        \prop_map_inline:Nn \l_fnpct_footnote_fixfoot_prop
+          {
+            \cs_set_eq:cc { fnpct_orig_fix_#2:w } { #2 }
+            \exp_after:wN \RenewDocumentCommand \cs:w #2 \cs_end: { s }
+              { \fnpct_dot_or_comma:cnnn { fnpct_orig_fix_#2:w } { \NoValue } { } { ##1 } }
+          }
       }
       { }
   }
@@ -378,6 +389,24 @@
       }
     \bool_if:NT \l_fnpct_bigfoot_default_top_bool
       { \DeclareNewFootnote { default } }
+  }
+  { }
+
+% as does the `fixfoot' package
+\prop_new:N \l_fnpct_footnote_fixfoot_prop
+\@ifpackageloaded { fixfoot }
+  {
+    % hook into \DeclareFixedFootnote so we can redefine all footnote
+    % classes defined be users
+    \cs_new_eq:NN \fnpct_new_fixnote:w \DeclareFixedFootnote
+    \RenewDocumentCommand \DeclareFixedFootnote { smm }
+      {
+        \prop_put:Nnx \l_fnpct_footnote_fixfoot_prop { #2 }
+          { \cs_to_str:N #2 }
+        \IfBooleanTF { #1 }
+          { \fnpct_new_fixnote:w * { #2 } { #3 } }
+          { \fnpct_new_fixnote:w { #2 } { #3 } }
+      }
   }
   { }
 

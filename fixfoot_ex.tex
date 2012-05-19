@@ -1,0 +1,20 @@
+\documentclass{article}
+\usepackage[
+  paperwidth=.55\textwidth,
+  paperheight=12\baselineskip,
+  margin=5pt,
+  bottom=1.5cm]{geometry}
+  
+\usepackage{fixfoot}
+\usepackage{fnpct}
+
+\DeclareFixedFootnote{\myfn}{I'm confused: what do I want to say?}
+
+\begin{document}
+
+\noindent The three little pigs\myfn\ built their houses
+out of straw\myfn*, sticks\footnote{or lumber according
+to some sources} and bricks\footnote{probably fired clay
+bricks}.
+
+\end{document}

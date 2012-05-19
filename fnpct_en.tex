@@ -85,6 +85,13 @@
   date    = {2012/01/15},
   url     = {http://www.ctan.org/pkg/endnotes}
 }
+@software{fixfoot,
+  title   = {fixfoot},
+  author  = {Robin Fairbairns},
+  date    = {2007/12/12},
+  version = {0.3a} ,
+  url     = {http://www.ctan.org/pkg/fixfoot}
+}
 @software{footmisc,
   title   = {footmisc},
   author  = {Robin Fairbairns},
@@ -503,6 +510,49 @@ into \cmd{multendnote}s.
  \end{minipage}
 \end{beispiel}
 \secidx*{endnotes}
+
+\subsection{fixfoot}
+The \paket{fixfoot} \cite{fixfoot} package provides possibility to create repeating footnotes.
+\fnpct supports this package provided you take care of the following:
+\begin{itemize}
+ \item load the \paket{fixfoot} package first;
+ \item use \cmd{DeclareFixedFootnote} only in the preamble but \emph{after} loading
+ \fnpct;
+\end{itemize}
+Every fixed footnote declared with \cmd{DeclareFixedFootnote} gets an optional
+\code{*} to prevent the punctuation switching.
+
+Since this package cannot easily combine every footnote package for demonstration
+purposes the following code is shown in figure \ref{fig:fixfoot}:
+\begin{beispiel}[code only]
+\documentclass{article}
+\usepackage[
+  paperwidth=.55\textwidth,
+  paperheight=12\baselineskip,
+  margin=5pt,
+  bottom=1.5cm]{geometry}
+  
+\usepackage{fixfoot}
+\usepackage{fnpct}
+
+\DeclareFixedFootnote{\myfn}{I'm confused: what do I want to say?}
+
+\begin{document}
+
+\noindent The three little pigs\myfn\ built their houses
+out of straw\myfn*, sticks\footnote{or lumber according
+to some sources} and bricks\footnote{probably fired clay
+bricks}.
+
+\end{document}
+\end{beispiel}
+
+\begin{figure}[ht]
+ \centering
+ \includegraphics{fixfoot_ex.pdf}
+ \caption{\paket*{fixfoot} example}
+ \label{fig:fixfoot}
+\end{figure}
 
 \subsection{footmisc}
 Testing showed no incompatibilities with the \paket{footmisc} package \cite{footmisc}.
