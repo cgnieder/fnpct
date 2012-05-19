@@ -1,5 +1,5 @@
 % --------------------------------------------------------------------------
-% the FNPCT package v0.1alpha
+% the FNPCT package v0.1beta
 % 
 %   messing with footnote kerning
 % 
@@ -37,7 +37,7 @@
 \ProvidesExplPackage
   {fnpct}
   {2012/05/19}
-  {0.1alpha}
+  {0.1beta}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -150,32 +150,14 @@
             \bool_set_false:N \l_fnpct_dont_switch_bool
           }
           {
-            % what about multiple footnotes? (their usage is discouraged with
-            % this package, but anyway...)
-            % this check should probably be removed
-            \peek_meaning:NTF \footnote
-              {
-                \bool_set_true:N \l_fnpct_multiple_footnotes_bool
-                % else insert space and then note
-                \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim
-                \IfNoValueTF { #2 }
-                  { #1 { #3 } }
-                  { #1 [ #2 ] { #3 } }
-                \fnpct_no_break:
-                \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
-%                 \bool_set_false:N \l_fnpct_dont_switch_bool
-              }
-              {
-                % else insert space and then note
-                \bool_if:NTF \l_fnpct_multiple_footnotes_bool
-                  { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
-                  { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
-                \IfNoValueTF { #2 }
-                  { #1 { #3 } }
-                  { #1 [ #2 ] { #3 } }
-                \bool_set_false:N \l_fnpct_dont_switch_bool
-              }
-            
+            % else insert space and then note
+            \bool_if:NTF \l_fnpct_multiple_footnotes_bool
+              { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
+              { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
+            \IfNoValueTF { #2 }
+              { #1 { #3 } }
+              { #1 [ #2 ] { #3 } }
+            \bool_set_false:N \l_fnpct_dont_switch_bool
           }
       }
   }
@@ -410,6 +392,7 @@
 % HISTORY:
 2012/05/18 v0.1alpha - various changes still possible without announcement
                        until declared `v0.1'
+2012/05/19 v0.1beta  - considered ready for public use, needs feedback, though
 
 % --------------------------------------------------------------------------
 % TODO:
