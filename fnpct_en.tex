@@ -3,7 +3,7 @@
 % 
 %   footnote kerning
 % 
-% 2012/05/18
+% 2012/05/19
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -47,7 +47,9 @@
 }
 \addcmds{
   arabic,
+  DeclareNewFootnote,
   endnote,
+  footnoteB,
   kfc,
   kfp,
   multendnote,
@@ -67,8 +69,46 @@
 
 \usepackage[backend=biber]{biblatex}
 \addbibresource{biblatex-examples.bib}
+\addbibresource{\jobname.bib}
 
-\begin{filecontents}{fnpct_en.ist}
+\begin{filecontents}{\jobname.bib}
+@software{bigfoot,
+  title   = {bigfoot},
+  author  = {David Kastrup},
+  date    = {2006/07/15},
+  version = {1.25},
+  url     = {http://www.ctan.org/pkg/bigfoot}
+}
+@software{endnotes,
+  title   = {endnotes},
+  author  = {Robin Fairbairns},
+  date    = {2012/01/15},
+  url     = {http://www.ctan.org/pkg/endnotes}
+}
+@software{footmisc,
+  title   = {footmisc},
+  author  = {Robin Fairbairns},
+  date    = {2011/06/06},
+  version = {5.5b},
+  url     = {http://www.ctan.org/pkg/footmisc}
+}
+@software{manyfoot,
+  title   = {manyfoot},
+  author  = {Alexander I. Rozhenko},
+  date    = {2005/09/11},
+  version = {1.10},
+  url     = {http://www.ctan.org/pkg/manyfoot}
+}
+@software{parnotes,
+  title   = {parnotes},
+  author  = {Micheal Hughes},
+  date    = {2012/03/01},
+  version = {1},
+  url     = {http://www.ctan.org/pkg/parnotes}
+}
+\end{filecontents}
+
+\begin{filecontents}{\jobname.ist}
  preamble "\\begin{theindex}\n Section titles are indicated \\textbf{bold},
  packages \\textsf{sans serif}, commands \\code{\\textbackslash\\textcolor{code}{brown}}
  and options \\textcolor{key}{\\code{green}}.\\newline\n\n"
@@ -94,6 +134,7 @@ It has the status \enquote{maintained}.
 \fnpct depends on the \paket{l3kernel} and \paket*{xparse} which is part of the
 \paket{l3packages} bundle.
 
+\newpage
 \section{What's it all about?}
 \subsection{Basics}\secidx{basics}
 The \fnpct package basically does two things to footnotes: if footnote marks are
@@ -310,7 +351,6 @@ If you want you can turn all footnotes into \cmd{multfootnote}s.
 \end{beispiel}
 \secidx*{multiple footnotes}
 
-\newpage
 \section{Footcites}\secidx{footcites}
 Preliminary testing suggests that \fnpct seems to be compatible with the
 \cmd{footcite} and \cmd{footfullcite} commands provided by the \paket{biblatex}
@@ -371,11 +411,68 @@ In case of \key{punct-after}{true}:
 \end{beispiel}
 \secidx*{footcites}
 
-\newpage
-\section{Other notes}
-\fnpct currently supports two packages which provide commands similar to footnotes.
+\section{Other packages}
+
+\subsection{bigfoot}\label{ssec:bigfoot}
+\fnpct is compatible with the \paket{bigfoot} \cite{bigfoot} package. You need to
+a bit cautious, though. You'll need to
+\begin{itemize}
+ \item load \paket{bigfoot} first;
+ \item declare footnotes with \cmd{DeclareNewFootnote} \emph{after} loading \fnpct
+ but \emph{in} the document preamble.
+\end{itemize}
+Also verbatim material won't work inside footnotes anymore. Since \fnpct does not
+redefine any \cmd{footnotetext} like command it will still work inside one of them.
+
+For every footnote class defined with \cmd{DeclareNewFootnote} the commands
+\cmd{footnote<class>} and \cmd{footnotemark<class>} are redefined with the starred
+variant and a \cmd{multfootnote<class>} is defined. The \key{multiple} option
+will turn all \cmd{footnote<class>} commands into the corresponding
+\cmd{multfootnote<class>}.
+
+\fnpct has an additional package option which \emph{cannot} be set with \cmd{setfnpct}
+and only has any effects if \paket{bigfoot} has been loaded:
+\begin{beschreibung}
+ \option{bigfoot-default-top}{\default{true}/false} sets the \code{default} footnote
+ class as top layer. Default = \code{false}
+\end{beschreibung}
+
+Since this package cannot easily combine every footnote package for demonstration
+purposes the following code is shown in figure \ref{fig:bigfoot}:
+\begin{beispiel}[code only]
+\documentclass{article}
+\usepackage[
+  paperwidth=.5\textwidth,
+  paperheight=12\baselineskip,
+  margin=5pt,
+  bottom=1.5cm]{geometry}
+
+\usepackage{bigfoot}
+\usepackage[bigfoot-default-top]{fnpct}
+\setfnpct{multiple}
+\DeclareNewFootnote[para]{B}[alph]
+
+\begin{document}
+
+\noindent The three little pigs built their houses
+out of straw\footnote*{not to be confused with hay%
+\footnoteB{let alone grass}}, sticks\footnote{or
+lumber according to some sources} and bricks%
+\footnote{probably fired clay bricks;or something}.
+
+\end{document}
+\end{beispiel}
+
+\begin{figure}[ht]
+ \centering
+ \includegraphics{bigfoot_ex.pdf}
+ \caption{\paket*{bigfoot} example}
+ \label{fig:bigfoot}
+\end{figure}
+
+
 \subsection{endnotes}\secidx{endnotes}
-The \paket{endnotes} package povides the commands \cmd{endnote} and \cmd{endnotemark}
+The \paket{endnotes} \cite{endnotes} package povides the commands \cmd{endnote} and \cmd{endnotemark}
 which can be used to output all notes at the end of a chapter, say.
 
 If the package is loaded \fnpct extends its functionality to these commands in
@@ -403,9 +500,16 @@ into \cmd{multendnote}s.
 \end{beispiel}
 \secidx*{endnotes}
 
-\newpage
+\subsection{footmisc}
+Testing showed no incompatibilities with the \paket{footmisc} package \cite{footmisc}.
+The only thing is that you won't have to use its \code{multiple} option.
+
+\subsection{manyfoot}
+The \paket{manyfoot} package \cite{manyfoot} is not and will not be supported. It
+is loaded by \paket{bigfoot} (see section \ref{ssec:bigfoot}), anyway.
+
 \subsection{parnotes}\secidx{parnotes}
-The \paket{parnotes} package does something similar to the \paket{endnotes}
+The \paket{parnotes} package \cite{parnotes} does something similar to the \paket{endnotes}
 package. If \paket{parnotes} is loaded \fnpct extends its functionality analogous
 to the one of \paket{endnotes}.
 
