@@ -37,13 +37,23 @@
 \ProvidesExplPackage
   {fnpct}
   {2012/05/20}
-  {0.1beta-b}
+  {0.1beta-c}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
 % SETTING THINGS UP:
 % this is plain's \nobreak:
 \cs_new:Npn \fnpct_no_break: { \tex_penalty:D \c_ten_thousand }
+
+\cs_new:Npn \fnpct_dont_mess_around:
+  {
+    \iow_log:n { ................................................. }
+    \iow_log:n { . ~ fnpct~info: }
+    \iow_log:n { . }
+    \iow_log:n { . ~ All~right,~not~messing~around.~:( }
+    \iow_log:n { . ~ But~I'd~really~love~to~(http://www.youtube.com/watch?v=Bqz876VkwwY). }
+    \iow_log:n { ................................................. }
+  }
 
 % rigid lengths:
 \dim_new:N \l_fnpct_after_comma_dim
@@ -96,6 +106,14 @@
     before-footnote-space .dim_set:N  = \l_fnpct_before_footnote_dim ,
     punct-after           .bool_set:N = \l_fnpct_punct_after_bool ,
     punct-after           .default:n  = true ,
+    dont-mess-around      .code:n     =
+      \dim_zero:N \l_fnpct_after_comma_dim
+      \dim_zero:N \l_fnpct_after_dot_dim
+      \dim_zero:N \l_fnpct_before_comma_dim
+      \dim_zero:N \l_fnpct_before_dot_dim
+      \dim_zero:N \l_fnpct_before_footnote_dim
+      \bool_set_true:N \l_fnpct_punct_after_bool
+      \fnpct_dont_mess_around: ,
     mult-fn-delim         .tl_set:N   = \l_fnpct_multiple_footnotes_delimiter_tl ,
     mult-fn-sep           .tl_set:N   = \l_fnpct_multiple_footnote_separator_tl ,
     multiple              .bool_set:N = \l_fnpct_multiple_default_bool ,
@@ -117,7 +135,7 @@
 %   #2: optional argument of original command
 %   #3: mandatory argument of original command
 %   #4: boolean flag for starred version
-\cs_new:Npn \fnpct_dot_or_comma:Nnnn #1#2#3#4
+\cs_new_protected:Npn \fnpct_dot_or_comma:Nnnn #1#2#3#4
   {
     % if a dot follows remove it, insert dot, skip back
     % and then insert footnote
@@ -190,7 +208,7 @@
 % #1: original note command
 % #2: star
 % #3: multiple notes separated by \l_fnpct_multiple_footnotes_delimiter_tl
-\cs_new:Npn \fnpct_mult_note:Nnn #1#2#3 
+\cs_new_protected:Npn \fnpct_mult_note:Nnn #1#2#3 
   {
     \IfBooleanT { #2 } { \bool_set_true:N \l_fnpct_dont_switch_bool }
     % split input:
@@ -233,7 +251,7 @@
 
 % FIXME: change \seq_length into \seq_count when it has been renamed
 % #1: original note command
-\cs_new:Npn \fnpct_write_notes:N #1
+\cs_new_protected:Npn \fnpct_write_notes:N #1
   {
     \int_zero:N \l_tmpa_int
     \seq_map_inline:Nn \l_fnpct_multiple_footnotes_seq
@@ -244,20 +262,38 @@
           { \l_tmpa_int }
           <
           { \seq_length:N \l_fnpct_multiple_footnotes_seq }
-          { \textsuperscript { \l_fnpct_multiple_footnote_separator_tl } }
+          {
+            \bool_if:NTF \g_fnpct_only_text_bool
+              {
+                \bool_gset_false:N \l_fnpct_only_text_bool
+                \tex_unskip:D
+              }
+              { \textsuperscript { \l_fnpct_multiple_footnote_separator_tl } }
+          }
       }
   }
 
 % this shouldn't be a document command but is an really easy way to make
 % biblatex's \footcite et.al. compatible with the `multiple' option
-%   #1: optional argument to original note command
-%   #2: mandatory argument to original note command
-%   #3: original note command
-\NewDocumentCommand \fnpct_read_footnote_with_option:w { ou{\q_stop}m }
+%   #1: optional star => only invoke \footnotetext
+%   #2: optional argument to original note command
+%   #3: mandatory argument to original note command
+%   #4: original note command
+\bool_new:N \g_fnpct_only_text_bool
+\NewDocumentCommand \fnpct_read_footnote_with_option:w { sou{\q_stop}m }
   {
-    \IfNoValueTF { #1 }
-      { #3 { #2 } }
-      { #3 [ #1 ] { #2 } }
+    \IfBooleanTF { #1 }
+      {
+        \bool_gset_true:N \g_fnpct_only_text_bool
+        \IfNoValueTF { #2 }
+          { \footnotetext { #3 } }
+          { \footnotetext [ #2 ] { #3 } }
+      }
+      {
+        \IfNoValueTF { #2 }
+          { #4 { #3 } }
+          { #4 [ #2 ] { #3 } }
+      }
   }
 
 % --------------------------------------------------------------------------
@@ -489,12 +525,15 @@
 2012/05/20 v0.1beta-a - minor changes
 2012/05/20 v0.1beta-b - added `pagenote' support
                       - added `tablefootnote' support
+2012/05/20 v0.1beta-c - optional star argument to \multfootnote that only invokes
+                        \footnotetext
+                      - option `dont-mess-around': disable switching and kerning
 
 % --------------------------------------------------------------------------
 % NOTES:
-- `footnote' package => not compatible
+- `footnote' package => not compatible => see todo
 - `ednotes' package  => not tested; who knows?
 
 % --------------------------------------------------------------------------
 % TODO:
-
+- solve incompatibility with the `footnote' package

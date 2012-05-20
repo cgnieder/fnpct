@@ -55,6 +55,7 @@
   multendnote,
   multfootnote,
   multparnote,
+  myfn,
   parnote,
   parnotes,
   setfnpct,
@@ -114,6 +115,13 @@
   date    = {2011/06/06},
   version = {5.5b},
   url     = {http://www.ctan.org/pkg/footmisc}
+}
+@software{footnote,
+  title   = {footnote},
+  author  = {Mark Wooding},
+  date    = {1997/01/28},
+  version = {1.13},
+  url     = {http://www.ctan.org/pkg/footnote}
 }
 @software{manyfoot,
   title   = {manyfoot},
@@ -270,6 +278,9 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  \option{before-punct-space}{<dim>} set both spaces.
  \option{before-footnote-space}{<dim>} space to be inserted between a word and the
  following footnote mark. Default = \code{.06em}
+ \option{dont-mess-around} sets all mentioned lengths to \code{0} and \key{punct-after}{true}.
+ Basically this is as if you hadn't loaded \fnpct except the multiple footnote
+ command is still available, see section \ref{sec:multiple}.
  \option{multiple}{\default{true}/false} lets \cmd{footnote} be equal to
  \cmd{multfootnote}
  \option{mult-fn-delim}{<delimiter>} sets the delimiter for the \cmd{multfootnote}
@@ -309,7 +320,7 @@ And now the same with switched order:
 Some of the options are explained in a bit more detail in the next sections.
 \secidx*{options}
 
-\section{Multiple footnotes}\secidx{multiple footnotes}
+\section{Multiple footnotes}\secidx{multiple footnotes}\label{sec:multiple}
 \subsection{Basics}\secidx[basics]{multiple footnotes}
 Since multiple footnotes have to be treated differently\footnote{see these footnotes;for an example},
 \fnpct provides an extra command for that:
@@ -339,6 +350,36 @@ argument of \cmd{footnote}:
   something else}.
  \end{minipage}
 \end{beispiel}
+
+Additionally every item has an optional \code{*} which only invokes \cmd{footnotetext}.
+This enables for example to set nested footnotes\secidx[nested footnotes]{multiple footnotes}
+without disrupting the multiple setting. The following example is shown in figure
+\ref{fig:nested}:
+\begin{beispiel}[code only]
+\documentclass{article}
+\usepackage[
+  paperwidth=.5\textwidth,
+  paperheight=12\baselineskip,
+  margin=5pt,
+  bottom=1.5cm]{geometry}
+
+\usepackage[multiple]{fnpct}
+
+\begin{document}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\multfootnote{probably fired clay bricks%
+  \footnotemark;*or something else;what do I know}.
+\end{document}
+\end{beispiel}
+
+\begin{figure}[ht]
+ \centering
+ \includegraphics{nested_ex.pdf}
+ \caption{nested footnotes}\label{fig:nested}
+\end{figure}
+
 
 \subsection{The delimiter and separator}\secidx[delimiter]{multiple footnotes}\secidx[separator]{multiple footnotes}
 Since the semicolon might be part of the footnote text you might have some trouble.
@@ -610,6 +651,12 @@ footnotes, for example output them as margin notes or count footnotes per page.
 
 Testing showed no incompatibilities with \paket{footmisc}. The only thing is that
 you won't have to use its \code{multiple} option.
+
+\subsection{footnote}\secidx[footnote]{other packages}
+Unfortunately \fnpct is not compatible with the \paket{footnote} package \cite{footnote}.
+Or more precisely it is not compatible if the command pair \cmd{savenotes}/\cmd{spewnotes}
+is invoked. This disables \paket{footnote}'s environments as well as its environment
+escaping mechanism through \cmd{makesavenoteenv}.
 
 \subsection{manyfoot}\secidx[manyfoot]{other packages}
 The \paket{manyfoot} package \cite{manyfoot} is not and will not directly be
