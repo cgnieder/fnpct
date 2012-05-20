@@ -71,6 +71,21 @@
 \addbibresource{biblatex-examples.bib}
 \addbibresource{\jobname.bib}
 
+% rudimentary solution for a `maintainer' field:
+\DeclareFieldFormat{authortype}{\mkbibparens{#1}}
+\renewbibmacro*{author}{%
+  \ifboolexpr{
+    test \ifuseauthor
+    and
+    not test {\ifnameundef{author}}
+  }
+    {\printnames{author}%
+     \iffieldundef{authortype}
+       {}
+       {\setunit{\space}%
+	\usebibmacro{authorstrg}}}
+    {}}
+
 \begin{filecontents}{\jobname.bib}
 @software{bigfoot,
   title   = {bigfoot},
@@ -82,6 +97,7 @@
 @software{endnotes,
   title   = {endnotes},
   author  = {Robin Fairbairns},
+  authortype = {current maintainer},
   date    = {2012/01/15},
   url     = {http://www.ctan.org/pkg/endnotes}
 }
@@ -112,6 +128,28 @@
   date    = {2012/03/01},
   version = {1},
   url     = {http://www.ctan.org/pkg/parnotes}
+}
+@software{pagenote,
+  title   = {pagenote},
+  author  = {Will Robertson},
+  authortype = {current maintainer},
+  date    = {2009/09/03},
+  version = {1.1a},
+  url     = {http://www.ctan.org/pkg/pagenote}
+}
+@software{tablefootnote,
+  title   = {tablefootnote},
+  author  = {H.-Martin M\"{u}nch},
+  date    = {2012/01/14},
+  version = {1.0g},
+  url     = {http://www.ctan.org/pkg/tablefootnote}
+}
+@software{yafoot,
+  title   = {yafoot},
+  author  = {Hiroshi Nakashima},
+  date    = {1999/07/14},
+  version = {1.0},
+  url     = {http://www.ctan.org/pkg/yafoot}
 }
 \end{filecontents}
 
@@ -585,6 +623,11 @@ And since the latter states this in its documentation
 \end{zitat}
 you should probably prefer it anyway.
 
+\subsection{pagenote}\secidx[pagenote]{other packages}
+The package \paket{pagenote} \cite{pagenote} is supported and its \cmd{pagenote}
+command is treated the same way as all other note commands: it got an optional
+\code{*} argument and an additional \cmd{multpagenote} is defined.
+
 \subsection{parnotes}\secidx[parnotes]{other packages}
 The \paket{parnotes} package \cite{parnotes} does something similar to the \paket{endnotes}
 package. basically it allows to output the footnote text after a paragraph, either
@@ -613,9 +656,19 @@ Again the \key{multiple} option turns all \cmd{parnote}s into \cmd{multparnote}s
   \parnotes
  \end{minipage}
 \end{beispiel}
+
+\subsection{tablefootnote}\secidx[tablefootnote]{other packages}
+The package \paket{tablefootnote} \cite{tablefootnote} is supported and its
+\cmd{tablefootnote} command is treated the same way as all other note commands:
+it got an optional \code{*} argument and an additional \cmd{multtablefootnote}
+is defined.
+
+\subsection{yafoot}\secidx[yafoot bundle]{other packages}
+Currently no issues are known when using \fnpct with one or all of the packages
+of the \paket{yafoot} \cite{yafoot} bundle. Just for reference: these packages are
+\paket{pfnote}, \paket{fnpos} and \paket{dblfnote}.
 \secidx*{other packages}
 
-\newpage
 \appendix
 \printbibliography
 \printindex

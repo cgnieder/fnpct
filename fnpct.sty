@@ -37,7 +37,7 @@
 \ProvidesExplPackage
   {fnpct}
   {2012/05/20}
-  {0.1beta-a}
+  {0.1beta-b}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -153,6 +153,8 @@
             % what about multiple footnotes? (their usage is discouraged with
             % this package, but anyway...)
             % this check should probably/maybe be removed (?!)
+            % or at least improved: this _only_ chemcks for a second \footnote
+            % and will handle punctuation switches wrongly
             \peek_meaning:NTF \footnote
               {
                 \bool_set_true:N \l_fnpct_multiple_footnotes_bool
@@ -342,6 +344,43 @@
           }
       }
       { }
+    %% the `pagenote' package:
+    \@ifpackageloaded { pagenote }
+      {
+        % save definition of \pagenote
+        \cs_new_eq:NN \fnpct_orig_pagenote:w \pagenote
+        \NewDocumentCommand \multpagenote { s+m }
+          { \fnpct_mult_note:Nnn \fnpct_orig_pagenote:w { #1 } { #2 } }
+        % redefine \pagenote
+        \bool_if:NTF \l_fnpct_makepagenote_bool
+          {
+            \bool_if:NTF \l_fnpct_multiple_default_bool
+              { \cs_set_eq:NN \pagenote \multpagenote }
+              {
+                \RenewDocumentCommand \pagenote { so+m }
+                  { \fnpct_dot_or_comma:Nnnn \fnpct_orig_pagenote:w { #2 } { #3 } { #1 } }
+              }
+          }
+          { \RenewDocumentCommand \pagenote { so+m } { } }
+      }
+      { }
+    %% the `tablefootnote' package:
+    \@ifpackageloaded { tablefootnote }
+      {
+        % save definition of \tablefootnote
+        \cs_new_eq:NN \fnpct_orig_tablefootnote:w \tablefootnote
+        \NewDocumentCommand \multtablefootnote { s+m }
+          { \fnpct_mult_note:Nnn \fnpct_orig_tablefootnote:w { #1 } { #2 } }
+        % redefine \pagenote
+        \bool_if:NTF \l_fnpct_multiple_default_bool
+          { \cs_set_eq:NN \tablefootnote \multtablefootnote }
+          {
+            \RenewDocumentCommand \tablefootnote { s+m }
+              { \fnpct_dot_or_comma:Nnnn \fnpct_orig_tablefootnote:w { \Novalue } { #2 } { #1 } }
+          }
+      }
+      { }
+    %% the `bigfoot' package:
     \@ifpackageloaded { bigfoot }
       {
         \prop_map_inline:Nn \l_fnpct_footnote_class_prop
@@ -369,6 +408,7 @@
         \cs_set_eq:NN \multfootnote \multfootnotedefault
       }
       { }
+    %% the `fixfoot' package:
     \@ifpackageloaded { fixfoot }
       {
         \prop_map_inline:Nn \l_fnpct_footnote_fixfoot_prop
@@ -425,6 +465,14 @@
       }
   }
   { }
+% and the `pagenote' package:
+\bool_new:N \l_fnpct_makepagenote_bool
+\@ifpackageloaded { pagenote }
+  {
+    \tl_put_left:Nn \makepagenote
+      { \bool_set_true:N \l_fnpct_makepagenote_bool }
+  }
+  { }
 
 % --------------------------------------------------------------------------
 % SETUP COMMAND:
@@ -438,8 +486,15 @@
 2012/05/18 v0.1alpha  - various changes still possible without announcement
                         until declared `v0.1'
 2012/05/19 v0.1beta   - considered ready for public use, needs feedback, though
-2012/05/20 v0.1beta-a 
+2012/05/20 v0.1beta-a - minor changes
+2012/05/20 v0.1beta-b - added `pagenote' support
+                      - added `tablefootnote' support
+
+% --------------------------------------------------------------------------
+% NOTES:
+- `footnote' package => not compatible
+- `ednotes' package  => not tested; who knows?
 
 % --------------------------------------------------------------------------
 % TODO:
-- option: bigfoot-perpage?
+
