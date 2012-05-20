@@ -1,9 +1,9 @@
 % --------------------------------------------------------------------------
-% the FNPCT package v0.1beta
+% the FNPCT package
 % 
 %   footnote kerning
 % 
-% 2012/05/19
+% 2012/05/20
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -422,11 +422,19 @@ In case of \key{punct-after}{true}:
 \end{beispiel}
 \secidx*{footcites}
 
-\section{Other packages}
+\section{Other packages}\secidx{other packages}
+\fnpct tries it best to support other footnote and related packages. Each of the
+following subsections is dedicated to one of these packages and how they work
+together with \fnpct.
 
-\subsection{bigfoot}\label{ssec:bigfoot}
-\fnpct is compatible with the \paket{bigfoot} \cite{bigfoot} package. You need to
-a bit cautious, though. You'll need to
+\subsection{bigfoot}\label{ssec:bigfoot}\secidx[bigfoot]{other packages}
+The \paket{bigfoot} \cite{bigfoot} package extends the possibilities of the
+\paket{manyfoot} package \cite{manyfoot}, see section \ref{ssec:manyfoot}. The main
+feature is to use different classes of footnotes which are typeset in different
+\enquote{apparatus} (or layers as I like to call them) on the bottom of the page.
+
+\fnpct is compatible with \paket{bigfoot}. You need to be a bit cautious, though.
+You need to
 \begin{itemize}
  \item load \paket{bigfoot} first;
  \item declare footnotes with \cmd{DeclareNewFootnote} \emph{after} loading \fnpct
@@ -481,10 +489,10 @@ lumber according to some sources} and bricks%
  \label{fig:bigfoot}
 \end{figure}
 
-
-\subsection{endnotes}\secidx{endnotes}
-The \paket{endnotes} \cite{endnotes} package povides the commands \cmd{endnote} and \cmd{endnotemark}
-which can be used to output all notes at the end of a chapter, say.
+\subsection{endnotes}\secidx[endnotes]{other packages}
+The \paket{endnotes} \cite{endnotes} package povides the commands \cmd{endnote}
+and \cmd{endnotemark} which can be used to output all notes at the end of a chapter,
+say.
 
 If the package is loaded \fnpct extends its functionality to these commands in
 the same way it does with footnotes. For example an according \cmd{multendnote}
@@ -509,16 +517,20 @@ into \cmd{multendnote}s.
   \theendnotes
  \end{minipage}
 \end{beispiel}
-\secidx*{endnotes}
 
-\subsection{fixfoot}
-The \paket{fixfoot} \cite{fixfoot} package provides possibility to create repeating footnotes.
-\fnpct supports this package provided you take care of the following:
+\subsection{fixfoot}\secidx[fixfoot]{other packages}
+The \paket{fixfoot} \cite{fixfoot} package provides possibility to create repeating
+footnotes. \fnpct supports this package provided you take care of the following:
 \begin{itemize}
  \item load the \paket{fixfoot} package first;
  \item use \cmd{DeclareFixedFootnote} only in the preamble but \emph{after} loading
  \fnpct;
 \end{itemize}
+\cmd{DeclareFixedFootnote}{\cmd{cs}}\ma{<footnote text>} is used to store the
+\ma{<footnote text>} in \cmd{cs} and create a footnote mark for it but don't
+repeat the footnote text on the same page in the bottom. The document needs
+several runs to get all the numbers and footnotes right.
+
 Every fixed footnote declared with \cmd{DeclareFixedFootnote} gets an optional
 \code{*} to prevent the punctuation switching.
 
@@ -554,17 +566,31 @@ bricks}.
  \label{fig:fixfoot}
 \end{figure}
 
-\subsection{footmisc}
-Testing showed no incompatibilities with the \paket{footmisc} package \cite{footmisc}.
-The only thing is that you won't have to use its \code{multiple} option.
+\subsection{footmisc}\label{ssec:manyfoot}\secidx[footmisc]{other packages}
+The \paket{footmisc} package \cite{footmisc} provides a range of options to customize
+footnotes, for example output them as margin notes or count footnotes per page.
 
-\subsection{manyfoot}
-The \paket{manyfoot} package \cite{manyfoot} is not and will not be supported. It
-is loaded by \paket{bigfoot} (see section \ref{ssec:bigfoot}), anyway.
+Testing showed no incompatibilities with \paket{footmisc}. The only thing is that
+you won't have to use its \code{multiple} option.
 
-\subsection{parnotes}\secidx{parnotes}
+\subsection{manyfoot}\secidx[manyfoot]{other packages}
+The \paket{manyfoot} package \cite{manyfoot} is not and will not directly be
+supported. It is loaded by \paket{bigfoot} (see section \ref{ssec:bigfoot}), anyway.
+And since the latter states this in its documentation
+\begin{zitat}[David Kastrup \cite{bigfoot}]
+ Purpose of this package is to provide a one-stop solution to almost all problems
+ related to footnotes. You can use it as a drop-in replacement of the `\paket{manyfoot}'
+ package, but without many of its shortcomings, and quite a few features of its
+ own.
+\end{zitat}
+you should probably prefer it anyway.
+
+\subsection{parnotes}\secidx[parnotes]{other packages}
 The \paket{parnotes} package \cite{parnotes} does something similar to the \paket{endnotes}
-package. If \paket{parnotes} is loaded \fnpct extends its functionality analogous
+package. basically it allows to output the footnote text after a paragraph, either
+by using a special environment or by invoking \cmd{parnotes}.
+
+If \paket{parnotes} is loaded \fnpct extends its functionality analogous
 to the one of \paket{endnotes}.
 
 Again the \key{multiple} option turns all \cmd{parnote}s into \cmd{multparnote}s.
@@ -587,9 +613,9 @@ Again the \key{multiple} option turns all \cmd{parnote}s into \cmd{multparnote}s
   \parnotes
  \end{minipage}
 \end{beispiel}
+\secidx*{other packages}
 
-\secidx*{parnotes}
-
+\newpage
 \appendix
 \printbibliography
 \printindex

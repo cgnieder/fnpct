@@ -1,9 +1,9 @@
 % --------------------------------------------------------------------------
-% the FNPCT package v0.1beta
+% the FNPCT package
 % 
 %   messing with footnote kerning
 % 
-% 2012/05/19
+% 2012/05/20
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -36,8 +36,8 @@
 \RequirePackage { xparse , l3keys2e }
 \ProvidesExplPackage
   {fnpct}
-  {2012/05/19}
-  {0.1beta}
+  {2012/05/20}
+  {0.1beta-a}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -148,17 +148,33 @@
             \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
               { \skip_horizontal:N \l_fnpct_before_comma_dim \fnpct_no_break: , }
             \bool_set_false:N \l_fnpct_dont_switch_bool
-%             \tl_show:n { I'm~in }
           }
           {
-            % else insert space and then note
-            \bool_if:NTF \l_fnpct_multiple_footnotes_bool
-              { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
-              { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
-            \IfNoValueTF { #2 }
-              { #1 { #3 } }
-              { #1 [ #2 ] { #3 } }
-            \bool_set_false:N \l_fnpct_dont_switch_bool
+            % what about multiple footnotes? (their usage is discouraged with
+            % this package, but anyway...)
+            % this check should probably/maybe be removed (?!)
+            \peek_meaning:NTF \footnote
+              {
+                \bool_set_true:N \l_fnpct_multiple_footnotes_bool
+                % else insert space and then note
+                \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim
+                \IfNoValueTF { #2 }
+                  { #1 { #3 } }
+                  { #1 [ #2 ] { #3 } }
+                \fnpct_no_break:
+                \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
+%                 \bool_set_false:N \l_fnpct_dont_switch_bool
+              }
+              {
+                % else insert space and then note
+                \bool_if:NTF \l_fnpct_multiple_footnotes_bool
+                  { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
+                  { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
+                \IfNoValueTF { #2 }
+                  { #1 { #3 } }
+                  { #1 [ #2 ] { #3 } }
+                \bool_set_false:N \l_fnpct_dont_switch_bool
+              }
           }
       }
   }
@@ -419,9 +435,10 @@
 
 % --------------------------------------------------------------------------
 % HISTORY:
-2012/05/18 v0.1alpha - various changes still possible without announcement
-                       until declared `v0.1'
-2012/05/19 v0.1beta  - considered ready for public use, needs feedback, though
+2012/05/18 v0.1alpha  - various changes still possible without announcement
+                        until declared `v0.1'
+2012/05/19 v0.1beta   - considered ready for public use, needs feedback, though
+2012/05/20 v0.1beta-a 
 
 % --------------------------------------------------------------------------
 % TODO:
