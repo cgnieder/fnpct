@@ -3,7 +3,7 @@
 % 
 %   messing with footnote kerning
 % 
-% 2012/05/20
+% 2012/05/21
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -36,8 +36,8 @@
 \RequirePackage { xparse , l3keys2e }
 \ProvidesExplPackage
   {fnpct}
-  {2012/05/20}
-  {0.1beta-c}
+  {2012/05/21}
+  {0.1beta-d}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -149,6 +149,7 @@
         \IfNoValueTF { #2 }
           { #1 { #3 } }
           { #1 [ #2 ] { #3 } }
+        \fnpct_write_inner:N #1
         \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
           { \skip_horizontal:N \l_fnpct_before_dot_dim \fnpct_no_break: . }
         \bool_set_false:N \l_fnpct_dont_switch_bool
@@ -163,6 +164,7 @@
             \IfNoValueTF { #2 }
               { #1 { #3 } }
               { #1 [ #2 ] { #3 } }
+            \fnpct_write_inner:N #1
             \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
               { \skip_horizontal:N \l_fnpct_before_comma_dim \fnpct_no_break: , }
             \bool_set_false:N \l_fnpct_dont_switch_bool
@@ -181,6 +183,7 @@
                 \IfNoValueTF { #2 }
                   { #1 { #3 } }
                   { #1 [ #2 ] { #3 } }
+                \fnpct_write_inner:N #1
                 \fnpct_no_break:
                 \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
 %                 \bool_set_false:N \l_fnpct_dont_switch_bool
@@ -193,6 +196,7 @@
                 \IfNoValueTF { #2 }
                   { #1 { #3 } }
                   { #1 [ #2 ] { #3 } }
+                \fnpct_write_inner:N #1
                 \bool_set_false:N \l_fnpct_dont_switch_bool
               }
           }
@@ -258,18 +262,6 @@
       {
         \fnpct_read_footnote_with_option:w ##1 \q_stop { #1 }
         \int_incr:N \l_tmpa_int
-        \int_compare:nNnT
-          { \l_tmpa_int }
-          <
-          { \seq_length:N \l_fnpct_multiple_footnotes_seq }
-          {
-            \bool_if:NTF \g_fnpct_only_text_bool
-              {
-                \bool_gset_false:N \l_fnpct_only_text_bool
-                \tex_unskip:D
-              }
-              { \textsuperscript { \l_fnpct_multiple_footnote_separator_tl } }
-          }
       }
   }
 
@@ -282,6 +274,17 @@
 \bool_new:N \g_fnpct_only_text_bool
 \NewDocumentCommand \fnpct_read_footnote_with_option:w { sou{\q_stop}m }
   {
+    \bool_if:nT
+      {
+        \int_compare_p:n { \l_tmpa_int > 0 }
+         &&
+         \int_compare_p:n { \l_tmpa_int < \seq_length:N \l_fnpct_multiple_footnotes_seq }
+      }
+      {
+        \IfBooleanTF { #1 }
+          { \tex_unskip:D  }
+          { \textsuperscript { \l_fnpct_multiple_footnote_separator_tl } }
+      }
     \IfBooleanTF { #1 }
       {
         \bool_gset_true:N \g_fnpct_only_text_bool
@@ -294,7 +297,64 @@
           { #4 { #3 } }
           { #4 [ #2 ] { #3 } }
       }
+    \fnpct_write_inner:N #4
   }
+
+% --------------------------------------------------------------------------
+% NESTED FOOTNOTES:
+% 1 layer of nesting...
+\prop_new:N \g_fnpct_inner_footnote_prop
+\prop_new:N \g_fnpct_inner_footnote_hyperref_prop
+\cs_generate_variant:Nn \prop_gput:Nnn { Nxn , Nxo }
+
+% again: this shouldn't be a document command!
+\NewDocumentCommand \fnpct_inner_footnote:w { o+m }
+  {
+    \IfNoValueTF { #1 }
+      {
+        \fnpct_orig_footnotemark:w
+        \prop_gput:Nxn \g_fnpct_inner_footnote_prop { \thefootnote } { #2 }
+        \bool_if:NT \l_fnpct_hyperref_bool
+          {
+             \prop_gput:Nxo \g_fnpct_inner_footnote_hyperref_prop
+               { \thefootnote } { \Hy@footnote@currentHref }
+          }
+      }
+      {
+        \fnpct_orig_footnotemark:w [ #1 ]
+        \prop_gput:Nnn \g_fnpct_inner_footnote_prop { #1 } { #2 }
+          \bool_if:NT \l_fnpct_hyperref_bool
+          {
+             \prop_gput:Nno \g_fnpct_inner_footnote_hyperref_prop
+               { #1 } { \Hy@footnote@currentHref }
+          }
+      }
+  }
+
+\cs_new:Npn \fnpct_write_inner:N #1
+  {
+    \token_if_eq_meaning:NNF #1 \fnpct_inner_footnote:w
+      {
+        \prop_map_inline:Nn \g_fnpct_inner_footnote_prop
+          {
+            \footnotetext [ ##1 ]
+              {
+                \bool_if:NT \l_fnpct_hyperref_bool
+                  {
+                    \prop_get:NnN \g_fnpct_inner_footnote_hyperref_prop
+                      { ##1 } \l_tmpa_tl
+                    \Hy@raisedlink
+                      { \exp_args:No \hyper@@anchor { \l_tmpa_tl } }
+                  }
+                ##2
+              }
+          }
+        \prop_gclear:N \g_fnpct_inner_footnote_prop
+      }
+  }
+
+\cs_new:Npn \writeinnernotes
+  { \fnpct_write_inner:N X }
 
 % --------------------------------------------------------------------------
 % MANUAL KERNING:
@@ -329,8 +389,14 @@
 
 % --------------------------------------------------------------------------
 % DO THE REDEFINING:
-\AtBeginDocument
-  {
+\AtBeginDocument {
+  \@ifpackageloaded { hyperref }
+    { \bool_set_true:N \l_fnpct_hyperref_bool  }
+    {
+      \cs_if_exist:NF \AfterBeginDocument
+        { \cs_new:Npn \AfterBeginDocument #1 { #1 } }
+    }
+  \AfterBeginDocument {
     % save definition of \footnote
     \cs_set_eq:NN \fnpct_orig_footnote:w \footnote
     \cs_set_eq:NN \fnpct_orig_footnotemark:w \footnotemark
@@ -343,6 +409,8 @@
         \RenewDocumentCommand \footnote { so+m }
           { \fnpct_dot_or_comma:Nnnn \fnpct_orig_footnote:w { #2 } { #3 } { #1 } }
       }
+    \NewDocumentCommand \innerfootnote { so+m }
+      { \fnpct_dot_or_comma:Nnnn \fnpct_inner_footnote:w { #2 } { #3 } { #1 } }
     \RenewDocumentCommand \footnotemark { so }
       { \fnpct_dot_or_comma:Nnnn \fnpct_orig_footnotemark:w { #2 } { } { #1 } }
     %% the `endnotes' package:
@@ -456,6 +524,7 @@
       }
       { }
   }
+}
 
 % the `bigfoot' package neads special treatment:
 \prop_new:N \l_fnpct_footnote_class_prop
@@ -528,6 +597,9 @@
 2012/05/20 v0.1beta-c - optional star argument to \multfootnote that only invokes
                         \footnotetext
                       - option `dont-mess-around': disable switching and kerning
+2012/05/21 v0.1beta-d - \innerfootnote for nesting
+                      - `hyperref' support
+                      - bugfix in \multfootnote                      
 
 % --------------------------------------------------------------------------
 % NOTES:

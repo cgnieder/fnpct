@@ -1,3 +1,4 @@
+\errorcontextlines=50
 % --------------------------------------------------------------------------
 % the FNPCT package
 % 
@@ -60,7 +61,8 @@
   parnotes,
   setfnpct,
   theendnotes,
-  thempfootnote
+  thempfootnote,
+  writeinnernotes
 }
 \setfnpct{multiple}
 \usepackage{endnotes}
@@ -354,7 +356,7 @@ argument of \cmd{footnote}:
 Additionally every item has an optional \code{*} which only invokes \cmd{footnotetext}.
 This enables for example to set nested footnotes\secidx[nested footnotes]{multiple footnotes}
 without disrupting the multiple setting. The following example is shown in figure
-\ref{fig:nested}:
+\ref{fig:nested:mult}:
 \begin{beispiel}[code only]
 \documentclass{article}
 \usepackage[
@@ -374,10 +376,10 @@ without disrupting the multiple setting. The following example is shown in figur
 \end{document}
 \end{beispiel}
 
-\begin{figure}[ht]
+\begin{figure}[h]
  \centering
  \includegraphics{nested_ex.pdf}
- \caption{nested footnotes}\label{fig:nested}
+ \caption{nested footnotes}\label{fig:nested:mult}
 \end{figure}
 
 
@@ -441,6 +443,104 @@ If you want you can turn all footnotes into \cmd{multfootnote}s.
 \end{beispiel}
 \secidx*{multiple footnotes}
 
+\section{Nested Footnotes}\secidx{nested footnotes}
+\fnpct provides some support for nested footnotes. There are some restrictions,
+though. The command below can be used inside \cmd{footnote} and \cmd{multfootnote},
+but not inside another \cmd{innerfootnote}:
+\begin{beschreibung}
+ \befehl{innerfootnote}*[<mark>]{<text>} a nested footnote.
+\end{beschreibung}
+The output of the following code can be seen in figure \ref{fig:nested:a}.
+\begin{beispiel}[code only]
+\documentclass{article}
+\usepackage[
+  paperwidth=.5\textwidth,
+  paperheight=12\baselineskip,
+  margin=5pt,
+  bottom=1.5cm]{geometry}
+
+\usepackage{fnpct}
+
+\begin{document}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks%
+  \innerfootnote{or not}}.
+\end{document}
+\end{beispiel}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics{nested_ex_a.pdf}
+ \caption{\cmd{innerfootnote} example (a)}\label{fig:nested:a}
+\end{figure}
+
+This is especially useful if you have more than one additional footnote inside a
+footnote, a case that can't be solved satisfying (\ie automatic) way with the
+method mentioned in section \ref{sec:multiple}. See figure \ref{fig:nested:b} for
+the output of this code:
+\begin{beispiel}[code only]
+\documentclass{article}
+\usepackage[
+  paperwidth=.5\textwidth,
+  paperheight=12\baselineskip,
+  margin=5pt,
+  bottom=1.5cm]{geometry}
+
+\usepackage{fnpct}
+
+\begin{document}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably\innerfootnote{just guessing}
+  fired clay bricks\innerfootnote{or not}}.
+\end{document}
+\end{beispiel}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics{nested_ex_b.pdf}
+ \caption{\cmd{innerfootnote} example (b)}\label{fig:nested:b}
+\end{figure}
+
+\cmd{innerfootnote} can also be used to escape minipages. In this case use
+\cmd{innerfootnote} as a replacement for \cmd{footnote} and call this command
+later:
+\begin{beschreibung}
+ \befehl{writeinnernotes} writes all \cmd{footnotetext}s to the inner footnotes
+ when invoked 
+\end{beschreibung}
+See figure \ref{fig:nested:c} for the output of the following code:
+\begin{beispiel}[code only]
+\documentclass{article}
+\usepackage[
+  paperwidth=.5\textwidth,
+  paperheight=12\baselineskip,
+  margin=5pt,
+  bottom=1.5cm]{geometry}
+
+\usepackage{fnpct}
+
+\begin{document}
+\noindent\fbox{%
+\begin{minipage}{.9\linewidth}
+ The three little pigs built their houses
+ out of straw\innerfootnote{not to be confused with hay},
+ sticks\innerfootnote{or lumber according to some sources}
+ and bricks\innerfootnote{probably}.
+\end{minipage}}\writeinnernotes
+  
+\end{document}
+\end{beispiel}
+\begin{figure}[h]
+ \centering
+ \includegraphics{nested_ex_c.pdf}
+ \caption{\cmd{innerfootnote} example (c)}\label{fig:nested:c}
+\end{figure}
+\secidx*{nested footnotes}
+
 \section{Footcites}\secidx{footcites}
 Preliminary testing suggests that \fnpct seems to be compatible with the
 \cmd{footcite} and \cmd{footfullcite} commands provided by the \paket{biblatex}
@@ -501,16 +601,17 @@ In case of \key{punct-after}{true}:
 \end{beispiel}
 \secidx*{footcites}
 
+\newpage
 \section{Other packages}\secidx{other packages}
-\fnpct tries it best to support other footnote and related packages. Each of the
-following subsections is dedicated to one of these packages and how they work
-together with \fnpct.
+\fnpct tries its best to support other footnote and related packages. Each of the
+following subsections is dedicated to one of these packages and if and how they
+work together with \fnpct.
 
 \subsection{bigfoot}\label{ssec:bigfoot}\secidx[bigfoot]{other packages}
 The \paket{bigfoot} \cite{bigfoot} package extends the possibilities of the
 \paket{manyfoot} package \cite{manyfoot}, see section \ref{ssec:manyfoot}. The main
 feature is to use different classes of footnotes which are typeset in different
-\enquote{apparatus} (or layers as I like to call them) on the bottom of the page.
+apparatus on the bottom of the page.
 
 \fnpct is compatible with \paket{bigfoot}. You need to be a bit cautious, though.
 You need to
@@ -561,7 +662,7 @@ lumber according to some sources} and bricks%
 \end{document}
 \end{beispiel}
 
-\begin{figure}[ht]
+\begin{figure}[h]
  \centering
  \includegraphics{bigfoot_ex.pdf}
  \caption{\paket*{bigfoot} example}
@@ -638,7 +739,7 @@ bricks}.
 \end{document}
 \end{beispiel}
 
-\begin{figure}[ht]
+\begin{figure}[h]
  \centering
  \includegraphics{fixfoot_ex.pdf}
  \caption{\paket*{fixfoot} example}
