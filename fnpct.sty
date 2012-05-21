@@ -3,7 +3,7 @@
 % 
 %   messing with footnote kerning
 % 
-% 2012/05/21
+% 2012/05/22
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -36,8 +36,8 @@
 \RequirePackage { xparse , l3keys2e }
 \ProvidesExplPackage
   {fnpct}
-  {2012/05/21}
-  {0.1beta-e}
+  {2012/05/22}
+  {0.1beta-f}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -77,10 +77,20 @@
 \tl_new:N \l_fnpct_multiple_footnotes_delimiter_tl
 \tl_set:Nn \l_fnpct_multiple_footnotes_delimiter_tl { ; }
 \tl_new:N \l_fnpct_multiple_footnote_separator_tl
-% check for KOMA-Script's \multfootsep:
+% check for KOMA-Script's or anyone's \multfootsep:
 \cs_if_exist:NTF \multfootsep
   { \tl_set:Nn \l_fnpct_multiple_footnote_separator_tl { \multfootsep } }
   { \tl_set:Nn \l_fnpct_multiple_footnote_separator_tl { , } }
+% check for KOMA-Script's or anyone's \multiplefootnoteseparator:
+\cs_if_exist:NF \multiplefootnoteseparator
+  { 
+    \cs_new:Npn \multiplefootnoteseparator
+      {
+        \fnpct_no_break:
+        \textsuperscript { \tl_use:N \l_fnpct_multiple_footnote_separator_tl }
+        \fnpct_no_break:
+      }
+  }
 
 % basic booleans for punctuation order switch and multiple footnotes
 \bool_new:N \l_fnpct_punct_after_bool
@@ -174,9 +184,8 @@
             % what about multiple footnotes? (their usage is discouraged with
             % this package, but anyway...)
             % this check should probably/maybe be removed (?!)
-            % or at least improved: this _only_ chemcks for a second \footnote
-            % and will handle punctuation switches wrongly
-            \peek_meaning:NTF \footnote
+            % FIXME: this will always be false:
+            \peek_meaning:NTF #1
               {
                 \bool_set_true:N \l_fnpct_multiple_footnotes_bool
                 % else insert space and then note
@@ -389,6 +398,73 @@
   }
 
 % --------------------------------------------------------------------------
+% let's make it easier to adapt existing functions:
+%
+% COPY, RENEW AND CREATE MULT
+% standard \footnote[<mark>]{<text>} like commands
+% #1: old new name
+% #2: internal name of old definition
+% #3: mult-variant
+\cs_new:Npn \fnpct_renew_and_mult:NNN #1#2#3
+  {
+    \cs_new_eq:NN #2 #1
+    \fnpct_create_mult_variant:NN #3 #2
+    \bool_if:NTF \l_fnpct_multiple_default_bool
+      { \cs_set_eq:NN #1 #3 }
+      {
+        \RenewDocumentCommand #1 { so+m }
+          { \fnpct_dot_or_comma:Nnnn #2 { ##2 } { ##3 } { ##1 } }
+      }
+  }
+\cs_generate_variant:Nn \fnpct_renew_and_mult:NNN { ccc }
+
+\cs_new:Npn \fnpct_renew_and_mult_no_opt:NNN #1#2#3
+  {
+    \cs_new_eq:NN #2 #1
+    \fnpct_create_mult_variant:NN #3 #2
+    \bool_if:NTF \l_fnpct_multiple_default_bool
+      { \cs_set_eq:NN #1 #3 }
+      {
+        \RenewDocumentCommand #1 { s+m }
+          { \fnpct_dot_or_comma:Nnnn #2 { \NoValue } { ##2 } { ##1 } }
+      }
+  }
+\cs_generate_variant:Nn \fnpct_renew_and_mult_no_opt:NNN { ccc }
+
+% renew but don't create mult-variant:
+\cs_new:Npn \fnpct_renew:NN #1#2
+  {
+    \cs_set_eq:NN #2 #1
+    \RenewDocumentCommand #1 { sm }
+      { \fnpct_dot_or_comma:Nnnn #2 { \NoValue } { ##2 } { ##1 } }
+  }
+\cs_generate_variant:Nn \fnpct_renew:NN { cc }
+
+\cs_new:Npn \fnpct_renew_no_arg:NN #1#2
+  {
+    \cs_set_eq:NN #2 #1
+    \RenewDocumentCommand #1 { s }
+      { \fnpct_dot_or_comma:Nnnn #2 { \NoValue } { } { ##1 } }
+  }
+\cs_generate_variant:Nn \fnpct_renew_no_arg:NN { cc }
+
+% create mult-variant
+\cs_new:Npn \fnpct_create_mult_variant:NN #1#2
+  {
+    \NewDocumentCommand #1 { s+m }
+      { \fnpct_mult_note:Nnn #2 { ##1 } { ##2 } }
+  }
+
+% \footnotemark[<mark>] like commands:
+\cs_new:Npn \fnpct_renew_mark:NN #1#2
+  {
+    \cs_set_eq:NN #2 #1
+    \RenewDocumentCommand #1 { so }
+     { \fnpct_dot_or_comma:Nnnn #2 { ##2 } { } { ##1 } }
+  }
+\cs_generate_variant:Nn \fnpct_renew_mark:NN { cc }
+
+% --------------------------------------------------------------------------
 % DO THE REDEFINING:
 \AtBeginDocument {
   \@ifpackageloaded { hyperref }
@@ -398,91 +474,34 @@
         { \cs_new:Npn \AfterBeginDocument #1 { #1 } }
     }
   \AfterBeginDocument {
-    % save definition of \footnote
-    \cs_set_eq:NN \fnpct_orig_footnote:w \footnote
-    \cs_set_eq:NN \fnpct_orig_footnotemark:w \footnotemark
-    \NewDocumentCommand \multfootnote { s+m }
-      { \fnpct_mult_note:Nnn \fnpct_orig_footnote:w { #1 } { #2 } }
-    % redefine \footnote
-    \bool_if:NTF \l_fnpct_multiple_default_bool
-      { \cs_set_eq:NN \footnote \multfootnote }
-      {
-        \RenewDocumentCommand \footnote { so+m }
-          { \fnpct_dot_or_comma:Nnnn \fnpct_orig_footnote:w { #2 } { #3 } { #1 } }
-      }
-    \NewDocumentCommand \innerfootnote { so+m }
+    \fnpct_renew_and_mult:NNN \footnote \fnpct_orig_footnote:w \multfootnote
+    \fnpct_renew_mark:NN \footnotemark \fnpct_orig_footnotemark:w
+    \NewDocumentCommand \innernote { so+m }
       { \fnpct_dot_or_comma:Nnnn \fnpct_inner_footnote:w { #2 } { #3 } { #1 } }
-    \RenewDocumentCommand \footnotemark { so }
-      { \fnpct_dot_or_comma:Nnnn \fnpct_orig_footnotemark:w { #2 } { } { #1 } }
     %% the `endnotes' package:
     \@ifpackageloaded { endnotes }
       {
-        % save definition of \endnote
-        \cs_new_eq:NN \fnpct_orig_endnote:w \endnote
-        \cs_new_eq:NN \fnpct_orig_endnotemark:w \endnotemark
-        \NewDocumentCommand \multendnote { s+m }
-          { \fnpct_mult_note:Nnn \fnpct_orig_endnote:w { #1 } { #2 } }
-        % redefine \endnote
-        \bool_if:NTF \l_fnpct_multiple_default_bool
-          { \cs_set_eq:NN \endnote \multendnote }
-          {
-            \RenewDocumentCommand \endnote { so+m }
-              { \fnpct_dot_or_comma:Nnnn \fnpct_orig_endnote:w { #2 } { #3 } { #1 } }
-          }
-        \RenewDocumentCommand \endnotemark { so }
-          { \fnpct_dot_or_comma:Nnnn \fnpct_orig_endnotemark:w { #2 } { } { #1 } }
+        \fnpct_renew_and_mult:NNN \endnote \fnpct_orig_endnote:w \multendnote
+        \fnpct_renew_mark:NN \endnotemark \fnpct_orig_endnotemark:w
       }
       { }
     %% the `parnotes' package:
     \@ifpackageloaded { parnotes }
-      {
-        % save definition of \parnote
-        \cs_new_eq:NN \fnpct_orig_parnote:w \parnote
-        \NewDocumentCommand \multparnote { s+m }
-          { \fnpct_mult_note:Nnn \fnpct_orig_parnote:w { #1 } { #2 } }
-        % redefine \parnote
-        \bool_if:NTF \l_fnpct_multiple_default_bool
-          { \cs_set_eq:NN \parnote \multparnote }
-          {
-            \RenewDocumentCommand \parnote { so+m }
-              { \fnpct_dot_or_comma:Nnnn \fnpct_orig_parnote:w { #2 } { #3 } { #1 } }
-          }
-      }
+      { \fnpct_renew_and_mult:NNN \parnote \fnpct_orig_parnote:w \multparnote }
       { }
     %% the `pagenote' package:
     \@ifpackageloaded { pagenote }
       {
-        % save definition of \pagenote
-        \cs_new_eq:NN \fnpct_orig_pagenote:w \pagenote
-        \NewDocumentCommand \multpagenote { s+m }
-          { \fnpct_mult_note:Nnn \fnpct_orig_pagenote:w { #1 } { #2 } }
-        % redefine \pagenote
         \bool_if:NTF \l_fnpct_makepagenote_bool
-          {
-            \bool_if:NTF \l_fnpct_multiple_default_bool
-              { \cs_set_eq:NN \pagenote \multpagenote }
-              {
-                \RenewDocumentCommand \pagenote { so+m }
-                  { \fnpct_dot_or_comma:Nnnn \fnpct_orig_pagenote:w { #2 } { #3 } { #1 } }
-              }
-          }
+          { \fnpct_renew_and_mult:NNN \pagenote \fnpct_orig_pagenote:w \multpagenote }
           { \RenewDocumentCommand \pagenote { so+m } { } }
       }
       { }
     %% the `tablefootnote' package:
     \@ifpackageloaded { tablefootnote }
       {
-        % save definition of \tablefootnote
-        \cs_new_eq:NN \fnpct_orig_tablefootnote:w \tablefootnote
-        \NewDocumentCommand \multtablefootnote { s+m }
-          { \fnpct_mult_note:Nnn \fnpct_orig_tablefootnote:w { #1 } { #2 } }
-        % redefine \pagenote
-        \bool_if:NTF \l_fnpct_multiple_default_bool
-          { \cs_set_eq:NN \tablefootnote \multtablefootnote }
-          {
-            \RenewDocumentCommand \tablefootnote { s+m }
-              { \fnpct_dot_or_comma:Nnnn \fnpct_orig_tablefootnote:w { \Novalue } { #2 } { #1 } }
-          }
+        \fnpct_renew_and_mult_no_opt:NNN \tablefootnote
+          \fnpct_orig_tablefootnote:w \multtablefootnote
       }
       { }
     %% the `bigfoot' package:
@@ -490,22 +509,9 @@
       {
         \prop_map_inline:Nn \l_fnpct_footnote_class_prop
           {
-            % store each footnote command
-            \cs_set_eq:cc { fnpct_orig_footnote#2:w } { footnote#2 }
-            \cs_set_eq:cc { fnpct_orig_footnotemark#2:w } { footnotemark#2 }
-            % then define a suiting \mult... command
-            % (this is the 2e way: how do I do that with expl3?)
-            \exp_after:wN \NewDocumentCommand \cs:w multfootnote#2 \cs_end: { s+m }
-              { \fnpct_mult_note:cnn { fnpct_orig_footnote#2:w } { ##1 } { ##2 } }
-            % and redefine each command depending on `multiple'
-            \bool_if:NTF \l_fnpct_multiple_default_bool
-              { \cs_set_eq:cc { footnote#2 } { multfootnote#2 } }
-              {
-                \exp_after:wN \RenewDocumentCommand \cs:w footnote#2 \cs_end: { so+m }
-                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_footnote#2:w } { ##2 } { ##3 } { ##1 } }
-              }
-            \exp_after:wN \RenewDocumentCommand \cs:w footnotemark#2 \cs_end: { so }
-              { \fnpct_dot_or_comma:cnnn { fnpct_orig_footnotemark#2:w } { ##2 } { } { ##1 } }
+            \fnpct_renew_and_mult:ccc { footnote#2 }
+              { fnpct_orig_footnote#2:w } { multfootnote#2 }
+            \fnpct_renew_mark:cc { footnotemark#2 } { fnpct_orig_footnotemark#2:w }
           }
         % re-set basics:
         \cs_set_eq:NN \footnote \footnotedefault
@@ -517,11 +523,7 @@
     \@ifpackageloaded { fixfoot }
       {
         \prop_map_inline:Nn \l_fnpct_footnote_fixfoot_prop
-          {
-            \cs_set_eq:cc { fnpct_orig_fix_#2:w } { #2 }
-            \exp_after:wN \RenewDocumentCommand \cs:w #2 \cs_end: { s }
-              { \fnpct_dot_or_comma:cnnn { fnpct_orig_fix_#2:w } { \NoValue } { } { ##1 } }
-          }
+          { \fnpct_renew_no_arg:cc { #2 } { fnpct_orig_fix_#2:w } }
       }
       { }
     %% the `sepfootnotes' package:
@@ -529,33 +531,15 @@
       {
         \prop_map_inline:Nn \l_fnpct_sepfootnote_foot_classes_prop
           {
-            \cs_set_eq:cc { fnpct_orig_sep_#2:w } { #2note }
-            \cs_set_eq:cc { fnpct_orig_sep_#2_mark:w } { #2notemark }
-            \exp_after:wN \NewDocumentCommand \cs:w #2multnote \cs_end: { sm }
-              { \fnpct_mult_note:cnn { fnpct_orig_sep_#2:w } { ##1 } { ##2 } }
-            \bool_if:NTF \l_fnpct_multiple_default_bool
-              { \cs_set_eq:cc { #2note } { #2multnote } }
-              {
-                \exp_after:wN \RenewDocumentCommand \cs:w #2note \cs_end: { sm }
-                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_sep_#2:w } { \NoValue } { ##2 } { ##1 } }
-                \exp_after:wN \RenewDocumentCommand \cs:w #2notemark \cs_end: { sm }
-                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_sep_#2_mark:w } { \NoValue } { ##2 } { ##1 } }
-              }
+            \fnpct_renew_and_mult_no_opt:ccc { #2note } { fnpct_orig_sep_#2:w }
+              { #2multnote }
+            \fnpct_renew:cc { #2notemark } { fnpct_orig_sep_#2_mark:w }
           }
         \prop_map_inline:Nn \l_fnpct_sepfootnote_end_classes_prop
           {
-            \cs_set_eq:cc { fnpct_orig_sep_#2:w } { #2note }
-            \cs_set_eq:cc { fnpct_orig_sep_#2_mark:w } { #2notemark }
-            \exp_after:wN \NewDocumentCommand \cs:w #2multnote \cs_end: { sm }
-              { \fnpct_mult_note:cnn { fnpct_orig_sep_#2:w } { ##1 } { ##2 } }
-            \bool_if:NTF \l_fnpct_multiple_default_bool
-              { \cs_set_eq:cc { #2note } { #2multnote } }
-              {
-                \exp_after:wN \RenewDocumentCommand \cs:w #2note \cs_end: { sm }
-                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_sep_#2:w } { \NoValue } { ##2 } { ##1 } }
-                \exp_after:wN \RenewDocumentCommand \cs:w #2notemark \cs_end: { sm }
-                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_sep_#2_mark:w } { \NoValue } { ##2 } { ##1 } }
-              }
+            \fnpct_renew_and_mult_no_opt:ccc { #2note } { fnpct_orig_sep_#2:w }
+              { #2multnote }
+            \fnpct_renew:cc { #2notemark } { fnpct_orig_sep_#2_mark:w }
           }
       }
       { }
@@ -654,10 +638,11 @@
 2012/05/20 v0.1beta-c - optional star argument to \multfootnote that only invokes
                         \footnotetext
                       - option `dont-mess-around': disable switching and kerning
-2012/05/21 v0.1beta-d - \innerfootnote for nesting
+2012/05/21 v0.1beta-d - \innernote for nesting
                       - `hyperref' support
                       - bugfix in \multfootnote
 2012/05/21 v0.1beta-e - `sepfootnotes' support
+2012/05/22 v0.1beta-f - reorganized code
  
 % --------------------------------------------------------------------------
 % NOTES:
