@@ -37,7 +37,7 @@
 \ProvidesExplPackage
   {fnpct}
   {2012/05/21}
-  {0.1beta-d}
+  {0.1beta-e}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -124,7 +124,8 @@
     normal-marks          .default:n  = true ,
     normal-mark-indent    .dim_set:N  = \l_fnpct_normal_mark_indent_dim ,
     normal-indent         .dim_set:N  = \l_fnpct_normal_indent_dim ,
-    normal-parindent      .dim_set:N  = \l_fnpct_normal_parindent_dim
+    normal-parindent      .dim_set:N  = \l_fnpct_normal_parindent_dim ,
+    verb-format           .tl_set:N   = \l_fnpct_verbatim_format_tl
   }
 
 \ProcessKeysOptions { fnpct }
@@ -523,6 +524,41 @@
           }
       }
       { }
+    %% the `sepfootnotes' package:
+    \@ifpackageloaded { sepfootnotes }
+      {
+        \prop_map_inline:Nn \l_fnpct_sepfootnote_foot_classes_prop
+          {
+            \cs_set_eq:cc { fnpct_orig_sep_#2:w } { #2note }
+            \cs_set_eq:cc { fnpct_orig_sep_#2_mark:w } { #2notemark }
+            \exp_after:wN \NewDocumentCommand \cs:w #2multnote \cs_end: { sm }
+              { \fnpct_mult_note:cnn { fnpct_orig_sep_#2:w } { ##1 } { ##2 } }
+            \bool_if:NTF \l_fnpct_multiple_default_bool
+              { \cs_set_eq:cc { #2note } { #2multnote } }
+              {
+                \exp_after:wN \RenewDocumentCommand \cs:w #2note \cs_end: { sm }
+                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_sep_#2:w } { \NoValue } { ##2 } { ##1 } }
+                \exp_after:wN \RenewDocumentCommand \cs:w #2notemark \cs_end: { sm }
+                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_sep_#2_mark:w } { \NoValue } { ##2 } { ##1 } }
+              }
+          }
+        \prop_map_inline:Nn \l_fnpct_sepfootnote_end_classes_prop
+          {
+            \cs_set_eq:cc { fnpct_orig_sep_#2:w } { #2note }
+            \cs_set_eq:cc { fnpct_orig_sep_#2_mark:w } { #2notemark }
+            \exp_after:wN \NewDocumentCommand \cs:w #2multnote \cs_end: { sm }
+              { \fnpct_mult_note:cnn { fnpct_orig_sep_#2:w } { ##1 } { ##2 } }
+            \bool_if:NTF \l_fnpct_multiple_default_bool
+              { \cs_set_eq:cc { #2note } { #2multnote } }
+              {
+                \exp_after:wN \RenewDocumentCommand \cs:w #2note \cs_end: { sm }
+                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_sep_#2:w } { \NoValue } { ##2 } { ##1 } }
+                \exp_after:wN \RenewDocumentCommand \cs:w #2notemark \cs_end: { sm }
+                  { \fnpct_dot_or_comma:cnnn { fnpct_orig_sep_#2_mark:w } { \NoValue } { ##2 } { ##1 } }
+              }
+          }
+      }
+      { }
   }
 }
 
@@ -579,6 +615,27 @@
   }
   { }
 
+% aaand... the `sepfootnotes' package:
+\prop_new:N \l_fnpct_sepfootnote_foot_classes_prop
+\prop_new:N \l_fnpct_sepfootnote_end_classes_prop
+\@ifpackageloaded { sepfootnotes }
+  {
+    \cs_new_eq:NN \fnpct_orig_new_footnotes:n \newfootnotes
+    \cs_new_eq:NN \fnpct_orig_new_endnotes:n \newendnotes
+    \cs_new_eq:NN \fnpct_orig_new_symbolnotes:w \newsymbolfootnotes
+    \RenewDocumentCommand \newfootnotes { m }
+      {
+        \prop_put:Nnn \l_fnpct_sepfootnote_foot_classes_prop { #1 } { #1 }
+        \fnpct_orig_new_footnotes:n { #1 }
+      }
+    \RenewDocumentCommand \newendnotes { m }
+      {
+        \prop_put:Nnn \l_fnpct_sepfootnote_end_classes_prop { #1 } { #1 }
+        \fnpct_orig_new_endnotes:n { #1 }
+      }
+  }
+  { }
+
 % --------------------------------------------------------------------------
 % SETUP COMMAND:
 \NewDocumentCommand \setfnpct { m }
@@ -599,8 +656,9 @@
                       - option `dont-mess-around': disable switching and kerning
 2012/05/21 v0.1beta-d - \innerfootnote for nesting
                       - `hyperref' support
-                      - bugfix in \multfootnote                      
-
+                      - bugfix in \multfootnote
+2012/05/21 v0.1beta-e - `sepfootnotes' support
+ 
 % --------------------------------------------------------------------------
 % NOTES:
 - `footnote' package => not compatible => see todo

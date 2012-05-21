@@ -47,6 +47,8 @@
   }
 }
 \addcmds{
+  anote,
+  anotecontent,
   arabic,
   DeclareNewFootnote,
   endnote,
@@ -57,6 +59,7 @@
   multfootnote,
   multparnote,
   myfn,
+  newfootnotes,
   parnote,
   parnotes,
   setfnpct,
@@ -67,6 +70,8 @@
 \setfnpct{multiple}
 \usepackage{endnotes}
 \usepackage{parnotes}
+\usepackage{sepfootnotes}
+\newfootnotes{a}
 
 \renewcommand\thempfootnote{\arabic{mpfootnote}}
 
@@ -146,6 +151,13 @@
   date    = {2009/09/03},
   version = {1.1a},
   url     = {http://www.ctan.org/pkg/pagenote}
+}
+@software{sepfootnotes,
+  title   = {sepfootnotes},
+  author  = {Eduardo C. Louren\c{}o de Lima},
+  date    = {2012/03/06},
+  version = {0.1},
+  url     = {http://www.ctan.org/pkg/sepfootnotes}
 }
 @software{tablefootnote,
   title   = {tablefootnote},
@@ -712,7 +724,8 @@ repeat the footnote text on the same page in the bottom. The document needs
 several runs to get all the numbers and footnotes right.
 
 Every fixed footnote declared with \cmd{DeclareFixedFootnote} gets an optional
-\code{*} to prevent the punctuation switching.
+\code{*} to prevent the punctuation switching. There is \emph{no} mult-variant
+of the fixed notes!
 
 Since this package cannot easily combine every footnote package for demonstration
 purposes the following code is shown in figure \ref{fig:fixfoot}:
@@ -802,6 +815,33 @@ Again the \key{multiple} option turns all \cmd{parnote}s into \cmd{multparnote}s
   something else}.
   
   \parnotes
+ \end{minipage}
+\end{beispiel}
+
+\subsection{sepfootnotes}\secidx[sepfootnotes]{other packages}
+\fnpct supports the \paket{sepfootnotes} package \cite{sepfootnotes}. Each note
+type you have created with with one of the commands
+\begin{description}
+ \item \cmd{newfootnotes}{<prefix>},
+ \item \cmd{newendnotes}{<prefix>} or
+ \item \cmd{newsymbolfootnotes}{<prefix>}
+\end{description}
+gets the additional optional \code{*} to prevent punctuation switching. Also the
+corresponding mult-variant \cmd{<prefix>multnote} is defined. The option \key{multiple}
+again turns all note commands into their mult-variant.
+
+You have to call the package before \fnpct and use the \cmd{newfootnotes} commands
+in the document preamble.
+
+\begin{beispiel}
+ % preamble \newfootnotes{a}
+ \anotecontent{first}{not to be confused with hay}
+ \anotecontent{second}{or lumber according to some sources}
+ \anotecontent{third}{probably fired clay bricks}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\anote{first}, sticks\anote{second} and
+  bricks\anote{third}.
  \end{minipage}
 \end{beispiel}
 
