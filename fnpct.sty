@@ -434,7 +434,7 @@
 % renew but don't create mult-variant:
 \cs_new:Npn \fnpct_renew:NN #1#2
   {
-    \cs_set_eq:NN #2 #1
+    \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { sm }
       { \fnpct_dot_or_comma:Nnnn #2 { \NoValue } { ##2 } { ##1 } }
   }
@@ -442,11 +442,18 @@
 
 \cs_new:Npn \fnpct_renew_no_arg:NN #1#2
   {
-    \cs_set_eq:NN #2 #1
+    \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { s }
       { \fnpct_dot_or_comma:Nnnn #2 { \NoValue } { } { ##1 } }
   }
 \cs_generate_variant:Nn \fnpct_renew_no_arg:NN { cc }
+
+\cs_new:Npn \fnpct_new:NN #1#2
+  {
+    \NewDocumentCommand #1 { so+m }
+      { \fnpct_dot_or_comma:Nnnn #2 { ##2 } { ##3 } { ##1 } }
+  }
+\cs_generate_variant:Nn \fnpct_renew:NN { cc }
 
 % create mult-variant
 \cs_new:Npn \fnpct_create_mult_variant:NN #1#2
@@ -458,7 +465,7 @@
 % \footnotemark[<mark>] like commands:
 \cs_new:Npn \fnpct_renew_mark:NN #1#2
   {
-    \cs_set_eq:NN #2 #1
+    \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { so }
      { \fnpct_dot_or_comma:Nnnn #2 { ##2 } { } { ##1 } }
   }
@@ -476,8 +483,7 @@
   \AfterBeginDocument {
     \fnpct_renew_and_mult:NNN \footnote \fnpct_orig_footnote:w \multfootnote
     \fnpct_renew_mark:NN \footnotemark \fnpct_orig_footnotemark:w
-    \NewDocumentCommand \innernote { so+m }
-      { \fnpct_dot_or_comma:Nnnn \fnpct_inner_footnote:w { #2 } { #3 } { #1 } }
+    \fnpct_new:NN \innernote \fnpct_inner_footnote:w
     %% the `endnotes' package:
     \@ifpackageloaded { endnotes }
       {
