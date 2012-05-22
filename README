@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------
-the FNPCT package v0.1beta-f
+the FNPCT package v0.1
 
   footnote kerning
 
@@ -25,7 +25,14 @@ The Current Maintainer of this work is Clemens Niederberger.
 --------------------------------------------------------------------------
 The fnpct package consists of the files
  - fnpct.sty,
+ - fnpct_en.tex and fnpct_en.pdf
+ - bigfoot_ex.tex, fixfoot_ex.tex, normal_ex.tex, pagenote_ex.tex,
+   sepfootnotes_ex.tex, tufte_ex.tex
+ - nested_ex.tex, nested_ex_a.tex, nested_ex_b.tex, nested_ex_c.tex
  - README
+% --------------------------------------------------------------------------
+% the package is inspired by the following question on TeX.SE:
+%   http://tex.stackexchange.com/q/56094/5049
 --------------------------------------------------------------------------
 If you have any ideas, questions, suggestions or bugs to report, please
 feel free to contact me.

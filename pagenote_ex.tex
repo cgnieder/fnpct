@@ -28,20 +28,21 @@
 % --------------------------------------------------------------------------
 \documentclass{article}
 \usepackage[
-  paperwidth=.5\textwidth,
+  paperwidth=.55\textwidth,
   paperheight=12\baselineskip,
   margin=5pt,
   bottom=1.5cm]{geometry}
+  
+\usepackage{pagenote}
+\usepackage[multiple]{fnpct}
 
-\usepackage{fnpct}
-
+\makepagenote
 \begin{document}
-  \noindent The three little pigs built their houses
-  out of straw\footnote{not to be confused with hay},
-  sticks\footnote{or lumber according to some sources}
-  and bricks\footnote{probably\innernote{just guessing}
-  fired clay bricks\innernote{or not}}.
+\section{Text}
+\noindent The three little pigs built their houses
+out of straw\pagenote{not to be confused with hay},
+sticks\pagenote{or lumber according to some sources}
+and bricks\pagenote{probably fired clay bricks;or whatever}.
+
+\printnotes
 \end{document}
-
-
-

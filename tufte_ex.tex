@@ -26,22 +26,11 @@
 % If you have any ideas, questions, suggestions or bugs to report, please
 % feel free to contact me.
 % --------------------------------------------------------------------------
-\documentclass{article}
-\usepackage[
-  paperwidth=.5\textwidth,
-  paperheight=12\baselineskip,
-  margin=5pt,
-  bottom=1.5cm]{geometry}
-
-\usepackage{fnpct}
-
+\documentclass{tufte-handout}
+\usepackage[multiple]{fnpct}
+\AdaptNote\sidenote\multsidenote
 \begin{document}
-  \noindent The three little pigs built their houses
-  out of straw\footnote{not to be confused with hay},
-  sticks\footnote{or lumber according to some sources}
-  and bricks\footnote{probably\innernote{just guessing}
-  fired clay bricks\innernote{or not}}.
+
+Some text in the document body\sidenote{Some text in a sidenote.;A second sidenote}.
+
 \end{document}
-
-
-
