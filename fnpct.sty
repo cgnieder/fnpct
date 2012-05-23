@@ -33,7 +33,7 @@
 \ProvidesExplPackage
   {fnpct}
   {2012/05/22}
-  {0.1}
+  {0.1a}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -41,6 +41,7 @@
 % this is plain's \nobreak:
 \cs_new:Npn \fnpct_no_break: { \tex_penalty:D \c_ten_thousand }
 
+% messages:
 \cs_new:Npn \fnpct_dont_mess_around:
   {
     \iow_log:n { ................................................. }
@@ -49,6 +50,23 @@
     \iow_log:n { . ~ All~right,~not~messing~around.~:( }
     \iow_log:n { . ~ But~I'd~really~love~to~(http://www.youtube.com/watch?v=Bqz876VkwwY). }
     \iow_log:n { ................................................. }
+  }
+
+\msg_set:nnn { fnpct } { already-adapted }
+  {
+    The~command~\token_to_str:N #1 \tl_use:N \c_space_tl has~already~been~
+    adapted. \\
+    I~will~do~nothing~instead.
+  }
+
+\bool_new:N \l_fnpct_strict_bool
+
+\cs_new:Npn \fnpct_message:nx #1#2
+  {
+    \bool_if:NTF \l_fnpct_strict_bool
+      { \msg_error:nnx { fnpct } { #1 } }
+      { \msg_warning:nnx { fnpct } { #1 } }
+    { #2 }
   }
 
 % rigid lengths:
@@ -89,6 +107,8 @@
 % options:
 \keys_define:nn { fnpct }
   {
+    strict                .bool_set:N = \l_fnpct_strict_bool ,
+    strict                .default:n  = true ,
     after-comma-space     .dim_set:N  = \l_fnpct_after_comma_dim ,
     after-dot-space       .dim_set:N  = \l_fnpct_after_dot_dim ,
     before-comma-space    .dim_set:N  = \l_fnpct_before_comma_dim ,
@@ -128,24 +148,34 @@
 
 % --------------------------------------------------------------------------
 % MAIN INTERNAL FOOTNOTE FUNCTION:
+\cs_new:Npn \fnpct_write_note:Nnnn #1#2#3#4
+  {
+    \IfNoValueTF { #2 }
+      { #1 { #4 } }
+      {
+        \IfNoValueTF { #3 }
+          { #1 [ #2 ] { #4 } }
+          { #1 [ #2 ] [ #3 ] { #4 } }
+      }
+  }
+
 %   #1: original command
 %   #2: optional argument of original command
-%   #3: mandatory argument of original command
-%   #4: boolean flag for starred version
-\cs_new_protected:Npn \fnpct_dot_or_comma:Nnnn #1#2#3#4
+%   #3: second optional argument of original command
+%   #4: mandatory argument of original command
+%   #5: boolean flag for starred version
+\cs_new_protected:Npn \fnpct_dot_or_comma:Nnnnn #1#2#3#4#5
   {
     % if a dot follows remove it, insert dot, skip back
     % and then insert footnote
     \fnpct_no_break:
-    \IfBooleanT { #4 } { \bool_set_true:N \l_fnpct_dont_switch_bool }
+    \IfBooleanT { #5 } { \bool_set_true:N \l_fnpct_dont_switch_bool }
     \peek_meaning_remove:NTF .
       {
         \bool_if:nTF { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
           { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
           { . \fnpct_no_break: \skip_horizontal:N \l_fnpct_after_dot_dim }
-        \IfNoValueTF { #2 }
-          { #1 { #3 } }
-          { #1 [ #2 ] { #3 } }
+        \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
         \fnpct_write_inner:N #1
         \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
           { \skip_horizontal:N \l_fnpct_before_dot_dim \fnpct_no_break: . }
@@ -158,9 +188,7 @@
             \bool_if:nTF { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
               { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
               { , \fnpct_no_break: \skip_horizontal:N \l_fnpct_after_comma_dim }
-            \IfNoValueTF { #2 }
-              { #1 { #3 } }
-              { #1 [ #2 ] { #3 } }
+            \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
             \fnpct_write_inner:N #1
             \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
               { \skip_horizontal:N \l_fnpct_before_comma_dim \fnpct_no_break: , }
@@ -178,9 +206,7 @@
                 \bool_set_true:N \l_fnpct_multiple_footnotes_bool
                 % else insert space and then note
                 \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim
-                \IfNoValueTF { #2 }
-                  { #1 { #3 } }
-                  { #1 [ #2 ] { #3 } }
+                \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
                 \fnpct_write_inner:N #1
                 \fnpct_no_break:
                 \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
@@ -191,16 +217,14 @@
                 \bool_if:NTF \l_fnpct_multiple_footnotes_bool
                   { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
                   { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
-                \IfNoValueTF { #2 }
-                  { #1 { #3 } }
-                  { #1 [ #2 ] { #3 } }
+                \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
                 \fnpct_write_inner:N #1
                 \bool_set_false:N \l_fnpct_dont_switch_bool
               }
           }
       }
   }
-\cs_generate_variant:Nn \fnpct_dot_or_comma:Nnnn { cnnn }
+\cs_generate_variant:Nn \fnpct_dot_or_comma:Nnnnn { cnnnn }
 
 % --------------------------------------------------------------------------
 % MULTIPLE FOOTNOTES
@@ -272,7 +296,7 @@
     \int_zero:N \l_tmpa_int
     \seq_map_inline:Nn \l_fnpct_multiple_footnotes_seq
       {
-        \fnpct_read_footnote_with_option:w ##1 \q_stop { #1 }
+        \fnpct_read_note_with_option:w ##1 \q_stop { #1 }
         \int_incr:N \l_tmpa_int
       }
   }
@@ -281,10 +305,11 @@
 % biblatex's \footcite et.al. compatible with the `multiple' option
 %   #1: optional star => only invoke \footnotetext
 %   #2: optional argument to original note command
-%   #3: mandatory argument to original note command
-%   #4: original note command
+%   #3: second optional argument to original note command
+%   #4: mandatory argument to original note command
+%   #5: original note command
 \bool_new:N \g_fnpct_only_text_bool
-\NewDocumentCommand \fnpct_read_footnote_with_option:w { sou{\q_stop}m }
+\NewDocumentCommand \fnpct_read_note_with_option:w { soo+u{\q_stop}m }
   {
     % FIXME: change \seq_length into \seq_count when it has been renamed
     \bool_if:nT
@@ -300,17 +325,15 @@
       }
     \IfBooleanTF { #1 }
       {
+        % TODO: maybe provide option to change \footnotetext? Or do it
+        % automatically?
         \bool_gset_true:N \g_fnpct_only_text_bool
         \IfNoValueTF { #2 }
-          { \footnotetext { #3 } }
-          { \footnotetext [ #2 ] { #3 } }
+          { \footnotetext { #4 } }
+          { \footnotetext [ #2 ] { #4 } }
       }
-      {
-        \IfNoValueTF { #2 }
-          { #4 { #3 } }
-          { #4 [ #2 ] { #3 } }
-      }
-    \fnpct_write_inner:N #4
+      { \fnpct_write_note:Nnnn #5 { #2 } { #3 } { #4 } }
+    \fnpct_write_inner:N #5
   }
 
 % --------------------------------------------------------------------------
@@ -327,6 +350,7 @@
     \IfNoValueTF { #1 }
       {
         % TODO: maybe detect what type of note we're in and use the appropriate mark?
+        % Ot provide a user interface to choose the appropriate mark?
         \fnpct_orig_footnotemark:w
         \prop_gput:Nxn \g_fnpct_inner_footnote_prop { \thefootnote } { #2 }
         \bool_if:NT \l_fnpct_hyperref_bool
@@ -412,6 +436,8 @@
 % #1: old new name
 % #2: internal name of old definition
 % #3: mult-variant
+%
+% \footnote[<mark>]{<text>} like:
 \cs_new:Npn \fnpct_renew_and_mult:NNN #1#2#3
   {
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
@@ -421,7 +447,7 @@
       { \cs_set_eq:NN #1 #3 }
       {
         \RenewDocumentCommand #1 { so+m }
-          { \fnpct_dot_or_comma:Nnnn #2 { ##2 } { ##3 } { ##1 } }
+          { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { \NoValue } { ##3 } { ##1 } }
       }
   }
 \cs_generate_variant:Nn \fnpct_renew_and_mult:NNN { ccc , NcN }
@@ -435,7 +461,7 @@
       { \cs_set_eq:NN #1 #3 }
       {
         \RenewDocumentCommand #1 { s+m }
-          { \fnpct_dot_or_comma:Nnnn #2 { \NoValue } { ##2 } { ##1 } }
+          { \fnpct_dot_or_comma:Nnnnn #2 { \NoValue } { \NoValue } { ##2 } { ##1 } }
       }
   }
 \cs_generate_variant:Nn \fnpct_renew_and_mult_no_opt:NNN { ccc }
@@ -445,27 +471,63 @@
   {
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
     \cs_new_eq:NN #2 #1
-    \RenewDocumentCommand #1 { sm }
-      { \fnpct_dot_or_comma:Nnnn #2 { \NoValue } { ##2 } { ##1 } }
+    \RenewDocumentCommand #1 { so+m }
+      { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { \NoValue } { ##3 } { ##1 } }
   }
-\cs_generate_variant:Nn \fnpct_renew:NN { cc }
+\cs_generate_variant:Nn \fnpct_renew:NN { cc ,Nc }
 
+% new
+\cs_new:Npn \fnpct_new:NN #1#2
+  {
+    \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
+    \NewDocumentCommand #1 { so+m }
+      { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { \NoValue } { ##3 } { ##1 } }
+  }
+\cs_generate_variant:Nn \fnpct_new:NN { cc , Nc }
+
+% \note[<mark>][<oarg>]{<text>} like:
+\cs_new:Npn \fnpct_renew_and_mult_opt:NNN #1#2#3
+  {
+    \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
+    \cs_new_eq:NN #2 #1
+    \fnpct_create_mult_variant:NN #3 #2
+    \bool_if:NTF \l_fnpct_multiple_default_bool
+      { \cs_set_eq:NN #1 #3 }
+      {
+        \RenewDocumentCommand #1 { soo+m }
+          { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { ##3 } { ##4 } { ##1 } }
+      }
+  }
+\cs_generate_variant:Nn \fnpct_renew_and_mult_opt:NNN { ccc , NcN }
+
+\cs_new:Npn \fnpct_renew_opt:NN #1#2
+  {
+    \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
+    \cs_new_eq:NN #2 #1
+    \RenewDocumentCommand #1 { soo+m }
+      { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { ##3 } { ##4 } { ##1 } }
+  }
+\cs_generate_variant:Nn \fnpct_renew_opt:NN { cc , Nc }
+
+% \note{<arg>} like
+\cs_new:Npn \fnpct_renew_no_opt:NN #1#2
+  {
+    \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
+    \cs_new_eq:NN #2 #1
+    \RenewDocumentCommand #1 { s+m }
+      { \fnpct_dot_or_comma:Nnnnn #2 { \NoValue } { \NoValue } { ##2 } { ##1 } }
+  }
+\cs_generate_variant:Nn \fnpct_renew_no_opt:NN { cc ,Nc }
+
+% \note like
 \cs_new:Npn \fnpct_renew_no_arg:NN #1#2
   {
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
     \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { s }
-      { \fnpct_dot_or_comma:Nnnn #2 { \NoValue } { } { ##1 } }
+      { \fnpct_dot_or_comma:Nnnnn #2 { \NoValue } { \NoValue } { } { ##1 } }
   }
 \cs_generate_variant:Nn \fnpct_renew_no_arg:NN { cc }
-
-\cs_new:Npn \fnpct_new:NN #1#2
-  {
-    \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
-    \NewDocumentCommand #1 { so+m }
-      { \fnpct_dot_or_comma:Nnnn #2 { ##2 } { ##3 } { ##1 } }
-  }
-\cs_generate_variant:Nn \fnpct_renew:NN { cc }
 
 % create mult-variant
 \cs_new:Npn \fnpct_create_mult_variant:NN #1#2
@@ -480,19 +542,45 @@
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
     \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { so }
-     { \fnpct_dot_or_comma:Nnnn #2 { ##2 } { } { ##1 } }
+     { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { \NoValue } { } { ##1 } }
   }
 \cs_generate_variant:Nn \fnpct_renew_mark:NN { cc , Nc }
 
 % user commands:
 \NewDocumentCommand \AdaptNote { mm }
   {
-    \exp_args:NNx
-      \fnpct_renew_and_mult:NcN #1 { fnpct_orig_ \cs_to_str:N #1 :w } #2
+    \cs_if_exist:cTF { fnpct_orig_ \cs_to_str:N #1 :w }
+      { \fnpct_message:nx { already-adapted } { #1 } }
+      { \fnpct_renew_and_mult:NcN #1 { fnpct_orig_ \cs_to_str:N #1 :w } #2 }
+  }
+
+\NewDocumentCommand \AdaptNoteNoMult { m }
+  {
+    \cs_if_exist:cTF { fnpct_orig_ \cs_to_str:N #1 :w }
+      { \fnpct_message:nx { already-adapted } { #1 } }
+      { \fnpct_renew:Nc #1 { fnpct_orig_ \cs_to_str:N #1 :w } }
+  }
+
+\NewDocumentCommand \AdaptNoteOpt { mm }
+  {
+    \cs_if_exist:cTF { fnpct_orig_ \cs_to_str:N #1 :w }
+      { \fnpct_message:nx { already-adapted } { #1 } }
+      { \fnpct_renew_and_mult_opt:NcN #1 { fnpct_orig_ \cs_to_str:N #1 :w } #2 }
+  }
+
+\NewDocumentCommand \AdaptNoteOptNoMult { m }
+  {
+    \cs_if_exist:cTF { fnpct_orig_ \cs_to_str:N #1 :w }
+      { \fnpct_message:nx { already-adapted } { #1 } }
+      { \fnpct_renew_opt:Nc #1 { fnpct_orig_ \cs_to_str:N #1 :w } }
   }
 
 \NewDocumentCommand \AdaptNoteMark { m }
-  { \exp_args:NNx \fnpct_renew_mark:Nc #1 { fnpct_orig_ \cs_to_str:N #1 :w } }
+  {
+    \cs_if_exist:cTF { fnpct_orig_ \cs_to_str:N #1 :w }
+      { \fnpct_message:nx { already-adapted } { #1 } }
+      { \fnpct_renew_mark:Nc #1 { fnpct_orig_ \cs_to_str:N #1 :w } }
+  }
 
 % --------------------------------------------------------------------------
 % DO THE REDEFINING:
@@ -522,6 +610,13 @@
           {
             \AdaptNote \endnote \multendnote
             \AdaptNoteMark \endnotemark
+          }
+        %% the `sidenotes' package:
+        \fnpct_treatment:nn { sidenotes }
+          {
+            \AdaptNote \sidenote \multsidenote
+            \AdaptNoteMark \sidenotemark
+            \AdaptNoteOpt \sidecite \multsidecite
           }
         %% the `parnotes' package:
         \fnpct_treatment:nn { parnotes } { \AdaptNote \parnote \multparnote }
@@ -564,13 +659,13 @@
               {
                 \fnpct_renew_and_mult_no_opt:ccc { #2note }
                   { fnpct_orig_sep_#2:w } { #2multnote }
-                \fnpct_renew:cc { #2notemark } { fnpct_orig_sep_#2_mark:w }
+                \fnpct_renew_no_opt:cc { #2notemark } { fnpct_orig_sep_#2_mark:w }
               }
             \prop_map_inline:Nn \l_fnpct_sepfootnote_end_classes_prop
               {
                 \fnpct_renew_and_mult_no_opt:ccc { #2note }
                   { fnpct_orig_sep_#2:w } { #2multnote }
-                \fnpct_renew:cc { #2notemark } { fnpct_orig_sep_#2_mark:w }
+                \fnpct_renew_no_opt:cc { #2notemark } { fnpct_orig_sep_#2_mark:w }
               }
           }
       }
@@ -673,6 +768,11 @@
 2012/05/22 v0.1       - a bit more cleaning up of the code
                       - completed documentation
                       - ready for CTAN
+2012/05/23 v0.1a      - \AdaptNoteNoMult, \AdaptNoteOpt, \AdaptNoteOptNoMult
+                      - support `sidenotes' package
+                      - better support for citing commands
+                      - error checking in the \Adapt<sth> commands
+                      - package option `strict'
  
 % --------------------------------------------------------------------------
 % NOTES:

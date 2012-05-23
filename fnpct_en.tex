@@ -54,6 +54,7 @@
   kfc,
   kfp,
   multendnote,
+  multfootcite,
   multfootnote,
   multparnote,
   multsidenote,
@@ -75,7 +76,7 @@
 
 \renewcommand\thempfootnote{\arabic{mpfootnote}}
 
-\usepackage[backend=biber]{biblatex}
+\usepackage[backend=biber,style=alphabetic]{biblatex}
 \addbibresource{biblatex-examples.bib}
 \addbibresource{\jobname.bib}
 
@@ -154,10 +155,17 @@
 }
 @software{sepfootnotes,
   title   = {sepfootnotes},
-  author  = {Eduardo C. Louren\c{}o de Lima},
+  author  = {Eduardo C. Louren\c{c}o de Lima},
   date    = {2012/03/06},
   version = {0.1},
   url     = {http://www.ctan.org/pkg/sepfootnotes}
+}
+@software{sidenotes,
+  title   = {sidenotes},
+  author  = {Andy Thomas},
+  date    = {2011/11/10},
+  version = {0.80},
+  url     = {http://www.ctan.org/pkg/sidenotes}
 }
 @software{tablefootnote,
   title   = {tablefootnote},
@@ -175,10 +183,9 @@
 }
 \end{filecontents}
 
+\AdaptNoteOpt\footcite\multfootcite
+
 \begin{filecontents}{\jobname.ist}
- preamble "\\begin{theindex}\n Section titles are indicated \\textbf{bold},
- packages \\textsf{sans serif}, commands \\code{\\textbackslash\\textcolor{code}{brown}}
- and options \\textcolor{key}{\\code{green}}.\\newline\n\n"
  heading_prefix "{\\bfseries "
  heading_suffix "\\hfil}\\nopagebreak\n"
  headings_flag  1
@@ -194,9 +201,9 @@
 \let\verb\lstinline
 
 \TitlePicture{\parbox{.75\textwidth}{The \fnpct package basically does two things
-to footnotes: if footnote marks are followed by a comma or a dot the order of
-footnote and punctuation mark is reversed and the kerning gets adjusted. As a side
-effect a new method of creating multiple footnotes and some other features are
+to footnotes: if footnote marks are followed by a comma or a full stop the order
+of footnote and punctuation mark is reversed and the kerning gets adjusted. As a
+side effect a new method of creating multiple footnotes and some other features are
 provided.}}
 
 \makeindex
@@ -213,13 +220,24 @@ It has the status \enquote{maintained}.
 \section{What's it all about?}
 \subsection{Basics}\secidx{basics}
 The \fnpct package basically does two things to footnotes: if footnote marks are
-followed by a comma or a dot the order of footnote and punctuation mark is reversed
-and the kerning gets adjusted. As a side effect a new method of creating multiple
-footnotes\footnote{like;this} is provided, see section \ref{sec:multiple} for details.
+followed by a comma or a full stop the order of footnote and punctuation mark is
+reversed and the kerning gets adjusted. As a side effect a new method of creating
+multiple footnotes\footnote{like;this} is provided, see section \ref{sec:multiple}
+for details.
+
+In what way is the kerning adjusted? After being placed behind the punctuation
+mark the footnote mark is moved a little bit back, namely by the amount specified
+with the option \key{after-punct-space} (see section \ref{sec:options}). If the
+footnote mark follows a word \emph{without} being followed by a punctuation%
+\footnote{Well, it does not necessarily have to follow a \emph{word}. The important
+point is \emph{not being followed} by a punctuation mark.}, there (obviously) is
+no order switching and a little space is inserted before the footnote mark, namely
+the amount specified by the option \key{before-footnote-space} (see section
+\ref{sec:options}).
 
 All examples in this documentation use
 
-\setapart{\cmd{renewcommand}\cmd{thempfootnote}{\cmd{arabic}{mpfootnote}}}
+\setapart{\cmd{renewcommand}\cmd{thempfootnote}{\cmd{arabic}{mpfootnote}}}.
 
 Now, let's see some action:
 \begin{beispiel}
@@ -232,7 +250,7 @@ Now, let's see some action:
 \end{beispiel}
 
 To ensure that the kerning is set the right way the footnote \emph{must} be placed
-\emph{before} the dot or the comma. The command can look ahead but not look back.
+\emph{before} the dot or the comma. \emph{The command can look ahead but not look back}.
 This means if you place the \cmd{footnote} command after a dot or a comma it is
 treated as if following a word, \ie a thin space is inserted: effectivly the opposite 
 of the desired behaviour.
@@ -243,7 +261,7 @@ and languages have the same typographic conventions.
  \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
  will be placed \emph{after} the footnote.
 \end{beschreibung}
-which like all options can also be set using the setup command.
+Like all options it can also be set using the setup command.
 \begin{beschreibung}
  \befehl{setfnpct}{<options>} set up options. Can be used anywhere in the document.
  Some options can only be set in the preamble, though.
@@ -277,14 +295,10 @@ This argument temporarily turns off the punctuation/footnote switching.
   and bricks\footnote{probably fired clay bricks}.
  \end{minipage}
 \end{beispiel}
-
-\achtung{Please be aware that this package is in an experimental state and there
-hasn't been extensive testing with other footnote behaviour changing packages!}
 \secidx*{disable switching}
 
-\newpage
-\section{Options}\secidx{options}
-All package options are listed below. They all can be set as a package option or
+\section{Options}\secidx{options}\label{sec:options}
+Most package options are listed below. They all can be set as a package option or
 with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
 \begin{beschreibung}
  \option{after-dot-space}{<dim>} space to be inserted after a dot and before the
@@ -340,6 +354,15 @@ And now the same with switched order:
   and bricks\footnote{probably fired clay bricks}.
  \end{minipage}
 \end{beispiel}
+
+In case the automatic kerning doesn't work for whatever reason the spaces are
+available as user commands as well:
+\begin{beschreibung}
+ \befehl{kfp} insert the \key{after-dot-space} or (if \key{punct-after}{true})
+ the \key{before-dot-space}.
+ \befehl{kfc} insert the \key{after-comma-space} or (if \key{punct-after}{true})
+ the \key{before-comma-space}.
+\end{beschreibung}
 
 Some of the options are explained in a bit more detail in the next sections.
 \secidx*{options}
@@ -472,6 +495,9 @@ but not inside another \cmd{innernote}:
 \begin{beschreibung}
  \befehl{innernote}*[<mark>]{<text>} a nested footnote.
 \end{beschreibung}
+The inner node uses a \cmd{footnotemark} internally and the mark will be set with
+the definition it has at begin document.
+
 The output of the following code can be seen in figure \ref{fig:nested:a}.
 \begin{beispiel}[code only]
 \documentclass{article}
@@ -499,7 +525,7 @@ The output of the following code can be seen in figure \ref{fig:nested:a}.
 \end{figure}
 
 This is especially useful if you have more than one additional footnote inside a
-footnote, a case that can't be solved satisfying (\ie automatic) way with the
+footnote, a case that can't be solved in a satisfying (\ie automatic) way with the
 method mentioned in section \ref{sec:multiple}. See figure \ref{fig:nested:b} for
 the output of this code:
 \begin{beispiel}[code only]
@@ -563,67 +589,7 @@ See figure \ref{fig:nested:c} for the output of the following code:
 \end{figure}
 \secidx*{nested footnotes}
 
-\section{Footcites}\secidx{footcites}
-Preliminary testing suggests that \fnpct seems to be compatible with the
-\cmd{footcite} and \cmd{footfullcite} commands provided by the \paket{biblatex}
-package. However, the punctuation switching does not apply to them.
-
-The kerning works \ldots
-\begin{beispiel}
- \setfnpct{before-footnote-space=2pt}
- \begin{minipage}{.5\linewidth}
-  \noindent The three little pigs built their houses
-  out of straw\footnote{not to be confused with hay},
-  sticks\footnote{or lumber according to some sources}
-  and bricks\footnote{probably fired clay bricks}. The
-  companion\footfullcite{companion} has nothing on this
-  topic.
- \end{minipage}
-\end{beispiel}
-
-\ldots\ but the punctuation switching doesn't:
-\begin{beispiel}
- \begin{minipage}{.5\linewidth}
-  \noindent The three little pigs built their houses
-  out of straw\footnote{not to be confused with hay},
-  sticks\footnote{or lumber according to some sources}
-  and bricks\footnote{probably fired clay bricks}. The
-  companion has nothing on this topic\footfullcite{companion}.
- \end{minipage}
-\end{beispiel}
-
-One can simulate that behaviour by actively setting one of these commands:
-\begin{beschreibung}
- \befehl{kfp} insert the \key{after-dot-space} or (if \key{punct-after}{true})
- the \key{before-dot-space}.
- \befehl{kfc} insert the \key{after-comma-space} or (if \key{punct-after}{true})
- the \key{before-comma-space}.
-\end{beschreibung}
-\begin{beispiel}
- \setfnpct{after-punct-space=-.15em}
- \begin{minipage}{.5\linewidth}
-  \noindent The three little pigs built their houses
-  out of straw\footnote{not to be confused with hay},
-  sticks\footnote{or lumber according to some sources}
-  and bricks\footnote{probably fired clay bricks}. The
-  companion has nothing on this topic.\kfp\footfullcite{companion}
- \end{minipage}
-\end{beispiel}
-
-In case of \key{punct-after}{true}:
-\begin{beispiel}
- \setfnpct{punct-after}
- \begin{minipage}{.5\linewidth}
-  \noindent The three little pigs built their houses
-  out of straw\footnote{not to be confused with hay},
-  sticks\footnote{or lumber according to some sources}
-  and bricks\footnote{probably fired clay bricks}. The
-  companion has nothing on this topic\footfullcite{companion}\kfp.
- \end{minipage}
-\end{beispiel}
-\secidx*{footcites}
-
-\section{Normal notes}\secidx{normal notes}
+\section{Normal notes}\secidx{normal notes}\label{sec:normal}
 The package option \key{normal-marks} (see p.\,\pageref{key:normal-marks}) changes
 the layout of the footnote marks in the foot by using \paket[koma-script]{KOMA-Script}'s
 
@@ -668,43 +634,11 @@ The three indent values used by \fnpct can be changed with the following options
 \end{beschreibung}
 \secidx*{normal notes}
 
-\newpage
-\section{Other packages}\secidx{other packages}
+\section{Other packages}\secidx{other packages}\label{sec:other:packages}
 \fnpct tries its best to support other footnote and related packages\footnote{If
 you find some package missing please let me know.}. Each of the following subsections
 is dedicated to one of these packages and if and how they work together with \fnpct.
-Fortunately most of them work do quite well.
-
-If the note command is simple enough and follows the standard \cmd{footnote} syntax
-you can always try adapting the command yourself.
-\begin{beschreibung}
- \Befehl{AdaptNote}{<csname>}\ma{<new mult-variant>} this lets \code{<csname>}
- adapt to the kerning behaviour and adds an optional \code{*}. It also creates a
- corresponding mult-variant. The package option \key{multiple} will now turn
- \code{<csname>} into its mult-variant.
- \befehl{AdaptNoteMark}{<csname>} this lets \code{<csname>} adapt to the kerning
- behaviour and adds an optional \code{*}.
-\end{beschreibung}
-
-For example using the \cmd{sidenote} command from the \paket[tufte-latex]{tufte-handout}
-class is easily possible, see also figure \ref{fig:tufte}:
-\begin{beispiel}[code only]
-\documentclass{tufte-handout}
-\usepackage[multiple]{fnpct}
-\AdaptNote\sidenote\multsidenote
-\begin{document}
-Some text in the document body\sidenote{Some
-text in a sidenote.;A second sidenote.}.
-\end{document}
-\end{beispiel}
-
-\begin{figure}[h]
- \centering
- \fbox{\includegraphics[trim=2.5cm 24.5cm 2cm 1cm,scale=.75]{tufte_ex.pdf}}
- \caption{Adapt {tufte-latex}.}
- \label{fig:tufte}
-\end{figure}
-
+Fortunately most of them do quite well.
 
 \subsection{bigfoot}\label{ssec:bigfoot}\secidx[bigfoot]{other packages}
 The \paket{bigfoot} \cite{bigfoot} package extends the possibilities of the
@@ -714,10 +648,10 @@ apparatus on the bottom of the page.
 
 \fnpct is compatible with \paket{bigfoot}. You need to be a bit cautious, though.
 You need to
-\begin{itemize}
- \item declare footnotes with \cmd{DeclareNewFootnote} \emph{after} loading \fnpct
- but in the document \emph{preamble}.
-\end{itemize}
+
+\setapart{declare footnotes with \cmd{DeclareNewFootnote} \emph{after} loading \fnpct
+ but in the document \emph{preamble}.}
+
 \emph{Also verbatim material won't work inside footnotes anymore}. Since \fnpct
 does not redefine any \cmd{footnotetext} like command it will still work inside
 one of them.
@@ -768,7 +702,6 @@ lumber according to some sources} and bricks%
  \label{fig:bigfoot}
 \end{figure}
 
-\newpage
 \subsection{endnotes}\secidx[endnotes]{other packages}
 The \paket{endnotes} \cite{endnotes} package povides the commands \cmd{endnote}
 and \cmd{endnotemark} which can be used to output all notes at the end of a chapter,
@@ -803,12 +736,12 @@ Everything else stays the same:
 \end{beispiel}
 
 \subsection{fixfoot}\secidx[fixfoot]{other packages}
-The \paket{fixfoot} \cite{fixfoot} package provides possibility to create repeating
+The \paket{fixfoot} \cite{fixfoot} package provides a possibility to create repeating
 footnotes. \fnpct supports this package provided you take care of the following:
-\begin{itemize}
- \item use \cmd{DeclareFixedFootnote} only in the preamble but \emph{after} loading
- \fnpct.
-\end{itemize}
+
+\setapart{\cmd{DeclareFixedFootnote} only in the preamble but \emph{after} loading
+ \fnpct.}
+
 \cmd{DeclareFixedFootnote}{\cmd{cs}}\ma{<footnote text>} is used to store the
 \ma{<footnote text>} in \cmd{cs} and create a footnote mark for it but don't
 repeat the footnote text on the same page in the bottom. The document needs
@@ -938,11 +871,18 @@ loading \fnpct.
  \end{minipage}
 \end{beispiel}
 
+\subsection{sidenotes}\secidx[sidenotes]{other packages}
+The package \paket{sidenotes} \cite{sidenotes} is supported and its commands
+\cmd{sidenote}, \cmd{sidenotemark} and \cmd{sidecite} are treated the same way
+as footnotes: they got an optional \code{*} argument and the additional
+\cmd{multsidenote} and \cmd{multsidecite} are created. The option \key{multiple}
+turns all note commands into their mult-variant.
+
 \subsection{tablefootnote}\secidx[tablefootnote]{other packages}
 The package \paket{tablefootnote} \cite{tablefootnote} is supported and its
 \cmd{tablefootnote} command is treated the same way as all other note commands:
 it got an optional \code{*} argument and an additional \cmd{multtablefootnote}
-is defined.
+is defined. The option \key{multiple} turns all note commands into their mult-variant.
 
 \subsection{yafoot}\secidx[yafoot bundle]{other packages}
 Currently no issues are known when using \fnpct with one or all of the packages
@@ -950,8 +890,102 @@ of the \paket{yafoot} \cite{yafoot} bundle. Just for reference: these packages a
 \paket*{pfnote}, \paket*{fnpos} and \paket*{dblfnote}.
 \secidx*{other packages}
 
-\newpage
+\section{Adapting note commands}\secidx{adapting notes}
+If a package is not natively supported you can try and adapt commands yourself.
+You'll need to use one of the following commands. Please be aware that if the
+adapted command does not match the required syntax it will get the required syntax
+afterwards. This can result in dummy arguments or an overwritten \code{*} argument.
+
+\begin{beschreibung}
+ % \AdaptNote
+ \Befehl{AdaptNote}{\cmd{cs}}\ma{\cmd{multcs}} this lets \cmd{cs}  adapt to
+ the kerning behaviour and adds an optional \code{*}. It also creates a
+ corresponding mult-variant. The package option \key{multiple} will now turn
+ \cmd{cs} into its mult-variant. Required syntax: \cmd{cs}[<oarg>]{<marg>}
+ % \AdaptNoteNoMult
+ \befehl{AdaptNoteNoMult}{\cmd{cs}} like \cmd{AdaptNote} but doesn't create a
+ mult-variant and thus there is no change in behaviour when the option \key{multiple}
+ is used. Required syntax: \cmd{cs}[<oarg>]{<marg>}
+ % \AdaptNoteOpt
+ \Befehl{AdaptNoteOpt}{\cmd{cs}}\ma{\cmd{multcs}} this lets \cmd{cs}  adapt to
+ the kerning behaviour and adds an optional \code{*}. It also creates a
+ corresponding mult-variant. The package option \key{multiple} will now turn
+ \cmd{cs} into its mult-variant. Required syntax: \cmd{cs}[<oarg>]\oa{<oarg>}\ma{<marg>}
+ % \AdaptNoteOptNoMult
+ \befehl{AdaptNoteOptNoMult}{\cmd{cs}} like \cmd{AdaptNoteOpt} but doesn't create
+ a mult-variant and thus there is no change in behaviour when the option \key{multiple}
+ is used. Required syntax: \cmd{cs}[<oarg>]\oa{<oarg>}\ma{<marg>}
+ % \AdaptNoteMark
+ \befehl{AdaptNoteMark}{\cmd{cs}} this lets \cmd{cs} adapt to the kerning
+ behaviour and adds an optional \code{*}. Required syntax: \cmd{cs}[<oarg>]
+ % strict
+ \option{strict}{\default{true}/false} when \code{true} \cmd{AdaptNote} (and the
+ othe two) will issue errors if the note command in wuestion has already been
+ adapted. Default = \code{false}
+\end{beschreibung}
+
+\subsection{tufte-latex's side notes}\secidx[tufte-latex]{adapting notes}
+For example using the \cmd{sidenote} command from the \paket[tufte-latex]{tufte-handout}
+class is easily possible, see also figure \ref{fig:tufte}:
+\begin{beispiel}[code only]
+\documentclass{tufte-handout}
+\usepackage[multiple]{fnpct}
+\AdaptNote\sidenote\multsidenote
+\begin{document}
+Some text in the document body\sidenote{Some
+text in a sidenote.;A second sidenote.}.
+\end{document}
+\end{beispiel}
+
+\begin{figure}[h]
+ \centering
+ \fbox{\includegraphics[trim=2.5cm 24.5cm 2cm 1cm,scale=.75]{tufte_ex.pdf}}
+ \caption{Adapt {tufte-latex}.}
+ \label{fig:tufte}
+\end{figure}
+
+\subsection{Adapting \code{\textbackslash\textcolor{code}{footcite}} and siblings}
+\secidx[biblatex]{adapting notes}\label{ssec:adapt:footcite}
+If you're willing to sacrifice \cmd{footcite}'s \code{*} argument which it has
+in some styles you can adapt the commands provided by \paket{biblatex} as well:
+
+\begin{beispiel}
+ % used in preamble: \AdaptNoteOpt\footcite\multfootcite
+ \begin{minipage}{.5\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}. The
+  companion has nothing on this topic\multfootcite{[see]
+  [but there's nothing there]companion;[or see][but there's
+  also nothing]knuth:ct:a}.
+ \end{minipage}
+\end{beispiel}
+
+The option \key{multiple} turns all \cmd{footcite}s into \cmd{multfootcite}s now.
+Remember that the optional arguments then are inside the braces!
+
+\begin{beispiel}
+ % used in preamble: \AdaptNoteOpt\footcite\multfootcite
+ % with option `multiple':
+ \begin{minipage}{.5\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}. The
+  companion has nothing on this topic\footcite{[see][but
+  there's nothing there]companion;[or see][but there's also
+  nothing]knuth:ct:a}.
+ \end{minipage}
+\end{beispiel}
+\secidx*{adapting notes}
+
 \appendix
 \printbibliography
+
+\setindexpreamble{Section titles are indicated \textbf{bold}, packages
+\textsf{sans serif}, commands \code{\textbackslash\textcolor{code}{brown}}
+ and options \textcolor{key}{\code{green}}\par\bigskip}
+
 \printindex
 \end{document}
