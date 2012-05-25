@@ -226,8 +226,8 @@
     normal-indent         .dim_set:N  = \l_fnpct_normal_indent_dim ,
     normal-parindent      .dim_set:N  = \l_fnpct_normal_parindent_dim ,
     verb-format           .tl_set:N   = \l_fnpct_verbatim_format_tl ,
-    add-punct-mark        .code:n     = \fnpct_add_punctuation:n { #1 }  ,
-    remove-punct-mark     .code:n     =
+    add-punct-marks       .code:n     = \fnpct_add_punctuation:n { #1 }  ,
+    remove-punct-marks    .code:n     =
       \tl_map_function:nN { #1 } \fnpct_rm_punctuation:n
   }
 

@@ -302,10 +302,10 @@ This argument temporarily turns off the punctuation/footnote switching.
 Most package options are listed below. They all can be set as a package option or
 with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
 \begin{beschreibung}
- \option{add-punct-mark}{<mark>[<space after>][<space before>]} add another punctuation
- mark for the position switching and spacify kerning if necessary. This option
- accepts list of marks.
- \option{remove-punct-mark}{<mark>} remove punctuation mark from the kerning/position
+ \option{add-punct-marks}{<mark>[<space after>][<space before>]} add another punctuation
+ mark for the position switching and spacify kerning if necessary. An existing entry
+ will be overwritten. This option accepts list of marks.
+ \option{remove-punct-marks}{<mark>} remove punctuation mark from the kerning/position
  switching behaviour. This command accepts a list of marks.
  \option{after-dot-space}{<dim>} space to be inserted after a dot and before the
  footnote mark. Default = \code{-.06em}
@@ -340,7 +340,7 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
 So if you want to extend the punctuation switching and kerning to other punctuation
 marks you can do something like this:
 \begin{beispiel}
- \setfnpct{add-punct-mark=!?}
+ \setfnpct{add-punct-marks=!?}
  \begin{minipage}{.4\linewidth}
   \noindent The three little pigs built their houses
   out of straw\footnote{not to be confused with hay}?
@@ -349,8 +349,9 @@ marks you can do something like this:
  \end{minipage}
 \end{beispiel}
 
+Or with some additional spacing:
 \begin{beispiel}
- \setfnpct{add-punct-mark=![.03em]?[.03em]}
+ \setfnpct{add-punct-marks=![.03em]?[.03em]}
  \begin{minipage}{.4\linewidth}
   \noindent The three little pigs built their houses
   out of straw\footnote{not to be confused with hay}?
