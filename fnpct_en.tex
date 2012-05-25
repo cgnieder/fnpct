@@ -3,7 +3,7 @@
 % 
 %   footnote kerning
 % 
-% 2012/05/22
+% 2012/05/25
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -201,7 +201,7 @@
 \let\verb\lstinline
 
 \TitlePicture{\parbox{.75\textwidth}{The \fnpct package basically does two things
-to footnotes: if footnote marks are followed by a comma or a full stop the order
+to footnotes: if footnote marks are followed by punctuation mark the order
 of footnote and punctuation mark is reversed and the kerning gets adjusted. As a
 side effect a new method of creating multiple footnotes and some other features are
 provided.}}
@@ -220,7 +220,8 @@ It has the status \enquote{maintained}.
 \section{What's it all about?}
 \subsection{Basics}\secidx{basics}
 The \fnpct package basically does two things to footnotes: if footnote marks are
-followed by a comma or a full stop the order of footnote and punctuation mark is
+followed by a comma or a full stop\footnote{More punctuation marks can be added
+through a package option.} the order of footnote and punctuation mark is
 reversed and the kerning gets adjusted. As a side effect a new method of creating
 multiple footnotes\footnote{like;this} is provided, see section \ref{sec:multiple}
 for details.
@@ -251,7 +252,7 @@ Now, let's see some action:
 
 To ensure that the kerning is set the right way the footnote \emph{must} be placed
 \emph{before} the dot or the comma. \emph{The command can look ahead but not look back}.
-This means if you place the \cmd{footnote} command after a dot or a comma it is
+This means if you place the \cmd{footnote} command after a full stop or a comma it is
 treated as if following a word, \ie a thin space is inserted: effectivly the opposite 
 of the desired behaviour.
 
@@ -301,18 +302,23 @@ This argument temporarily turns off the punctuation/footnote switching.
 Most package options are listed below. They all can be set as a package option or
 with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
 \begin{beschreibung}
+ \option{add-punct-mark}{<mark>[<space after>][<space before>]} add another punctuation
+ mark for the position switching and spacify kerning if necessary. This option
+ accepts list of marks.
+ \option{remove-punct-mark}{<mark>} remove punctuation mark from the kerning/position
+ switching behaviour. This command accepts a list of marks.
  \option{after-dot-space}{<dim>} space to be inserted after a dot and before the
  footnote mark. Default = \code{-.06em}
  \option{after-comma-space}{<dim>} space to be inserted after a comma and before
  the footnote mark. Default = \code{-.06em}
- \option{after-punct-space}{<dim>} set both spaces.
+ \option{after-punct-space}{<dim>} set \emph{all} spaces.
  \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
  will be placed \emph{after} the footnote.
  \option{before-dot-space}{<dim>} space to be inserted before a dot and after the
  footnote mark, \ie with \key{punct-after}{true}. Default = \code{-.15em}
  \option{before-comma-space}{<dim>} space to be inserted before a comma and after
  the footnote mark, \ie with \key{punct-after}{true}. Default = \code{-.15em}
- \option{before-punct-space}{<dim>} set both spaces.
+ \option{before-punct-space}{<dim>} set \emph{all} spaces.
  \option{before-footnote-space}{<dim>} space to be inserted between a word and the
  following footnote mark. Default = \code{.06em}
  \option{dont-mess-around} sets all mentioned lengths to \code{0} and \key{punct-after}{true}.
@@ -330,6 +336,28 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  for more information. \emph{This option can only be set in the preamble}. Default
  = \code{false}
 \end{beschreibung}
+
+So if you want to extend the punctuation switching and kerning to other punctuation
+marks you can do something like this:
+\begin{beispiel}
+ \setfnpct{add-punct-mark=!?}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay}?
+  Sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}!
+ \end{minipage}
+\end{beispiel}
+
+\begin{beispiel}
+ \setfnpct{add-punct-mark=![.03em]?[.03em]}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote{not to be confused with hay}?
+  Sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}!
+ \end{minipage}
+\end{beispiel}
 
 Let's take a look at an example with some ridiculous settings:
 \begin{beispiel}

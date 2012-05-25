@@ -3,7 +3,7 @@
 % 
 %   footnote kerning
 % 
-% 2012/05/23
+% 2012/05/25
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -32,8 +32,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2012/05/23}
-  {0.1a}
+  {2012/05/25}
+  {0.2}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -104,6 +104,90 @@
 \bool_new:N \l_fnpct_bigfoot_default_top_bool
 \bool_new:N \l_fnpct_normal_marks_bool
 
+% default punctuation marks for switching:
+\tl_new:N \l_fnpct_punctuation_marks_tl
+\tl_set:Nn \l_fnpct_punctuation_marks_tl { ., }
+\prop_new:N \l_fnpct_punctuation_marks_after_prop
+\prop_new:N \l_fnpct_punctuation_marks_before_prop
+\prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { . } { \l_fnpct_after_dot_dim }
+\prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { , } { \l_fnpct_after_comma_dim }
+\prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { . } { \l_fnpct_before_dot_dim }
+\prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { , } { \l_fnpct_before_comma_dim }
+
+\cs_new:Npn \fnpct_rm_punctuation:n #1
+  {
+    \tl_remove_all:Nn \l_fnpct_punctuation_marks_tl { #1 }
+    \prop_del:Nn \l_fnpct_punctuation_marks_after_prop { #1 }
+    \prop_del:Nn \l_fnpct_punctuation_marks_before_prop { #1 }
+  }
+
+\tl_new:N \l_fnpct_last_punct_mark_tl
+
+\cs_new:Npn \fnpct_add_punctuation:n #1
+  { \fnpct_add_punctuation_aux:w #1 [ \q_no_value ] \q_no_value \q_stop }
+\cs_generate_variant:Nn \fnpct_add_punctuation:n { V }
+
+\cs_new:Npn \fnpct_add_punctuation_aux:w #1[#2]#3 \q_stop
+  {
+    \quark_if_no_value:nTF { #2 }
+      {
+        % there is no option at all
+        \tl_map_inline:nn { #1 }
+          {
+            \tl_put_right:Nn \l_fnpct_punctuation_marks_tl { ##1 }
+            \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { ##1 } { 0pt }
+            \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { ##1 } { 0pt }
+            \tl_set:Nx \l_fnpct_last_punct_mark_tl { ##1 }
+          }
+      }
+      {
+        \tl_if_blank:nTF { #1 }
+          {
+            % #2 is a second option (= before space)
+            \prop_put:NVn \l_fnpct_punctuation_marks_before_prop
+              \l_fnpct_last_punct_mark_tl { #2 }
+          }
+          {
+            % #2 is a first option (= after space), #1 might be more than one token:
+            \tl_if_single_token:nTF { #1 }
+              {
+                \tl_put_right:Nn \l_fnpct_punctuation_marks_tl { #1 }
+                \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { #1 } { #2 }
+                \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { #1 } { 0pt }
+                \tl_set:Nx \l_fnpct_last_punct_mark_tl { #1 }
+              }
+              {
+                \int_zero:N \l_tmpa_int
+                \tl_map_inline:nn { #1 }
+                  {
+                    \tl_put_right:Nn \l_fnpct_punctuation_marks_tl { ##1 }
+                    \int_compare:nTF { \l_tmpa_int < ( \tl_length:n { #1 } - 1 ) }
+                      {
+                        \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { ##1 } { 0pt }
+                        \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { ##1 } { 0pt }
+                      }
+                      {
+                        \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { ##1 } { #2 }
+                        \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { ##1 } { 0pt }
+                      }
+                    \tl_set:Nx \l_fnpct_last_punct_mark_tl { ##1 }
+                    \int_incr:N \l_tmpa_int
+                  }
+              }
+          }
+      }
+    % is there more?
+    \tl_if_eq:nnF { #3 } { [\q_no_value]\q_no_value }
+      {
+        \quark_if_no_value:nF { #3 }
+          {
+            \tl_set:Nn \l_tmpa_tl { #3 }
+            \tl_remove_all:Nn \l_tmpa_tl { [\q_no_value]\q_no_value }
+            \fnpct_add_punctuation:V \l_tmpa_tl
+          }
+      }
+  }
+
 % options:
 \keys_define:nn { fnpct }
   {
@@ -114,11 +198,11 @@
     before-comma-space    .dim_set:N  = \l_fnpct_before_comma_dim ,
     before-dot-space      .dim_set:N  = \l_fnpct_before_dot_dim ,
     after-punct-space     .code:n     =
-      \dim_set:Nn \l_fnpct_after_comma_dim { #1 }
-      \dim_set:Nn \l_fnpct_after_dot_dim { #1 } ,
+      \prop_map_inline:Nn \l_fnpct_punctuation_marks_after_prop
+        { \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { ##1 } { #1 } } ,
     before-punct-space    .code:n     =
-      \dim_set:Nn \l_fnpct_before_comma_dim { #1 }
-      \dim_set:Nn \l_fnpct_before_dot_dim { #1 } ,
+      \prop_map_inline:Nn \l_fnpct_punctuation_marks_before_prop
+        { \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { ##1 } { #1 } } ,
     before-footnote-space .dim_set:N  = \l_fnpct_before_footnote_dim ,
     punct-after           .bool_set:N = \l_fnpct_punct_after_bool ,
     punct-after           .default:n  = true ,
@@ -141,13 +225,17 @@
     normal-mark-width     .dim_set:N  = \l_fnpct_normal_mark_width_dim ,
     normal-indent         .dim_set:N  = \l_fnpct_normal_indent_dim ,
     normal-parindent      .dim_set:N  = \l_fnpct_normal_parindent_dim ,
-    verb-format           .tl_set:N   = \l_fnpct_verbatim_format_tl
+    verb-format           .tl_set:N   = \l_fnpct_verbatim_format_tl ,
+    add-punct-mark        .code:n     = \fnpct_add_punctuation:n { #1 }  ,
+    remove-punct-mark     .code:n     =
+      \tl_map_function:nN { #1 } \fnpct_rm_punctuation:n
   }
 
 \ProcessKeysOptions { fnpct }
 
 % --------------------------------------------------------------------------
 % MAIN INTERNAL FOOTNOTE FUNCTION:
+% write the notes:
 \cs_new:Npn \fnpct_write_note:Nnnn #1#2#3#4
   {
     \IfNoValueTF { #2 }
@@ -159,72 +247,104 @@
       }
   }
 
+% check for punctuation:
+\cs_new:Npn \fnpct_check_punctuation:TF #1#2
+  { \fnpct_check_punctuation_auxi:nTF { 0 } { #1 } { #2 } }
+
+\cs_new:Npn \fnpct_check_punctuation_auxi:nTF #1#2#3
+  {
+    \tl_set:Nx \l_fnpct_current_punct_mark_tl
+      { \tl_head:N \l_fnpct_punctuation_marks_tl }
+    \peek_meaning_remove:VTF \l_fnpct_current_punct_mark_tl
+      { #2 }
+      {
+        \fnpct_check_punctuation_auxii:nnn { #1 }
+          { \fnpct_check_punctuation_auxi:VTF \l_tmpa_int { #2 } { #3 } }
+          { #3 }
+      }
+  }
+
+\cs_new:Npn \fnpct_check_punctuation_auxii:nnn #1#2#3
+  {
+    \int_set:Nn \l_tmpa_int { #1 }
+    \int_incr:N \l_tmpa_int
+    \tl_set:Nx \l_tmpb_tl { \int_to_arabic:n { \l_tmpa_int } }
+    \tl_set:Nx \l_fnpct_punctuation_marks_tl
+      { \tl_tail:N \l_fnpct_punctuation_marks_tl }
+    \tl_put_right:Nx \l_fnpct_punctuation_marks_tl
+      { \l_fnpct_current_punct_mark_tl }
+    \int_compare:nTF { \l_tmpa_int < \tl_length:V \l_fnpct_punctuation_marks_tl }
+      { #2 }
+      { #3 }
+  }
+\cs_generate_variant:Nn \fnpct_check_punctuation_auxi:nTF { V }
+\cs_generate_variant:Nn \peek_meaning_remove:NTF { V }
+
+% this is where the magic happens:
 %   #1: original command
 %   #2: optional argument of original command
 %   #3: second optional argument of original command
 %   #4: mandatory argument of original command
 %   #5: boolean flag for starred version
-\cs_new_protected:Npn \fnpct_dot_or_comma:Nnnnn #1#2#3#4#5
+\cs_new_protected:Npn \fnpct_handle_note:Nnnnn #1#2#3#4#5
   {
-    % if a dot follows remove it, insert dot, skip back
+    % if a punctuation mark follows remove it, insert dot, skip back
     % and then insert footnote
     \fnpct_no_break:
     \IfBooleanT { #5 } { \bool_set_true:N \l_fnpct_dont_switch_bool }
-    \peek_meaning_remove:NTF .
+    \fnpct_check_punctuation:TF
       {
         \bool_if:nTF { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
           { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
-          { . \fnpct_no_break: \skip_horizontal:N \l_fnpct_after_dot_dim }
+          {
+            \tl_use:N \l_fnpct_current_punct_mark_tl
+            \fnpct_no_break:
+            \prop_get:NVNT \l_fnpct_punctuation_marks_after_prop
+              \l_fnpct_current_punct_mark_tl \l_tmpa_dim
+              { \skip_horizontal:N \l_tmpa_dim }
+          }
         \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
         \fnpct_write_inner:N #1
         \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
-          { \skip_horizontal:N \l_fnpct_before_dot_dim \fnpct_no_break: . }
+          {
+            \prop_get:NVNT \l_fnpct_punctuation_marks_before_prop
+              \l_fnpct_current_punct_mark_tl \l_tmpa_dim
+              { \skip_horizontal:N \l_tmpa_dim }
+            \fnpct_no_break:
+            \tl_use:N \l_fnpct_current_punct_mark_tl
+          }
         \bool_set_false:N \l_fnpct_dont_switch_bool
       }
       {
-        % else do the same with comma
-        \peek_meaning_remove:NTF ,
+        % what about multiple footnotes? (their usage is discouraged with
+        % this package, but anyway...)
+        % this check should probably/maybe be removed (?!)
+        \tl_set:Nx \l_tmpa_tl { \cs_to_str:N #1 }
+        \prop_get:NVN \g_fnpct_adapted_notes_prop \l_tmpa_tl \l_tmpb_tl
+        \exp_args:No
+        \peek_meaning:NTF \l_tmpb_tl
           {
-            \bool_if:nTF { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
-              { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
-              { , \fnpct_no_break: \skip_horizontal:N \l_fnpct_after_comma_dim }
+            \bool_set_true:N \l_fnpct_multiple_footnotes_bool
+            % else insert space and then note
+            \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim
             \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
             \fnpct_write_inner:N #1
-            \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
-              { \skip_horizontal:N \l_fnpct_before_comma_dim \fnpct_no_break: , }
-            \bool_set_false:N \l_fnpct_dont_switch_bool
+            \fnpct_no_break:
+            \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
+            % \bool_set_false:N \l_fnpct_dont_switch_bool
           }
           {
-            % what about multiple footnotes? (their usage is discouraged with
-            % this package, but anyway...)
-            % this check should probably/maybe be removed (?!)
-            \tl_set:Nx \l_tmpa_tl { \cs_to_str:N #1 }
-            \prop_get:NVN \g_fnpct_adapted_notes_prop \l_tmpa_tl \l_tmpb_tl
-            \exp_args:No
-            \peek_meaning:NTF \l_tmpb_tl
-              {
-                \bool_set_true:N \l_fnpct_multiple_footnotes_bool
-                % else insert space and then note
-                \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim
-                \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
-                \fnpct_write_inner:N #1
-                \fnpct_no_break:
-                \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
-                % \bool_set_false:N \l_fnpct_dont_switch_bool
-              }
-              {
-                % else insert space and then note
-                \bool_if:NTF \l_fnpct_multiple_footnotes_bool
-                  { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
-                  { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
-                \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
-                \fnpct_write_inner:N #1
-                \bool_set_false:N \l_fnpct_dont_switch_bool
-              }
+            % else insert space and then note
+            \bool_if:NTF \l_fnpct_multiple_footnotes_bool
+              { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
+              { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
+            \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
+            \fnpct_write_inner:N #1
+            \bool_set_false:N \l_fnpct_dont_switch_bool
           }
       }
   }
-\cs_generate_variant:Nn \fnpct_dot_or_comma:Nnnnn { cnnnn }
+\cs_generate_variant:Nn \fnpct_handle_note:Nnnnn { cnnnn }
 
 % --------------------------------------------------------------------------
 % MULTIPLE FOOTNOTES
@@ -242,49 +362,48 @@
       \l_fnpct_multiple_footnotes_delimiter_tl
       { #3 }
     \fnpct_no_break:
-    % look for dot and do magic:
-    \peek_meaning_remove:NTF .
+    % look for punctuation mark and do magic:
+    \fnpct_check_punctuation:TF
       {
         \bool_if:nTF { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
           { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
-          { . \fnpct_no_break: \skip_horizontal:N \l_fnpct_after_dot_dim }
+          {
+            \tl_use:N \l_fnpct_current_punct_mark_tl
+            \fnpct_no_break:
+            \prop_get:NVNT \l_fnpct_punctuation_marks_after_prop
+              \l_fnpct_current_punct_mark_tl \l_tmpa_dim
+              { \skip_horizontal:N \l_tmpa_dim }
+          }
         \fnpct_write_notes:N #1
         \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
-          { \skip_horizontal:N \l_fnpct_before_dot_dim \fnpct_no_break: . }
+          {
+            \prop_get:NVNT \l_fnpct_punctuation_marks_before_prop
+              \l_fnpct_current_punct_mark_tl \l_tmpa_dim
+              { \skip_horizontal:N \l_tmpa_dim }
+            \fnpct_no_break:
+            \tl_use:N \l_fnpct_current_punct_mark_tl
+          }
         \bool_set_false:N \l_fnpct_dont_switch_bool
       }
       {
-        % else look for comma and do magic:
-        \peek_meaning_remove:NTF ,
+        % else insert space and notes:
+        \tl_set:Nx \l_tmpa_tl { \cs_to_str:N #1 }
+        \prop_get:NVN \g_fnpct_adapted_notes_prop \l_tmpa_tl \l_tmpb_tl
+        \exp_args:No
+        \peek_meaning:NTF \l_tmpb_tl
           {
-            \bool_if:nTF { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
-              { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
-              { , \fnpct_no_break: \skip_horizontal:N \l_fnpct_after_comma_dim }
+            \bool_set_true:N \l_fnpct_multiple_footnotes_bool
+            \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim
             \fnpct_write_notes:N #1
-            \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
-              { \skip_horizontal:N \l_fnpct_before_comma_dim \fnpct_no_break: , }
             \bool_set_false:N \l_fnpct_dont_switch_bool
+            \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
           }
           {
-            % else insert space and notes:
-            \tl_set:Nx \l_tmpa_tl { \cs_to_str:N #1 }
-            \prop_get:NVN \g_fnpct_adapted_notes_prop \l_tmpa_tl \l_tmpb_tl
-            \exp_args:No
-            \peek_meaning:NTF \l_tmpb_tl
-              {
-                \bool_set_true:N \l_fnpct_multiple_footnotes_bool
-                \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim
-                \fnpct_write_notes:N #1
-                \bool_set_false:N \l_fnpct_dont_switch_bool
-                \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
-              }
-              {
-                \bool_if:NTF \l_fnpct_multiple_footnotes_bool
-                  { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
-                  { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
-                \fnpct_write_notes:N #1
-                \bool_set_false:N \l_fnpct_dont_switch_bool
-              }
+            \bool_if:NTF \l_fnpct_multiple_footnotes_bool
+              { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
+              { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
+            \fnpct_write_notes:N #1
+            \bool_set_false:N \l_fnpct_dont_switch_bool
           }
       }
   }
@@ -447,7 +566,7 @@
       { \cs_set_eq:NN #1 #3 }
       {
         \RenewDocumentCommand #1 { so+m }
-          { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { \NoValue } { ##3 } { ##1 } }
+          { \fnpct_handle_note:Nnnnn #2 { ##2 } { \NoValue } { ##3 } { ##1 } }
       }
   }
 \cs_generate_variant:Nn \fnpct_renew_and_mult:NNN { ccc , NcN }
@@ -461,7 +580,7 @@
       { \cs_set_eq:NN #1 #3 }
       {
         \RenewDocumentCommand #1 { s+m }
-          { \fnpct_dot_or_comma:Nnnnn #2 { \NoValue } { \NoValue } { ##2 } { ##1 } }
+          { \fnpct_handle_note:Nnnnn #2 { \NoValue } { \NoValue } { ##2 } { ##1 } }
       }
   }
 \cs_generate_variant:Nn \fnpct_renew_and_mult_no_opt:NNN { ccc }
@@ -472,7 +591,7 @@
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
     \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { so+m }
-      { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { \NoValue } { ##3 } { ##1 } }
+      { \fnpct_handle_note:Nnnnn #2 { ##2 } { \NoValue } { ##3 } { ##1 } }
   }
 \cs_generate_variant:Nn \fnpct_renew:NN { cc ,Nc }
 
@@ -481,7 +600,7 @@
   {
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
     \NewDocumentCommand #1 { so+m }
-      { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { \NoValue } { ##3 } { ##1 } }
+      { \fnpct_handle_note:Nnnnn #2 { ##2 } { \NoValue } { ##3 } { ##1 } }
   }
 \cs_generate_variant:Nn \fnpct_new:NN { cc , Nc }
 
@@ -495,7 +614,7 @@
       { \cs_set_eq:NN #1 #3 }
       {
         \RenewDocumentCommand #1 { soo+m }
-          { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { ##3 } { ##4 } { ##1 } }
+          { \fnpct_handle_note:Nnnnn #2 { ##2 } { ##3 } { ##4 } { ##1 } }
       }
   }
 \cs_generate_variant:Nn \fnpct_renew_and_mult_opt:NNN { ccc , NcN }
@@ -505,7 +624,7 @@
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
     \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { soo+m }
-      { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { ##3 } { ##4 } { ##1 } }
+      { \fnpct_handle_note:Nnnnn #2 { ##2 } { ##3 } { ##4 } { ##1 } }
   }
 \cs_generate_variant:Nn \fnpct_renew_opt:NN { cc , Nc }
 
@@ -515,7 +634,7 @@
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
     \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { s+m }
-      { \fnpct_dot_or_comma:Nnnnn #2 { \NoValue } { \NoValue } { ##2 } { ##1 } }
+      { \fnpct_handle_note:Nnnnn #2 { \NoValue } { \NoValue } { ##2 } { ##1 } }
   }
 \cs_generate_variant:Nn \fnpct_renew_no_opt:NN { cc ,Nc }
 
@@ -525,7 +644,7 @@
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
     \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { s }
-      { \fnpct_dot_or_comma:Nnnnn #2 { \NoValue } { \NoValue } { } { ##1 } }
+      { \fnpct_handle_note:Nnnnn #2 { \NoValue } { \NoValue } { } { ##1 } }
   }
 \cs_generate_variant:Nn \fnpct_renew_no_arg:NN { cc }
 
@@ -542,7 +661,7 @@
     \prop_gput:Nxn \g_fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
     \cs_new_eq:NN #2 #1
     \RenewDocumentCommand #1 { so }
-     { \fnpct_dot_or_comma:Nnnnn #2 { ##2 } { \NoValue } { } { ##1 } }
+     { \fnpct_handle_note:Nnnnn #2 { ##2 } { \NoValue } { } { ##1 } }
   }
 \cs_generate_variant:Nn \fnpct_renew_mark:NN { cc , Nc }
 
@@ -773,6 +892,8 @@
                       - better support for citing commands
                       - error checking in the \Adapt<sth> commands
                       - package option `strict'
+2012/05/25 v0.2       - added possibility to add punctuation marks to the
+                        switching/kerning mechansim (or remove them)
  
 % --------------------------------------------------------------------------
 % NOTES:
