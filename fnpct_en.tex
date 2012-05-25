@@ -251,7 +251,7 @@ Now, let's see some action:
 \end{beispiel}
 
 To ensure that the kerning is set the right way the footnote \emph{must} be placed
-\emph{before} the dot or the comma. \emph{The command can look ahead but not look back}.
+\emph{before} the full stop or the comma. \emph{The command can look ahead but not look back}.
 This means if you place the \cmd{footnote} command after a full stop or a comma it is
 treated as if following a word, \ie a thin space is inserted: effectivly the opposite 
 of the desired behaviour.
@@ -307,14 +307,14 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  will be overwritten. This option accepts list of marks.
  \option{remove-punct-marks}{<mark>} remove punctuation mark from the kerning/position
  switching behaviour. This command accepts a list of marks.
- \option{after-dot-space}{<dim>} space to be inserted after a dot and before the
+ \option{after-dot-space}{<dim>} space to be inserted after a full stop and before the
  footnote mark. Default = \code{-.06em}
  \option{after-comma-space}{<dim>} space to be inserted after a comma and before
  the footnote mark. Default = \code{-.06em}
  \option{after-punct-space}{<dim>} set \emph{all} spaces.
  \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
  will be placed \emph{after} the footnote.
- \option{before-dot-space}{<dim>} space to be inserted before a dot and after the
+ \option{before-dot-space}{<dim>} space to be inserted before a full stop and after the
  footnote mark, \ie with \key{punct-after}{true}. Default = \code{-.15em}
  \option{before-comma-space}{<dim>} space to be inserted before a comma and after
  the footnote mark, \ie with \key{punct-after}{true}. Default = \code{-.15em}
