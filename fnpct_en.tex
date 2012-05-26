@@ -315,25 +315,30 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  will be overwritten. This option accepts list of marks.
  \option{remove-punct-marks}{<mark>} remove punctuation mark from the kerning/position
  switching behaviour. This command accepts a list of marks.
- \option{after-dot-space}{<dim>} space to be inserted after a full stop and before
- the footnote mark. Default = \code{-.06em}
- \option{after-comma-space}{<dim>} space to be inserted after a comma and before
- the footnote mark. Default = \code{-.06em}
+ \option{after-dot-space}{<dim>} space to be inserted after a footnote mark and
+ before the full stop (\enquote{footnote \emph{after} dot}). A negative space
+ will move the full stop further to the footnote mark. Default = \code{-.06em}
+ \option{after-comma-space}{<dim>} space to be inserted after a footnote mark and
+ before the comma (\enquote{footnote \emph{after} comma}). A negative space
+ will move the comma further to the footnote mark.  Default = \code{-.06em}
  \option{after-punct-space}{<dim>} set \emph{all} spaces, \ie also the ones for
  marks you've added with \key{add-punct-mark}.
  \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
  will be placed \emph{after} the footnote.
- \option{before-dot-space}{<dim>} space to be inserted before a full stop and after
- the footnote mark, \ie with \key{punct-after}{true}. Default = \code{-.15em}
- \option{before-comma-space}{<dim>} space to be inserted before a comma and after
- the footnote mark, \ie with \key{punct-after}{true}. Default = \code{-.15em}
+ \option{before-dot-space}{<dim>} space to be inserted after a footnote mark and
+ before the full stop (\enquote{footnote \emph{before} dot}), \ie with
+ \key{punct-after}{true}. Default = \code{-.15em}
+ \option{before-comma-space}{<dim>} space to be inserted after a footnote mark and
+ before the comma (\enquote{footnote \emph{before} comma}), \ie with
+ \key{punct-after}{true}. Default = \code{-.15em}
  \option{before-punct-space}{<dim>} set \emph{all} spaces, \ie also the ones for
  marks you've added with \key{add-punct-mark}.
  \option{before-footnote-space}{<dim>} space to be inserted between a word and
  the following footnote mark. Default = \code{.06em}
  \option{dont-mess-around} sets all mentioned lengths to \code{0} and
  \key{punct-after}{true}. Basically this is as if you hadn't loaded \fnpct except
- the multiple footnote command is still available, see section \ref{sec:multiple}.
+ the multiple footnotes command and \cmd{innernote} are still available, see
+ sections \ref{sec:multiple} and \ref{sec:nested}, respectively.
  \option{multiple}{\default{true}/false} lets \cmd{footnote} be equal to
  \cmd{multfootnote}
  \option{mult-fn-delim}{<delimiter>} sets the delimiter for the \cmd{multfootnote}
@@ -526,7 +531,7 @@ If you want you can turn all footnotes into \cmd{multfootnote}s.
 \end{beispiel}
 \secidx*{multiple footnotes}
 
-\section{Nested Footnotes}\secidx{nested footnotes}
+\section{Nested Footnotes}\secidx{nested footnotes}\label{sec:nested}
 \fnpct provides some support for nested footnotes. There are some restrictions,
 though. The command below can be used inside \cmd{footnote} and \cmd{multfootnote},
 but not inside another \cmd{innernote}:

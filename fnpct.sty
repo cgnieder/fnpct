@@ -207,10 +207,10 @@
     punct-after           .bool_set:N = \l_fnpct_punct_after_bool ,
     punct-after           .default:n  = true ,
     dont-mess-around      .code:n     =
-      \dim_zero:N \l_fnpct_after_comma_dim
-      \dim_zero:N \l_fnpct_after_dot_dim
-      \dim_zero:N \l_fnpct_before_comma_dim
-      \dim_zero:N \l_fnpct_before_dot_dim
+      \prop_map_inline:Nn \l_fnpct_punctuation_marks_after_prop
+        { \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { ##1 } { 0pt } }
+      \prop_map_inline:Nn \l_fnpct_punctuation_marks_before_prop
+        { \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { ##1 } { 0pt } }
       \dim_zero:N \l_fnpct_before_footnote_dim
       \bool_set_true:N \l_fnpct_punct_after_bool
       \fnpct_dont_mess_around: ,
