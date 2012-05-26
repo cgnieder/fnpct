@@ -68,7 +68,7 @@
   thempfootnote,
   writeinnernotes
 }
-\setfnpct{multiple}
+\setfnpct{multiple,add-punct-marks=:[0pt][-.05em]}
 \usepackage{endnotes}
 \usepackage{parnotes}
 
@@ -215,7 +215,7 @@ provided.}}
 \section{License and Requirements}
 \fnpct is placed under the terms of the LaTeX Project Public License,
 version 1.3 or later (\url{http://www.latex-project.org/lppl.txt}).
-It has the status \enquote{maintained}.
+It has the status ``maintained.''
 
 \fnpct depends on the \paket*{l3kernel}, \paket*{xparse}, \paket*{l3keys2e} and
 \paket*{scrlfile}.
@@ -241,7 +241,7 @@ the amount specified by the option \key{before-footnote-space} (see section
 
 All examples in this documentation use
 
-\setapart{\cmd{renewcommand}\cmd{thempfootnote}{\cmd{arabic}{mpfootnote}}}.
+\setapart{\cmd{renewcommand}\cmd{thempfootnote}{\cmd{arabic}{mpfootnote}}.}
 
 Now, let's see some action:
 \begin{beispiel}
@@ -256,11 +256,27 @@ Now, let's see some action:
 To ensure that the kerning is set the right way the footnote \emph{must} be placed
 \emph{before} the full stop or the comma. \emph{The command can look ahead but not look back}.
 This means if you place the \cmd{footnote} command after a full stop or a comma it is
-treated as if following a word, \ie a thin space is inserted: effectivly the opposite 
+treated as if following a word, \ie a thin space is inserted: effectively the opposite 
 of the desired behaviour.
 
 The order-switching can be prevented using a package option since not all countries
-and languages have the same typographic conventions.
+and languages have the same typographic conventions. In this case the full stop
+and the comma are move a bit back.
+
+\bigskip\hfil
+\begin{minipage}{.25\linewidth}
+\setlength\parindent{0pt}%
+without \fnpct:\\
+{\setfnpct{dont-mess-around}%
+\null\quad text.\footnotemark[1]\\
+\null\quad text\footnotemark[1]}.
+
+with \fnpct:\\
+\null\quad text\footnotemark[1].\\
+\setfnpct{punct-after}%
+\null\quad text\footnotemark[1].
+\end{minipage}\hfil
+
 \begin{beschreibung}
  \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
  will be placed \emph{after} the footnote.
@@ -285,7 +301,7 @@ Like all options it can also be set using the setup command.
 One maybe want to put some footnote marks \emph{before} the punctuation and some
 after, for example because the first one describes a single word but the second
 one a whole sentence. For this purpose \fnpct adds a \code{*} argument to \cmd{footnote}
-and \cmd{footnotemark}. The complete new syntax now is like follows:
+and \cmd{footnotemark}. The complete new syntax now is as follows:
 \begin{beschreibung}
  \Befehl{footnote}*[<num>]{<footnote text>}\code{<tpunct>} \cnpkgdocarrow\ new
  \code{*} argument added. \code{<tpunct>} is the optional trailing punctuation
@@ -314,30 +330,30 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  mark for the position switching and spacify kerning if necessary. An existing entry
  will be overwritten. This option accepts list of marks.
  \option{remove-punct-marks}{<mark>} remove punctuation mark from the kerning/position
- switching behaviour. This command accepts a list of marks.
+ switching behaviour. This option accepts a list of marks.
  \option{after-dot-space}{<dim>} space to be inserted after a footnote mark and
- before the full stop (\enquote{footnote \emph{after} dot}). A negative space
+ before the full stop (``footnote \emph{after} dot''). A negative space
  will move the full stop further to the footnote mark. Default = \code{-.06em}
  \option{after-comma-space}{<dim>} space to be inserted after a footnote mark and
- before the comma (\enquote{footnote \emph{after} comma}). A negative space
+ before the comma (``footnote \emph{after} comma''). A negative space
  will move the comma further to the footnote mark.  Default = \code{-.06em}
  \option{after-punct-space}{<dim>} set \emph{all} spaces, \ie also the ones for
- marks you've added with \key{add-punct-mark}.
+ marks you've added with \key{add-punct-marks}.
  \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
  will be placed \emph{after} the footnote.
  \option{before-dot-space}{<dim>} space to be inserted after a footnote mark and
- before the full stop (\enquote{footnote \emph{before} dot}), \ie with
+ before the full stop (``footnote \emph{before} dot''), \ie with
  \key{punct-after}{true}. Default = \code{-.15em}
  \option{before-comma-space}{<dim>} space to be inserted after a footnote mark and
- before the comma (\enquote{footnote \emph{before} comma}), \ie with
+ before the comma (``footnote \emph{before} comma''), \ie with
  \key{punct-after}{true}. Default = \code{-.15em}
  \option{before-punct-space}{<dim>} set \emph{all} spaces, \ie also the ones for
- marks you've added with \key{add-punct-mark}.
+ marks you've added with \key{add-punct-marks}.
  \option{before-footnote-space}{<dim>} space to be inserted between a word and
  the following footnote mark. Default = \code{.06em}
- \option{dont-mess-around} sets all mentioned lengths to \code{0} and
+ \option{dont-mess-around} sets all mentioned lengths to \code{0pt} and
  \key{punct-after}{true}. Basically this is as if you hadn't loaded \fnpct except
- the multiple footnotes command and \cmd{innernote} are still available, see
+ the multiple footnote commands and \cmd{innernote} are still available, see
  sections \ref{sec:multiple} and \ref{sec:nested}, respectively.
  \option{multiple}{\default{true}/false} lets \cmd{footnote} be equal to
  \cmd{multfootnote}
@@ -430,8 +446,11 @@ Since multiple footnotes have to be treated differently\footnote{see these footn
  \end{minipage}
 \end{beispiel}
 
-Every of the items of the list has an optional argument equivalent to the optional
-argument of \cmd{footnote}:
+Every of the items of the list has an optional \code{*} argument and an optional
+argument equivalent to the optional argument of \cmd{footnotetext}:
+\begin{beschreibung}
+ \Befehl{multfootnote}{*[<mark>]<footnote text>;...}
+\end{beschreibung}
 \begin{beispiel}
  \begin{minipage}{.4\linewidth}
   \noindent The three little pigs built their houses
@@ -471,9 +490,10 @@ without disrupting the multiple setting. The following example is shown in figur
  \caption{nested footnotes}\label{fig:nested:mult}
 \end{figure}
 
+\newpage
 \subsection{The delimiter and separator}\secidx[delimiter]{multiple footnotes}\secidx[separator]{multiple footnotes}
 Since the semicolon might be part of the footnote text you might have some trouble.
-But there are ways around. Maybe try enclosing it with braces:
+But there are ways around. Maybe try enclosing it in braces:
 \begin{beispiel}
  \begin{minipage}{.4\linewidth}
   \noindent The three little pigs built their houses
@@ -484,7 +504,7 @@ But there are ways around. Maybe try enclosing it with braces:
  \end{minipage}
 \end{beispiel}
 
-There are options which lets you choose the (input) delimiter and the (output)
+There also are options which lets you choose the (input) delimiter and the (output)
 separator:
 \begin{beschreibung}
  \option{mult-fn-delim}{<delimiter>} choose delimiter for the \cmd{multfootnote}.
@@ -677,7 +697,6 @@ The three indent values used by \fnpct can be changed with the following options
 \end{beschreibung}
 \secidx*{normal notes}
 
-\newpage
 \section{Other packages}\secidx{other packages}\label{sec:other:packages}
 \fnpct tries its best to support other footnote and related packages\footnote{If
 you find some package missing please let me know.}. Each of the following subsections
@@ -751,7 +770,8 @@ The \paket{endnotes} \cite{endnotes} package povides the commands \cmd{endnote}
 and \cmd{endnotemark} which can be used to output all notes at the end of a chapter,
 say.
 
-If the package is loaded both commands are adapted (see section \ref{sec:adapt}):
+If the package is loaded both commands are adapted\footnote*{see section \ref{sec:adapt}
+on manual adaption}:
 \begin{beispiel}[code only]
  % `fnpct' does this for you:
  \AdaptNote\endnote\multendnote
@@ -792,8 +812,8 @@ repeat the footnote text on the same page in the bottom. The document needs
 several runs to get all the numbers and footnotes right.
 
 Every fixed footnote declared with \cmd{DeclareFixedFootnote} gets an optional
-\code{*} to prevent the punctuation switching. There is \emph{no} mult-variant
-of the fixed notes!
+\code{*} to prevent the punctuation switching. \emph{There is \emph{no} mult-variant
+of the fixed notes!}
 
 Since this document cannot easily combine \emph{every} footnote package at the same
 time for demonstration purposes the following code is shown in figure \ref{fig:fixfoot}:
@@ -843,8 +863,8 @@ escaping mechanism through \cmd{makesavenoteenv}.
 \subsection{manyfoot}\secidx[manyfoot]{other packages}
 The \paket{manyfoot} package \cite{manyfoot} is not and will not directly be
 supported. It is loaded by \paket{bigfoot} (see section \ref{ssec:bigfoot}), anyway.
-And since the latter states this in its documentation
-\begin{zitat}[David Kastrup \cite{bigfoot}]
+And since the latter states in its documentation
+\begin{zitat}[David Kastrup \textup{\cite{bigfoot}}]
  Purpose of this package is to provide a one-stop solution to almost all problems
  related to footnotes. You can use it as a drop-in replacement of the `\paket{manyfoot}'
  package, but without many of its shortcomings, and quite a few features of its
@@ -990,8 +1010,8 @@ text in a sidenote.;A second sidenote.}.
 
 \subsection{Adapting \code{\textbackslash\textcolor{code}{footcite}} and siblings}
 \secidx[biblatex]{adapting notes}\label{ssec:adapt:footcite}
-If you're willing to sacrifice \cmd{footcite}'s \code{*} argument which it has
-in some styles you can adapt the commands provided by \paket{biblatex} as well:
+If you're willing to sacrifice \cmd{footcite}'s \code{*} argument (which it has
+in some styles) you can adapt the commands provided by \paket{biblatex} as well:
 
 \begin{beispiel}
  % used in preamble: \AdaptNoteOpt\footcite\multfootcite
