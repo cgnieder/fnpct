@@ -297,7 +297,7 @@ Like all options it can also be set using the setup command.
 \end{beispiel}
 \secidx*{basics}
 
-\subsection{Temporarily disable switching}\secidx{disable switching}
+\subsection{Temporarily disable or enable switching}\secidx{disable switching}
 One maybe want to put some footnote marks \emph{before} the punctuation and some
 after, for example because the first one describes a single word but the second
 one a whole sentence. For this purpose \fnpct adds a \code{*} argument to \cmd{footnote}
@@ -310,7 +310,16 @@ and \cmd{footnotemark}. The complete new syntax now is as follows:
  added. \code{<tpunct>} is the optional trailing punctuation mark.
 \end{beschreibung}
 The \code{*} argument temporarily turns off the punctuation/footnote switching.
+In case you set \key{punct-after}{true} the \code{*} argument temporarily
+\emph{enables} the switching.
 \begin{beispiel}
+ \begin{minipage}{.4\linewidth}
+  \noindent The three little pigs built their houses
+  out of straw\footnote*{not to be confused with hay},
+  sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}.
+ \end{minipage}\hfil
+ \setfnpct{punct-after}
  \begin{minipage}{.4\linewidth}
   \noindent The three little pigs built their houses
   out of straw\footnote*{not to be confused with hay},

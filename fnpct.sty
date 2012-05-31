@@ -3,7 +3,7 @@
 % 
 %   footnote kerning
 % 
-% 2012/05/26
+% 2012/05/31
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -32,8 +32,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2012/05/26}
-  {0.2}
+  {2012/05/31}
+  {0.2a}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -98,9 +98,10 @@
 
 % basic booleans for punctuation order switch and multiple footnotes
 \bool_new:N \l_fnpct_punct_after_bool
+\bool_new:N \l_fnpct_dont_mess_around_bool
 \bool_new:N \l_fnpct_multiple_default_bool
 \bool_new:N \l_fnpct_multiple_footnotes_bool
-\bool_new:N \l_fnpct_dont_switch_bool
+\bool_new:N \l_fnpct_reverse_switch_bool
 \bool_new:N \l_fnpct_bigfoot_default_top_bool
 \bool_new:N \l_fnpct_normal_marks_bool
 
@@ -213,6 +214,7 @@
         { \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { ##1 } { 0pt } }
       \dim_zero:N \l_fnpct_before_footnote_dim
       \bool_set_true:N \l_fnpct_punct_after_bool
+      \bool_set_true:N \l_fnpct_dont_mess_around_bool
       \fnpct_dont_mess_around: ,
     mult-fn-delim         .tl_set:N   = \l_fnpct_multiple_footnotes_delimiter_tl ,
     mult-fn-sep           .tl_set:N   = \l_fnpct_multiple_footnote_separator_tl ,
@@ -280,6 +282,29 @@
 \cs_generate_variant:Nn \fnpct_check_punctuation_auxi:nTF { V }
 \cs_generate_variant:Nn \peek_meaning_remove:NTF { V }
 
+\cs_new:Npn \fnpct_punct_if_after:TF #1#2
+  {
+    \bool_if:nTF
+      {
+        \bool_xor_p:nn
+          { \l_fnpct_punct_after_bool }
+          { \l_fnpct_reverse_switch_bool }
+      }
+      { #1 }
+      { #2 }
+  }
+
+\cs_new:Npn \fnpct_punct_if_after:T #1
+  {
+    \bool_if:nT
+      {
+        \bool_xor_p:nn
+          { \l_fnpct_punct_after_bool }
+          { \l_fnpct_reverse_switch_bool }
+      }
+      { #1 }
+  }
+
 % this is where the magic happens:
 %   #1: original command
 %   #2: optional argument of original command
@@ -291,10 +316,15 @@
     % if a punctuation mark follows remove it, insert dot, skip back
     % and then insert footnote
     \fnpct_no_break:
-    \IfBooleanT { #5 } { \bool_set_true:N \l_fnpct_dont_switch_bool }
+    \bool_if:NF \l_fnpct_dont_mess_around_bool
+      { \IfBooleanT { #5 } { \bool_set_true:N \l_fnpct_reverse_switch_bool } }
     \fnpct_check_punctuation:TF
       {
-        \bool_if:nTF { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
+        % A: after=1 && reverse=0
+        %    after=0 && reverse=1
+        % B: after=1 && reverse=1
+        %    after=0 && reverse=0
+        \fnpct_punct_if_after:TF
           { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
           {
             \tl_use:N \l_fnpct_current_punct_mark_tl
@@ -305,7 +335,7 @@
           }
         \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
         \fnpct_write_inner:N #1
-        \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
+        \fnpct_punct_if_after:T
           {
             \prop_get:NVNT \l_fnpct_punctuation_marks_before_prop
               \l_fnpct_current_punct_mark_tl \l_tmpa_dim
@@ -313,7 +343,7 @@
             \fnpct_no_break:
             \tl_use:N \l_fnpct_current_punct_mark_tl
           }
-        \bool_set_false:N \l_fnpct_dont_switch_bool
+        \bool_set_false:N \l_fnpct_reverse_switch_bool
       }
       {
         % what about multiple footnotes? (their usage is discouraged with
@@ -331,7 +361,7 @@
             \fnpct_write_inner:N #1
             \fnpct_no_break:
             \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
-            % \bool_set_false:N \l_fnpct_dont_switch_bool
+            % \bool_set_false:N \l_fnpct_reverse_switch_bool
           }
           {
             % else insert space and then note
@@ -340,7 +370,7 @@
               { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
             \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
             \fnpct_write_inner:N #1
-            \bool_set_false:N \l_fnpct_dont_switch_bool
+            \bool_set_false:N \l_fnpct_reverse_switch_bool
           }
       }
   }
@@ -356,7 +386,8 @@
 % #3: multiple notes separated by \l_fnpct_multiple_footnotes_delimiter_tl
 \cs_new_protected:Npn \fnpct_mult_note:Nnn #1#2#3 
   {
-    \IfBooleanT { #2 } { \bool_set_true:N \l_fnpct_dont_switch_bool }
+    \bool_if:NF \l_fnpct_dont_mess_around_bool
+      { \IfBooleanT { #2 } { \bool_set_true:N \l_fnpct_reverse_switch_bool } }
     % split input:
     \seq_set_split:NVn \l_fnpct_multiple_footnotes_seq
       \l_fnpct_multiple_footnotes_delimiter_tl
@@ -365,7 +396,7 @@
     % look for punctuation mark and do magic:
     \fnpct_check_punctuation:TF
       {
-        \bool_if:nTF { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
+        \fnpct_punct_if_after:TF
           { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
           {
             \tl_use:N \l_fnpct_current_punct_mark_tl
@@ -375,7 +406,7 @@
               { \skip_horizontal:N \l_tmpa_dim }
           }
         \fnpct_write_notes:N #1
-        \bool_if:nT { \l_fnpct_punct_after_bool || \l_fnpct_dont_switch_bool }
+        \fnpct_punct_if_after:T
           {
             \prop_get:NVNT \l_fnpct_punctuation_marks_before_prop
               \l_fnpct_current_punct_mark_tl \l_tmpa_dim
@@ -383,7 +414,7 @@
             \fnpct_no_break:
             \tl_use:N \l_fnpct_current_punct_mark_tl
           }
-        \bool_set_false:N \l_fnpct_dont_switch_bool
+        \bool_set_false:N \l_fnpct_reverse_switch_bool
       }
       {
         % else insert space and notes:
@@ -395,7 +426,7 @@
             \bool_set_true:N \l_fnpct_multiple_footnotes_bool
             \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim
             \fnpct_write_notes:N #1
-            \bool_set_false:N \l_fnpct_dont_switch_bool
+            \bool_set_false:N \l_fnpct_reverse_switch_bool
             \textsuperscript { \l_fnpct_multiple_footnote_separator_tl }
           }
           {
@@ -403,7 +434,7 @@
               { \bool_set_false:N \l_fnpct_multiple_footnotes_bool }
               { \fnpct_no_break: \skip_horizontal:N \l_fnpct_before_footnote_dim }
             \fnpct_write_notes:N #1
-            \bool_set_false:N \l_fnpct_dont_switch_bool
+            \bool_set_false:N \l_fnpct_reverse_switch_bool
           }
       }
   }
@@ -890,10 +921,12 @@
 2012/05/23 v0.1a      - \AdaptNoteNoMult, \AdaptNoteOpt, \AdaptNoteOptNoMult
                       - support `sidenotes' package
                       - better support for citing commands
-                      - error checking in the \Adapt<sth> commands
+                      - error checking in the \AdaptNote<sth> commands
                       - package option `strict'
 2012/05/26 v0.2       - added possibility to add punctuation marks to the
                         switching/kerning mechansim (or remove them)
+2012/05/31 v0.2a      - * switches behaviour also with `punct-after=true'
+                      - `dont-mess-around' disables *
  
 % --------------------------------------------------------------------------
 % NOTES:
@@ -903,3 +936,4 @@
 % --------------------------------------------------------------------------
 % TODO:
 - solve incompatibility with the `footnote' package
+- get this working (??) => http://tex.stackexchange.com/questions/54288/nested-endnotes
