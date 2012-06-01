@@ -3,7 +3,7 @@
 % 
 %   footnote kerning
 % 
-% 2012/05/31
+% 2012/06/01
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -32,7 +32,7 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2012/05/31}
+  {2012/06/01}
   {0.2a}
   {footnote kerning}
 
@@ -282,6 +282,7 @@
 \cs_generate_variant:Nn \fnpct_check_punctuation_auxi:nTF { V }
 \cs_generate_variant:Nn \peek_meaning_remove:NTF { V }
 
+% check which mode is active:
 \cs_new:Npn \fnpct_punct_if_after:TF #1#2
   {
     \bool_if:nTF
@@ -500,7 +501,7 @@
     \IfNoValueTF { #1 }
       {
         % TODO: maybe detect what type of note we're in and use the appropriate mark?
-        % Ot provide a user interface to choose the appropriate mark?
+        % Or provide a user interface to choose the appropriate mark?
         \fnpct_orig_footnotemark:w
         \prop_gput:Nxn \g_fnpct_inner_footnote_prop { \thefootnote } { #2 }
         \bool_if:NT \l_fnpct_hyperref_bool
@@ -925,7 +926,7 @@
                       - package option `strict'
 2012/05/26 v0.2       - added possibility to add punctuation marks to the
                         switching/kerning mechansim (or remove them)
-2012/05/31 v0.2a      - * switches behaviour also with `punct-after=true'
+2012/06/01 v0.2a      - * switches behaviour also with `punct-after=true'
                       - `dont-mess-around' disables *
  
 % --------------------------------------------------------------------------

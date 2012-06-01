@@ -3,7 +3,7 @@
 % 
 %   footnote kerning
 % 
-% 2012/05/25
+% 2012/06/01
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -338,38 +338,52 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  \option{add-punct-marks}{<mark>[<space after>][<space before>]} add another punctuation
  mark for the position switching and spacify kerning if necessary. An existing entry
  will be overwritten. This option accepts list of marks.
+ %
  \option{remove-punct-marks}{<mark>} remove punctuation mark from the kerning/position
  switching behaviour. This option accepts a list of marks.
+ %
  \option{after-dot-space}{<dim>} space to be inserted after a footnote mark and
  before the full stop (``footnote \emph{after} dot''). A negative space
  will move the full stop further to the footnote mark. Default = \code{-.06em}
+ %
  \option{after-comma-space}{<dim>} space to be inserted after a footnote mark and
  before the comma (``footnote \emph{after} comma''). A negative space
  will move the comma further to the footnote mark.  Default = \code{-.06em}
+ %
  \option{after-punct-space}{<dim>} set \emph{all} spaces, \ie also the ones for
  marks you've added with \key{add-punct-marks}.
+ %
  \option{punct-after}{\default{true}/false} when \code{true} the punctuation sign
- will be placed \emph{after} the footnote.
+ will be placed \emph{after} the footnote Default = \code{false}.
+ %
  \option{before-dot-space}{<dim>} space to be inserted after a footnote mark and
  before the full stop (``footnote \emph{before} dot''), \ie with
  \key{punct-after}{true}. Default = \code{-.15em}
+ %
  \option{before-comma-space}{<dim>} space to be inserted after a footnote mark and
  before the comma (``footnote \emph{before} comma''), \ie with
  \key{punct-after}{true}. Default = \code{-.15em}
+ %
  \option{before-punct-space}{<dim>} set \emph{all} spaces, \ie also the ones for
  marks you've added with \key{add-punct-marks}.
+ %
  \option{before-footnote-space}{<dim>} space to be inserted between a word and
  the following footnote mark. Default = \code{.06em}
+ %
  \option{dont-mess-around} sets all mentioned lengths to \code{0pt} and
  \key{punct-after}{true}. Basically this is as if you hadn't loaded \fnpct except
  the multiple footnote commands and \cmd{innernote} are still available, see
  sections \ref{sec:multiple} and \ref{sec:nested}, respectively.
+ %
  \option{multiple}{\default{true}/false} lets \cmd{footnote} be equal to
- \cmd{multfootnote}
+ \cmd{multfootnote}. Default = \code{false}
+ %
  \option{mult-fn-delim}{<delimiter>} sets the delimiter for the \cmd{multfootnote}
- command.
+ command. Default = \code{;}
+ %
  \option{mult-fn-sep}{<separator>} sets the separator between multiple footnote
- marks.
+ marks. Default = \code{,}
+ %
  \option{normal-marks}{\default{true}/false} sets the footnote marks in the foot
  not as superscripts but as normal font. If you're not using a \paket[koma-script]{KOMA-Script}
  class this option will load the package \paket*{scrextend}. See section \ref{sec:normal}
@@ -630,7 +644,8 @@ the output of this code:
 later:
 \begin{beschreibung}
  \befehl{writeinnernotes} writes all \cmd{footnotetext}s to the inner footnotes
- when invoked 
+ when invoked. This is usually done automatically by the \cmd{footnote} command
+ but there are possible needs for it.
 \end{beschreibung}
 See figure \ref{fig:nested:c} for the output of the following code:
 \begin{beispiel}[code only]
@@ -812,7 +827,7 @@ Everything else stays the same:
 The \paket{fixfoot} \cite{fixfoot} package provides a possibility to create repeating
 footnotes. \fnpct supports this package provided you take care of the following:
 
-\setapart{\cmd{DeclareFixedFootnote} only in the preamble but \emph{after} loading
+\setapart{Use \cmd{DeclareFixedFootnote} only in the preamble but \emph{after} loading
  \fnpct.}
 
 \cmd{DeclareFixedFootnote}{\cmd{cs}}\ma{<footnote text>} is used to store the
