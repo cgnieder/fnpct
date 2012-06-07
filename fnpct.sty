@@ -3,7 +3,7 @@
 % 
 %   footnote kerning
 % 
-% 2012/06/01
+% 2012/06/07
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -32,8 +32,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2012/06/01}
-  {0.2a}
+  {2012/06/07}
+  {0.2b}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -548,17 +548,25 @@
 
 % --------------------------------------------------------------------------
 % MANUAL KERNING:
+% TODO: add nobreak and ensure that \l_fnpct_after_comma_dim et.al match the current
+% definition
 \cs_new:Npn \kfp
   {
+    \fnpct_no_break:
+    \prop_get:NnN \l_fnpct_punctuation_marks_before_prop { . } \l_tmpa_dim
+    \prop_get:NnN \l_fnpct_punctuation_marks_after_prop { . } \l_tmpb_dim
     \bool_if:NTF \l_fnpct_punct_after_bool
-      { \skip_horizontal:N \l_fnpct_before_dot_dim }
-      { \skip_horizontal:N \l_fnpct_after_dot_dim }
+      { \skip_horizontal:N \l_tmpa_dim }
+      { \skip_horizontal:N \l_tmpb_dim }
   }
 \cs_new:Npn \kfc
   {
+    \fnpct_no_break:
+    \prop_get:NnN \l_fnpct_punctuation_marks_before_prop { , } \l_tmpa_dim
+    \prop_get:NnN \l_fnpct_punctuation_marks_after_prop { , } \l_tmpb_dim
     \bool_if:NTF \l_fnpct_punct_after_bool
-      { \skip_horizontal:N \l_fnpct_before_comma_dim }
-      { \skip_horizontal:N \l_fnpct_after_comma_dim }
+      { \skip_horizontal:N \l_tmpa_dim }
+      { \skip_horizontal:N \l_tmpb_dim }
   }
 
 % --------------------------------------------------------------------------
@@ -928,6 +936,9 @@
                         switching/kerning mechansim (or remove them)
 2012/06/01 v0.2a      - * switches behaviour also with `punct-after=true'
                       - `dont-mess-around' disables *
+2012/06/07 v0.2b      - bugfix: \kfp and \kfc now get the updated values if
+                        add-punctuation was added. They also won't allow line
+                        breaks any more                     
  
 % --------------------------------------------------------------------------
 % NOTES:
