@@ -194,10 +194,14 @@
   {
     strict                .bool_set:N = \l_fnpct_strict_bool ,
     strict                .default:n  = true ,
-    after-comma-space     .dim_set:N  = \l_fnpct_after_comma_dim ,
-    after-dot-space       .dim_set:N  = \l_fnpct_after_dot_dim ,
-    before-comma-space    .dim_set:N  = \l_fnpct_before_comma_dim ,
-    before-dot-space      .dim_set:N  = \l_fnpct_before_dot_dim ,
+    after-comma-space     .code:n     =
+      \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { , } { #1 } ,
+    after-dot-space       .code:n     =
+      \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { . } { #1 } ,
+    before-comma-space    .code:n     =
+      \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { , } { #1 } ,
+    before-dot-space      .code:n     =
+      \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { , } { #1 } ,
     after-punct-space     .code:n     =
       \prop_map_inline:Nn \l_fnpct_punctuation_marks_after_prop
         { \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { ##1 } { #1 } } ,
