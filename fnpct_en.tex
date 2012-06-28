@@ -1,9 +1,14 @@
+% arara: pdflatex
+% arara: makeindex: { sort: true, style: fnpct_en.ist }
+% arara: biber
+% arara: pdflatex
+% arara: pdflatex
 % --------------------------------------------------------------------------
 % the FNPCT package
 % 
 %   footnote kerning
 % 
-% 2012/06/07
+% 2012/06/28
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -38,10 +43,27 @@
 \docsetup{
   pkg      = fnpct ,
   code-box = {
-    skipbelow = .5\baselineskip ,
-    skipabove = .5\baselineskip ,
+    backgroundcolor  = gray!7!white ,
+    skipbelow        = .5\baselineskip ,
+    skipabove        = .5\baselineskip ,
+    roundcorner      = 3pt
   }
 }
+
+\usepackage[osf]{libertine}
+
+\cnpkgcolors{
+  main   => cnpkgred ,
+  key    => yellow!40!brown ,
+  module => cnpkgblue ,
+  link   => black!90
+}
+
+\renewcommand*\othersectionlevelsformat[3]{%
+  \textcolor{main}{#3\autodot}\enskip}
+\renewcommand*\partformat{%
+  \textcolor{main}{\partname~\thepart\autodot}}
+
 \addcmds{
   AdaptNote,
   AdaptNoteMark,
@@ -95,11 +117,20 @@
 	\usebibmacro{authorstrg}}}
     {}}
 
+\usepackage{filecontents}
 \begin{filecontents}{\jobname.bib}
+@book{bringhurst04,
+  title     = {The Elements of Typographic Style},
+  author    = {Robert Bringhurst},
+  year      = {2004},
+  version   = {3.2},
+  isbn      = {978-0-88179-205-5},
+  publisher = {Hartley \&\ Marks, Canada}
+}
 @software{bigfoot,
   title   = {bigfoot},
   author  = {David Kastrup},
-  date    = {2006/07/15},
+  date    = {2006-07-15},
   version = {1.25},
   url     = {http://www.ctan.org/pkg/bigfoot}
 }
@@ -107,41 +138,41 @@
   title   = {endnotes},
   author  = {Robin Fairbairns},
   authortype = {current maintainer},
-  date    = {2012/01/15},
+  date    = {2012-01-15},
   url     = {http://www.ctan.org/pkg/endnotes}
 }
 @software{fixfoot,
   title   = {fixfoot},
   author  = {Robin Fairbairns},
-  date    = {2007/12/12},
+  date    = {2007-12-12},
   version = {0.3a} ,
   url     = {http://www.ctan.org/pkg/fixfoot}
 }
 @software{footmisc,
   title   = {footmisc},
   author  = {Robin Fairbairns},
-  date    = {2011/06/06},
+  date    = {2011-06-06},
   version = {5.5b},
   url     = {http://www.ctan.org/pkg/footmisc}
 }
 @software{footnote,
   title   = {footnote},
   author  = {Mark Wooding},
-  date    = {1997/01/28},
+  date    = {1997-01-28},
   version = {1.13},
   url     = {http://www.ctan.org/pkg/footnote}
 }
 @software{manyfoot,
   title   = {manyfoot},
   author  = {Alexander I. Rozhenko},
-  date    = {2005/09/11},
+  date    = {2005-09-11},
   version = {1.10},
   url     = {http://www.ctan.org/pkg/manyfoot}
 }
 @software{parnotes,
   title   = {parnotes},
   author  = {Micheal Hughes},
-  date    = {2012/03/01},
+  date    = {2012-03-01},
   version = {1},
   url     = {http://www.ctan.org/pkg/parnotes}
 }
@@ -149,35 +180,35 @@
   title   = {pagenote},
   author  = {Will Robertson},
   authortype = {current maintainer},
-  date    = {2009/09/03},
+  date    = {2009-09-03},
   version = {1.1a},
   url     = {http://www.ctan.org/pkg/pagenote}
 }
 @software{sepfootnotes,
   title   = {sepfootnotes},
   author  = {Eduardo C. Louren\c{c}o de Lima},
-  date    = {2012/03/06},
+  date    = {2012-03-06},
   version = {0.1},
   url     = {http://www.ctan.org/pkg/sepfootnotes}
 }
 @software{sidenotes,
   title   = {sidenotes},
   author  = {Andy Thomas},
-  date    = {2011/11/10},
+  date    = {2011-11-10},
   version = {0.80},
   url     = {http://www.ctan.org/pkg/sidenotes}
 }
 @software{tablefootnote,
   title   = {tablefootnote},
   author  = {H.-Martin M\"{u}nch},
-  date    = {2012/01/14},
+  date    = {2012-01-14},
   version = {1.0g},
   url     = {http://www.ctan.org/pkg/tablefootnote}
 }
 @software{yafoot,
   title   = {yafoot},
   author  = {Hiroshi Nakashima},
-  date    = {1999/07/14},
+  date    = {1999-07-14},
   version = {1.0},
   url     = {http://www.ctan.org/pkg/yafoot}
 }
@@ -221,23 +252,43 @@ It has the status ``maintained.''
 \paket*{scrlfile}.
 
 \section{What's it all about?}
+\subsection{Introduction}
+The purpose of this package is to offer kerning for footnote marks, \ie the
+superscripts. This is not appropriate for all superscripts. Symbols must be
+handled differently than numbers. And of course the amount depends on the chosen
+font. Robert Bringhurst says in ``\citetitle{bringhurst04}'':
+
+\begin{zitat}[\emph{\citetitle{bringhurst04}} \cite{bringhurst04}]
+ Superscripts frequently come at the ends of phrases or sentences. If they are
+ high above the line, they can be kerned over a comma or period, but this may
+ endanger readability, especially if the text is set in a modest size.
+\end{zitat}
+
+\fnpct can not make this decisions for you. It sets some initial values for the
+comma and the full stop which looked good to me with the tested fonts.
+Additionally it kerns the superscripts away from words when it follows directly.
+The amounts of the kerning can be changed using an option.
+
+As a side effect \fnpct switches the order of the superscript and the following
+comma or full stop. Additional punctuation marks can be added to the switching
+behaviour and the amount of kerning can be set for each punctuation mark individually.
+
 \subsection{Basics}\secidx{basics}
 The \fnpct package basically does two things to footnotes: if footnote marks are
 followed by a comma or a full stop\footnote{More punctuation marks can be added
 through a package option.} the order of footnote and punctuation mark is
 reversed and the kerning gets adjusted. As a side effect a new method of creating
-multiple footnotes\footnote{like;this} is provided, see section \ref{sec:multiple}
+multiple footnotes\footnote{like;this} is provided, see section~\ref{sec:multiple}
 for details.
 
 In what way is the kerning adjusted? After being placed behind the punctuation
 mark the footnote mark is moved a little bit back, namely by the amount specified
-with the option \key{after-punct-space} (see section \ref{sec:options}). If the
+with the option \key{after-punct-space} (see section~\ref{sec:options}). If the
 footnote mark follows a word \emph{without} being followed by a punctuation%
 \footnote{Well, it does not necessarily have to follow a \emph{word}. The important
 point is \emph{not being followed} by a punctuation mark.}, there (obviously) is
 no order switching and a little space is inserted before the footnote mark, namely
-the amount specified by the option \key{before-footnote-space} (see section
-\ref{sec:options}).
+the amount specified by the option \key{before-footnote-space} (see section~\ref{sec:options}).
 
 All examples in this documentation use
 
@@ -261,7 +312,7 @@ of the desired behaviour.
 
 The order-switching can be prevented using a package option since not all countries
 and languages have the same typographic conventions. In this case the full stop
-and the comma are move a bit back.
+and the comma are moved a bit back.
 
 \bigskip\hfil
 \begin{minipage}{.25\linewidth}
@@ -373,7 +424,7 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  \option{dont-mess-around} sets all mentioned lengths to \code{0pt} and
  \key{punct-after}{true}. Basically this is as if you hadn't loaded \fnpct except
  the multiple footnote commands and \cmd{innernote} are still available, see
- sections \ref{sec:multiple} and \ref{sec:nested}, respectively.
+ sections~\ref{sec:multiple} and~\ref{sec:nested}, respectively.
  %
  \option{multiple}{\default{true}/false} lets \cmd{footnote} be equal to
  \cmd{multfootnote}. Default = \code{false}
@@ -386,7 +437,7 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  %
  \option{normal-marks}{\default{true}/false} sets the footnote marks in the foot
  not as superscripts but as normal font. If you're not using a \paket[koma-script]{KOMA-Script}
- class this option will load the package \paket*{scrextend}. See section \ref{sec:normal}
+ class this option will load the package \paket*{scrextend}. See section~\ref{sec:normal}
  for more information. \emph{This option can only be set in the preamble}. Default
  = \code{false}
 \end{beschreibung}
@@ -452,8 +503,8 @@ Some of the options are explained in a bit more detail in the next sections.
 
 \section{Multiple footnotes}\secidx{multiple footnotes}\label{sec:multiple}
 \subsection{Basics}\secidx[basics]{multiple footnotes}
-Since multiple footnotes have to be treated differently\footnote{see these footnotes;for an example},
-\fnpct provides an extra command for that:
+Since multiple footnotes have to be treated differently\footnote{see these footnotes;%
+for an example}, \fnpct provides an extra command for that:
 \begin{beschreibung}
  \Befehl{multfootnote}*{<list>;<of>;<footnotes>}\code{<tpunct>} \cnpkgdocarrow\
  different footnotes are separated with a semicolon. The \code{*} turns the
@@ -469,8 +520,8 @@ Since multiple footnotes have to be treated differently\footnote{see these footn
  \end{minipage}
 \end{beispiel}
 
-Every of the items of the list has an optional \code{*} argument and an optional
-argument equivalent to the optional argument of \cmd{footnotetext}:
+Every of the items of the list has an optional argument equivalent to the optional
+argument of \cmd{footnotetext}:
 \begin{beschreibung}
  \Befehl{multfootnote}{*[<mark>]<footnote text>;...}
 \end{beschreibung}
@@ -486,8 +537,8 @@ argument equivalent to the optional argument of \cmd{footnotetext}:
 
 Additionally every item has an optional \code{*} which only invokes \cmd{footnotetext}.
 This enables for example to set nested footnotes\secidx[nested footnotes]{multiple footnotes}
-without disrupting the multiple setting. The following example is shown in figure
-\ref{fig:nested:mult}:
+without disrupting the multiple setting. The following example is shown in
+figure~\ref{fig:nested:mult}:
 \begin{beispiel}[code only]
 \documentclass{article}
 \usepackage[
@@ -513,7 +564,6 @@ without disrupting the multiple setting. The following example is shown in figur
  \caption{nested footnotes}\label{fig:nested:mult}
 \end{figure}
 
-\newpage
 \subsection{The delimiter and separator}\secidx[delimiter]{multiple footnotes}\secidx[separator]{multiple footnotes}
 Since the semicolon might be part of the footnote text you might have some trouble.
 But there are ways around. Maybe try enclosing it in braces:
@@ -575,16 +625,17 @@ If you want you can turn all footnotes into \cmd{multfootnote}s.
 \secidx*{multiple footnotes}
 
 \section{Nested Footnotes}\secidx{nested footnotes}\label{sec:nested}
-\fnpct provides some support for nested footnotes. There are some restrictions,
+\fnpct provides preliminary support for nested footnotes. There are some restrictions,
 though. The command below can be used inside \cmd{footnote} and \cmd{multfootnote},
-but not inside another \cmd{innernote}:
+but not inside another \cmd{innernote}. \cmd{innernote} really is a ``inner
+footnote'', it doesn't work with endnotes, for example.
 \begin{beschreibung}
  \Befehl{innernote}*[<mark>]{<text>}\code{<tpunct>} \cnpkgdocarrow\ a nested footnote.
 \end{beschreibung}
 The inner node uses a \cmd{footnotemark} internally and the mark will be set with
 the definition it has at begin document.
 
-The output of the following code can be seen in figure \ref{fig:nested:a}.
+The output of the following code can be seen in figure~\ref{fig:nested:a}.
 \begin{beispiel}[code only]
 \documentclass{article}
 \usepackage[
@@ -612,7 +663,7 @@ The output of the following code can be seen in figure \ref{fig:nested:a}.
 
 This is especially useful if you have more than one additional footnote inside a
 footnote, a case that can't be solved in a satisfying (\ie automatic) way with the
-method mentioned in section \ref{sec:multiple}. See figure \ref{fig:nested:b} for
+method mentioned in section~\ref{sec:multiple}. See figure~\ref{fig:nested:b} for
 the output of this code:
 \begin{beispiel}[code only]
 \documentclass{article}
@@ -647,7 +698,7 @@ later:
  when invoked. This is usually done automatically by the \cmd{footnote} command
  but there are possible needs for it.
 \end{beschreibung}
-See figure \ref{fig:nested:c} for the output of the following code:
+See figure~\ref{fig:nested:c} for the output of the following code:
 \begin{beispiel}[code only]
 \documentclass{article}
 \usepackage[
@@ -682,7 +733,7 @@ the layout of the footnote marks in the foot by using \paket[koma-script]{KOMA-S
 
 \setapart{\cmd{deffootnote}[<mark indent>]{<indent>}\ma{<par indent>}\ma{<format code>}.}
 
-The following code is shown in figure \ref{fig:normal}.
+The following code is shown in figure~\ref{fig:normal}.
 \begin{beispiel}[code only]
 \documentclass{article}
 \usepackage[
@@ -728,10 +779,10 @@ is dedicated to one of these packages and if and how they work together with \fn
 Fortunately most of them do quite well.
 
 \subsection{bigfoot}\label{ssec:bigfoot}\secidx[bigfoot]{other packages}
-The \paket{bigfoot} \cite{bigfoot} package extends the possibilities of the
-\paket{manyfoot} package \cite{manyfoot}, see section \ref{ssec:manyfoot}. The main
-feature is to use different classes of footnotes which are typeset in different
-apparatus on the bottom of the page.
+The \paket{bigfoot}~\cite{bigfoot} package extends the possibilities of the
+\paket{manyfoot} package~\cite{manyfoot} (see section~\ref{ssec:manyfoot}). The
+main visible feature is to use different classes of footnotes which are typeset
+in different apparatus on the bottom of the page.
 
 \fnpct is compatible with \paket{bigfoot}. You need to be a bit cautious, though.
 You need to
@@ -739,9 +790,10 @@ You need to
 \setapart{declare footnotes with \cmd{DeclareNewFootnote} \emph{after} loading \fnpct
  but in the document \emph{preamble}.}
 
-\emph{Also verbatim material won't work inside footnotes anymore}. Since \fnpct
-does not redefine any \cmd{footnotetext} like command it will still work inside
-one of them.
+\emph{Also verbatim material won't work inside footnotes anymore}. But you can of
+course use Bruno Le Floch's \paket{cprotect} if you really need verbatim material
+in footnotes \emph{and} want to use \fnpct. Since \fnpct does not redefine any
+\cmd{footnotetext} like command it will still work inside one of them.
 
 For every footnote class defined with \cmd{DeclareNewFootnote} the commands
 \cmd{footnote<class>} and \cmd{footnotemark<class>} are redefined with the starred
@@ -757,7 +809,7 @@ and only has any effects if \paket{bigfoot} has been loaded:
 \end{beschreibung}
 
 Since this document cannot easily combine \emph{every} footnote package at the same
-time for demonstration purposes the following code is shown in figure \ref{fig:bigfoot}:
+time for demonstration purposes the following code is shown in figure~\ref{fig:bigfoot}:
 \begin{beispiel}[code only]
 \documentclass{article}
 \usepackage[
@@ -790,11 +842,11 @@ lumber according to some sources} and bricks%
 \end{figure}
 
 \subsection{endnotes}\secidx[endnotes]{other packages}
-The \paket{endnotes} \cite{endnotes} package povides the commands \cmd{endnote}
+The \paket{endnotes}~\cite{endnotes} package povides the commands \cmd{endnote}
 and \cmd{endnotemark} which can be used to output all notes at the end of a chapter,
 say.
 
-If the package is loaded both commands are adapted\footnote*{see section \ref{sec:adapt}
+If the package is loaded both commands are adapted\footnote*{see section~\ref{sec:adapt}
 on manual adaption}:
 \begin{beispiel}[code only]
  % `fnpct' does this for you:
@@ -824,15 +876,15 @@ Everything else stays the same:
 \end{beispiel}
 
 \subsection{fixfoot}\secidx[fixfoot]{other packages}
-The \paket{fixfoot} \cite{fixfoot} package provides a possibility to create repeating
+The \paket{fixfoot}~\cite{fixfoot} package provides a possibility to create repeating
 footnotes. \fnpct supports this package provided you take care of the following:
 
 \setapart{Use \cmd{DeclareFixedFootnote} only in the preamble but \emph{after} loading
  \fnpct.}
 
 \cmd{DeclareFixedFootnote}{\cmd{cs}}\ma{<footnote text>} is used to store the
-\ma{<footnote text>} in \cmd{cs} and create a footnote mark for it but don't
-repeat the footnote text on the same page in the bottom. The document needs
+\ma{<footnote text>} in \cmd{cs} which in turn creates a footnote mark for it but
+doesn't repeat the footnote text on the same page in the bottom. The document needs
 several runs to get all the numbers and footnotes right.
 
 Every fixed footnote declared with \cmd{DeclareFixedFootnote} gets an optional
@@ -840,7 +892,7 @@ Every fixed footnote declared with \cmd{DeclareFixedFootnote} gets an optional
 of the fixed notes!}
 
 Since this document cannot easily combine \emph{every} footnote package at the same
-time for demonstration purposes the following code is shown in figure \ref{fig:fixfoot}:
+time for demonstration purposes the following code is shown in figure~\ref{fig:fixfoot}:
 \begin{beispiel}[code only]
 \documentclass{article}
 \usepackage[
@@ -872,23 +924,23 @@ bricks}.
 \end{figure}
 
 \subsection{footmisc}\label{ssec:manyfoot}\secidx[footmisc]{other packages}
-The \paket{footmisc} package \cite{footmisc} provides a range of options to customize
+The \paket{footmisc} package~\cite{footmisc} provides a range of options to customize
 footnotes, for example output them as margin notes or count footnotes per page.
 
 Testing showed no incompatibilities with \paket{footmisc}. The only thing is that
-you won't have to use its \code{multiple} option.
+you won't have to (and shouldn't) use its \code{multiple} option.
 
 \subsection{footnote}\secidx[footnote]{other packages}
-Unfortunately \fnpct is not compatible with the \paket{footnote} package \cite{footnote}.
+Unfortunately \fnpct is not compatible with the \paket{footnote} package~\cite{footnote}.
 Or more precisely it is not compatible if the command pair \cmd{savenotes}/\cmd{spewnotes}
 is invoked. This disables \paket{footnote}'s environments as well as its environment
 escaping mechanism through \cmd{makesavenoteenv}.
 
 \subsection{manyfoot}\secidx[manyfoot]{other packages}
-The \paket{manyfoot} package \cite{manyfoot} is not and will not directly be
-supported. It is loaded by \paket{bigfoot} (see section \ref{ssec:bigfoot}), anyway.
+The \paket{manyfoot} package~\cite{manyfoot} is not and will not directly be
+supported. It is loaded by \paket{bigfoot} (see section~\ref{ssec:bigfoot}), anyway.
 And since the latter states in its documentation
-\begin{zitat}[David Kastrup \textup{\cite{bigfoot}}]
+\begin{zitat}[David Kastrup~\textup{\cite{bigfoot}}]
  Purpose of this package is to provide a one-stop solution to almost all problems
  related to footnotes. You can use it as a drop-in replacement of the `\paket{manyfoot}'
  package, but without many of its shortcomings, and quite a few features of its
@@ -899,14 +951,14 @@ you should probably prefer it anyway.
 If it is \emph{really} wanted by users I might change my opinion, though \ldots
 
 \subsection{pagenote}\secidx[pagenote]{other packages}
-The package \paket{pagenote} \cite{pagenote} is supported and its \cmd{pagenote}
+The package \paket{pagenote}~\cite{pagenote} is supported and its \cmd{pagenote}
 command is treated the same way as all other note commands: it got an optional
 \code{*} argument and an additional \cmd{multpagenote} is defined.
 
 \subsection{parnotes}\secidx[parnotes]{other packages}
-The \paket{parnotes} package \cite{parnotes} does something similar to the \paket{endnotes}
-package. basically it allows to output the footnote text after a paragraph, either
-by using a special environment or by invoking \cmd{parnotes}.
+The function of the package \paket{parnotes}~\cite{parnotes} is similar to the
+\paket{endnotes} package. basically it allows to output the footnote text after
+a paragraph, either by using a special environment or by invoking \cmd{parnotes}.
 
 If \paket{parnotes} is loaded \fnpct extends its functionality analogous
 to the one of \paket{endnotes}.
@@ -933,7 +985,7 @@ Again the \key{multiple} option turns all \cmd{parnote}s into \cmd{multparnote}s
 \end{beispiel}
 
 \subsection{sepfootnotes}\secidx[sepfootnotes]{other packages}
-\fnpct supports the \paket{sepfootnotes} package \cite{sepfootnotes}. Each note
+\fnpct supports the \paket{sepfootnotes} package~\cite{sepfootnotes}. Each note
 type you have created with with one of the commands
 \begin{description}
  \item \cmd{newfootnotes}{<prefix>},
@@ -960,21 +1012,21 @@ loading \fnpct.
 \end{beispiel}
 
 \subsection{sidenotes}\secidx[sidenotes]{other packages}
-The package \paket{sidenotes} \cite{sidenotes} is supported and its commands
+The package \paket{sidenotes}~\cite{sidenotes} is supported and its commands
 \cmd{sidenote}, \cmd{sidenotemark} and \cmd{sidecite} are treated the same way
 as footnotes: they got an optional \code{*} argument and the additional
 \cmd{multsidenote} and \cmd{multsidecite} are created. The option \key{multiple}
 turns all note commands into their mult-variant.
 
 \subsection{tablefootnote}\secidx[tablefootnote]{other packages}
-The package \paket{tablefootnote} \cite{tablefootnote} is supported and its
+The package \paket{tablefootnote}~\cite{tablefootnote} is supported and its
 \cmd{tablefootnote} command is treated the same way as all other note commands:
 it got an optional \code{*} argument and an additional \cmd{multtablefootnote}
 is defined. The option \key{multiple} turns all note commands into their mult-variant.
 
 \subsection{yafoot}\secidx[yafoot bundle]{other packages}
 Currently no issues are known when using \fnpct with one or all of the packages
-of the \paket{yafoot} \cite{yafoot} bundle. Just for reference: these packages are
+of the \paket{yafoot}~\cite{yafoot} bundle. Just for reference: these packages are
 \paket*{pfnote}, \paket*{fnpos} and \paket*{dblfnote}.
 \secidx*{other packages}
 
@@ -1008,13 +1060,13 @@ afterwards. This can result in dummy arguments or an overwritten \code{*} argume
  kerning behaviour and adds an optional \code{*}. Required syntax: \cmd{cs}[<oarg>]
  % strict
  \option{strict}{\default{true}/false} when \code{true} \cmd{AdaptNote} (and the
- othe two) will issue errors if the note command in wuestion has already been
+ other two) will issue errors if the note command in question has already been
  adapted. Default = \code{false}
 \end{beschreibung}
 
 \subsection{tufte-latex's side notes}\secidx[tufte-latex]{adapting notes}
 For example using the \cmd{sidenote} command from the \paket[tufte-latex]{tufte-handout}
-class is easily possible, see also figure \ref{fig:tufte}:
+class is easily possible, see also figure~\ref{fig:tufte}:
 \begin{beispiel}[code only]
 \documentclass{tufte-handout}
 \usepackage[multiple]{fnpct}
@@ -1073,7 +1125,7 @@ Remember that the optional arguments then are inside the braces!
 
 \setindexpreamble{Section titles are indicated \textbf{bold}, packages
 \textsf{sans serif}, commands \code{\textbackslash\textcolor{code}{brown}}
- and options \textcolor{key}{\code{green}}\par\bigskip}
+ and options \textcolor{key}{\code{yellow}}.\par\bigskip}
 
 \printindex
 \end{document}

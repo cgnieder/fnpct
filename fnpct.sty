@@ -3,7 +3,6 @@
 % 
 %   footnote kerning
 % 
-% 2012/06/07
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://bitbucket.org/cgnieder/fnpct/
@@ -32,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2012/06/07}
-  {0.2b}
+  {2012/06/28}
+  {0.2c}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -70,22 +69,22 @@
   }
 
 % rigid lengths:
-\dim_new:N \l_fnpct_after_comma_dim
-\dim_set:Nn \l_fnpct_after_comma_dim { -.06em }
-\dim_new:N \l_fnpct_after_dot_dim
-\dim_set:Nn \l_fnpct_after_dot_dim { -.06em }
-\dim_new:N \l_fnpct_before_comma_dim
-\dim_set:Nn \l_fnpct_before_comma_dim { -.16em }
-\dim_new:N \l_fnpct_before_dot_dim
-\dim_set:Nn \l_fnpct_before_dot_dim { -.16em }
-\dim_new:N \l_fnpct_before_footnote_dim
-\dim_set:Nn \l_fnpct_before_footnote_dim { .06em }
-\dim_new:N \l_fnpct_normal_mark_width_dim
+\dim_new:N  \l_fnpct_after_comma_dim
+\dim_set:Nn \l_fnpct_after_comma_dim       { -.06em }
+\dim_new:N  \l_fnpct_after_dot_dim
+\dim_set:Nn \l_fnpct_after_dot_dim         { -.06em }
+\dim_new:N  \l_fnpct_before_comma_dim
+\dim_set:Nn \l_fnpct_before_comma_dim      { -.16em }
+\dim_new:N  \l_fnpct_before_dot_dim
+\dim_set:Nn \l_fnpct_before_dot_dim        { -.16em }
+\dim_new:N  \l_fnpct_before_footnote_dim
+\dim_set:Nn \l_fnpct_before_footnote_dim   { .06em }
+\dim_new:N  \l_fnpct_normal_mark_width_dim
 \dim_set:Nn \l_fnpct_normal_mark_width_dim { 1em }
-\dim_new:N \l_fnpct_normal_indent_dim
-\dim_set:Nn \l_fnpct_normal_indent_dim { 1.5em }
-\dim_new:N \l_fnpct_normal_parindent_dim
-\dim_set:Nn \l_fnpct_normal_parindent_dim { 1em }
+\dim_new:N  \l_fnpct_normal_indent_dim
+\dim_set:Nn \l_fnpct_normal_indent_dim     { 1.5em }
+\dim_new:N  \l_fnpct_normal_parindent_dim
+\dim_set:Nn \l_fnpct_normal_parindent_dim  { 1em }
 
 % multiple footnote input and output variables:
 \tl_new:N \l_fnpct_multiple_footnotes_delimiter_tl
@@ -106,12 +105,12 @@
 \bool_new:N \l_fnpct_normal_marks_bool
 
 % default punctuation marks for switching:
-\tl_new:N \l_fnpct_punctuation_marks_tl
-\tl_set:Nn \l_fnpct_punctuation_marks_tl { ., }
-\prop_new:N \l_fnpct_punctuation_marks_after_prop
-\prop_new:N \l_fnpct_punctuation_marks_before_prop
+\tl_new:N     \l_fnpct_punctuation_marks_tl
+\tl_set:Nn    \l_fnpct_punctuation_marks_tl { ., }
+\prop_new:N   \l_fnpct_punctuation_marks_after_prop
+\prop_new:N   \l_fnpct_punctuation_marks_before_prop
 \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { . } { \l_fnpct_after_dot_dim }
-\prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { , } { \l_fnpct_after_comma_dim }
+\prop_put:Nnn \l_fnpct_punctuation_marks_after_prop  { , } { \l_fnpct_after_comma_dim }
 \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { . } { \l_fnpct_before_dot_dim }
 \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { , } { \l_fnpct_before_comma_dim }
 
@@ -456,7 +455,7 @@
       }
   }
 
-% this shouldn't be a document command but is an really easy way to make
+% this shouldn't be a document command but is a really easy way to make
 % biblatex's \footcite et.al. compatible with the `multiple' option
 %   #1: optional star => only invoke \footnotetext
 %   #2: optional argument to original note command
@@ -804,10 +803,13 @@
                   { fnpct_orig_footnote#2:w } { multfootnote#2 }
                 \fnpct_renew_mark:cc { footnotemark#2 } { fnpct_orig_footnotemark#2:w }
               }
+            \prop_if_in:NnT \l_fnpct_footnote_class_prop { default }
+              {
             % re-set basics:
             \cs_set_eq:NN \footnote \footnotedefault
             \cs_set_eq:NN \footnotemark \footnotemarkdefault
             \cs_set_eq:NN \multfootnote \multfootnotedefault
+              }
           }
         %% the `fixfoot' package:
         \fnpct_treatment:nn { fixfoot }
@@ -942,8 +944,9 @@
                       - `dont-mess-around' disables *
 2012/06/07 v0.2b      - bugfix: \kfp and \kfc now get the updated values if
                         add-punctuation was added. They also won't allow line
-                        breaks any more                     
- 
+                        breaks any more  
+2012/06/28 v0.2c      - bugfix: works now flawless together with `bigfoot'
+
 % --------------------------------------------------------------------------
 % NOTES:
 - `footnote' package => not compatible => see todo
