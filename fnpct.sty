@@ -31,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2012/07/24}
-  {0.2e}
+  {2012/08/27}
+  {0.2f}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -67,6 +67,13 @@
       { \msg_warning:nnx { fnpct } { #1 } }
     { #2 }
   }
+
+% scratch variables:
+\tl_new:N  \l_fnpct_tmpa_tl
+\tl_new:N  \l_fnpct_tmpb_tl
+\dim_new:N \l_fnpct_tmpa_dim
+\dim_new:N \l_fnpct_tmpb_dim
+\int_new:N \l_fnpct_tmpa_int
 
 % rigid lengths:
 \dim_new:N  \l_fnpct_after_comma_dim
@@ -137,7 +144,7 @@
             \tl_put_right:Nn \l_fnpct_punctuation_marks_tl { ##1 }
             \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { ##1 } { 0pt }
             \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { ##1 } { 0pt }
-            \tl_set:Nx \l_fnpct_last_punct_mark_tl { ##1 }
+            \tl_set:No \l_fnpct_last_punct_mark_tl { ##1 }
           }
       }
       {
@@ -154,14 +161,14 @@
                 \tl_put_right:Nn \l_fnpct_punctuation_marks_tl { #1 }
                 \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { #1 } { #2 }
                 \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { #1 } { 0pt }
-                \tl_set:Nx \l_fnpct_last_punct_mark_tl { #1 }
+                \tl_set:No \l_fnpct_last_punct_mark_tl { #1 }
               }
               {
-                \int_zero:N \l_tmpa_int
+                \int_zero:N \l_fnpct_tmpa_int
                 \tl_map_inline:nn { #1 }
                   {
                     \tl_put_right:Nn \l_fnpct_punctuation_marks_tl { ##1 }
-                    \int_compare:nTF { \l_tmpa_int < ( \tl_count:n { #1 } - 1 ) }
+                    \int_compare:nTF { \l_fnpct_tmpa_int < ( \tl_count:n { #1 } - 1 ) }
                       {
                         \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { ##1 } { 0pt }
                         \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { ##1 } { 0pt }
@@ -170,8 +177,8 @@
                         \prop_put:Nnn \l_fnpct_punctuation_marks_after_prop { ##1 } { #2 }
                         \prop_put:Nnn \l_fnpct_punctuation_marks_before_prop { ##1 } { 0pt }
                       }
-                    \tl_set:Nx \l_fnpct_last_punct_mark_tl { ##1 }
-                    \int_incr:N \l_tmpa_int
+                    \tl_set:No \l_fnpct_last_punct_mark_tl { ##1 }
+                    \int_incr:N \l_fnpct_tmpa_int
                   }
               }
           }
@@ -181,9 +188,9 @@
       {
         \quark_if_no_value:nF { #3 }
           {
-            \tl_set:Nn \l_tmpa_tl { #3 }
-            \tl_remove_all:Nn \l_tmpa_tl { [\q_no_value]\q_no_value }
-            \fnpct_add_punctuation:V \l_tmpa_tl
+            \tl_set:Nn \l_fnpct_tmpa_tl { #3 }
+            \tl_remove_all:Nn \l_fnpct_tmpa_tl { [\q_no_value]\q_no_value }
+            \fnpct_add_punctuation:V \l_fnpct_tmpa_tl
           }
       }
   }
@@ -271,21 +278,21 @@
       { #2 }
       {
         \fnpct_check_punctuation_auxii:nnn { #1 }
-          { \fnpct_check_punctuation_auxi:VTF \l_tmpa_int { #2 } { #3 } }
+          { \fnpct_check_punctuation_auxi:VTF \l_fnpct_tmpa_int { #2 } { #3 } }
           { #3 }
       }
   }
 
 \cs_new:Npn \fnpct_check_punctuation_auxii:nnn #1#2#3
   {
-    \int_set:Nn \l_tmpa_int { #1 }
-    \int_incr:N \l_tmpa_int
-    \tl_set:Nx \l_tmpb_tl { \int_to_arabic:n { \l_tmpa_int } }
+    \int_set:Nn \l_fnpct_tmpa_int { #1 }
+    \int_incr:N \l_fnpct_tmpa_int
+    \tl_set:Nx \l_fnpct_tmpb_tl { \int_to_arabic:n { \l_fnpct_tmpa_int } }
     \tl_remove_all:NV \l_fnpct_punctuation_marks_tl
       \l_fnpct_current_punct_mark_tl
     \tl_put_right:NV \l_fnpct_punctuation_marks_tl
       \l_fnpct_current_punct_mark_tl
-    \int_compare:nTF { \l_tmpa_int < \tl_count:V \l_fnpct_punctuation_marks_tl }
+    \int_compare:nTF { \l_fnpct_tmpa_int < \tl_count:V \l_fnpct_punctuation_marks_tl }
       { #2 }
       { #3 }
   }
@@ -295,7 +302,11 @@
 \cs_generate_variant:Nn \tl_put_right:Nn { NV }
 
 \cs_new:Npn \fnpct_get_head:NN #1#2
-  { \exp_after:wN \fnpct_get_head_aux:Nw \exp_after:wN #1#2 \q_stop }
+  {
+    \tl_if_blank:VTF #2
+      { \tl_set:Nn #1 { #2 } }
+      { \exp_after:wN \fnpct_get_head_aux:Nw \exp_after:wN #1#2 \q_stop }
+  }
 \cs_new:Npn \fnpct_get_head_aux:Nw #1#2#3 \q_stop
   { \tl_set:Nn #1 { #2 } }
 
@@ -314,9 +325,9 @@
   {
     \prop_map_inline:Nn \g_fnpct_adapted_notes_prop
       {
-        \prop_get:NnN \g_fnpct_adapted_notes_prop { ##1 } \l_tmpb_tl
+        \prop_get:NnN \g_fnpct_adapted_notes_prop { ##1 } \l_fnpct_tmpb_tl
         \exp_after:wN
-        \token_if_eq_meaning:NNTF \l_tmpb_tl \l_peek_token
+        \token_if_eq_meaning:NNTF \l_fnpct_tmpb_tl \l_peek_token
           {
             \bool_set_true:N \l_fnpct_multiple_footnotes_bool
             \prop_map_break:
@@ -342,15 +353,7 @@
   }
 
 \cs_new:Npn \fnpct_punct_if_after:T #1
-  {
-    \bool_if:nT
-      {
-        \bool_xor_p:nn
-          { \l_fnpct_punct_after_bool }
-          { \l_fnpct_reverse_switch_bool }
-      }
-      { #1 }
-  }
+  { \fnpct_punct_if_after:TF { #1 } {} }
 
 % this is where the magic happens:
 %   #1: original command
@@ -377,16 +380,16 @@
             \tl_use:N \l_fnpct_current_punct_mark_tl
             \fnpct_no_break:
             \prop_get:NVNT \l_fnpct_punctuation_marks_after_prop
-              \l_fnpct_current_punct_mark_tl \l_tmpa_dim
-              { \skip_horizontal:N \l_tmpa_dim }
+              \l_fnpct_current_punct_mark_tl \l_fnpct_tmpa_dim
+              { \skip_horizontal:N \l_fnpct_tmpa_dim }
           }
         \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
         \fnpct_write_inner:N #1
         \fnpct_punct_if_after:T
           {
             \prop_get:NVNT \l_fnpct_punctuation_marks_before_prop
-              \l_fnpct_current_punct_mark_tl \l_tmpa_dim
-              { \skip_horizontal:N \l_tmpa_dim }
+              \l_fnpct_current_punct_mark_tl \l_fnpct_tmpa_dim
+              { \skip_horizontal:N \l_fnpct_tmpa_dim }
             \fnpct_no_break:
             \tl_use:N \l_fnpct_current_punct_mark_tl
           }
@@ -446,15 +449,15 @@
             \tl_use:N \l_fnpct_current_punct_mark_tl
             \fnpct_no_break:
             \prop_get:NVNT \l_fnpct_punctuation_marks_after_prop
-              \l_fnpct_current_punct_mark_tl \l_tmpa_dim
-              { \skip_horizontal:N \l_tmpa_dim }
+              \l_fnpct_current_punct_mark_tl \l_fnpct_tmpa_dim
+              { \skip_horizontal:N \l_fnpct_tmpa_dim }
           }
         \fnpct_write_notes:N #1
         \fnpct_punct_if_after:T
           {
             \prop_get:NVNT \l_fnpct_punctuation_marks_before_prop
-              \l_fnpct_current_punct_mark_tl \l_tmpa_dim
-              { \skip_horizontal:N \l_tmpa_dim }
+              \l_fnpct_current_punct_mark_tl \l_fnpct_tmpa_dim
+              { \skip_horizontal:N \l_fnpct_tmpa_dim }
             \fnpct_no_break:
             \tl_use:N \l_fnpct_current_punct_mark_tl
           }
@@ -484,11 +487,11 @@
 % #1: original note command
 \cs_new_protected:Npn \fnpct_write_notes:N #1
   {
-    \int_zero:N \l_tmpa_int
+    \int_zero:N \l_fnpct_tmpa_int
     \seq_map_inline:Nn \l_fnpct_multiple_footnotes_seq
       {
         \fnpct_read_note_with_option:w ##1 \q_stop { #1 }
-        \int_incr:N \l_tmpa_int
+        \int_incr:N \l_fnpct_tmpa_int
       }
   }
 
@@ -504,10 +507,10 @@
   {
     \bool_if:nT
       {
-        \int_compare_p:n { \l_tmpa_int > 0 }
+        \int_compare_p:n { \l_fnpct_tmpa_int > 0 }
          &&
          \int_compare_p:n
-           { \l_tmpa_int < \seq_count:N \l_fnpct_multiple_footnotes_seq }
+           { \l_fnpct_tmpa_int < \seq_count:N \l_fnpct_multiple_footnotes_seq }
       }
       {
         \IfBooleanTF { #1 }
@@ -572,9 +575,9 @@
                 \bool_if:NT \l_fnpct_hyperref_bool
                   {
                     \prop_get:NnN \g_fnpct_inner_footnote_hyperref_prop
-                      { ##1 } \l_tmpa_tl
+                      { ##1 } \l_fnpct_tmpa_tl
                     \Hy@raisedlink
-                      { \exp_args:No \hyper@@anchor { \l_tmpa_tl } }
+                      { \exp_args:No \hyper@@anchor { \l_fnpct_tmpa_tl } }
                   }
                 ##2
               }
@@ -593,20 +596,20 @@
 \cs_new:Npn \kfp
   {
     \fnpct_no_break:
-    \prop_get:NnN \l_fnpct_punctuation_marks_before_prop { . } \l_tmpa_dim
-    \prop_get:NnN \l_fnpct_punctuation_marks_after_prop { . } \l_tmpb_dim
+    \prop_get:NnN \l_fnpct_punctuation_marks_before_prop { . } \l_fnpct_tmpa_dim
+    \prop_get:NnN \l_fnpct_punctuation_marks_after_prop { . } \l_fnpct_tmpb_dim
     \bool_if:NTF \l_fnpct_punct_after_bool
-      { \skip_horizontal:N \l_tmpa_dim }
-      { \skip_horizontal:N \l_tmpb_dim }
+      { \skip_horizontal:N \l_fnpct_tmpa_dim }
+      { \skip_horizontal:N \l_fnpct_tmpb_dim }
   }
 \cs_new:Npn \kfc
   {
     \fnpct_no_break:
-    \prop_get:NnN \l_fnpct_punctuation_marks_before_prop { , } \l_tmpa_dim
-    \prop_get:NnN \l_fnpct_punctuation_marks_after_prop { , } \l_tmpb_dim
+    \prop_get:NnN \l_fnpct_punctuation_marks_before_prop { , } \l_fnpct_tmpa_dim
+    \prop_get:NnN \l_fnpct_punctuation_marks_after_prop { , } \l_fnpct_tmpb_dim
     \bool_if:NTF \l_fnpct_punct_after_bool
-      { \skip_horizontal:N \l_tmpa_dim }
-      { \skip_horizontal:N \l_tmpb_dim }
+      { \skip_horizontal:N \l_fnpct_tmpa_dim }
+      { \skip_horizontal:N \l_fnpct_tmpb_dim }
   }
 
 % --------------------------------------------------------------------------
@@ -987,6 +990,7 @@
                         \l_fnpct_multiple_footnote_separator_tl
 2012/07/24 v0.2e      - improved scanning ahead for punctuation marks, adapted
                         to deprecated functions in l3kernel and l3packages
+2012/08/27 v0.2f      - switched to internal scratch variables
 
 % --------------------------------------------------------------------------
 % NOTES:
