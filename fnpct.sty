@@ -8,7 +8,7 @@
 % Web:    https://bitbucket.org/cgnieder/fnpct/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
-% Copyright 2012 Clemens Niederberger
+% Copyright 2012-2013 Clemens Niederberger
 % 
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -31,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2012/08/27}
-  {0.2f}
+  {2013/01/18}
+  {0.2h}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -97,8 +97,8 @@
 \tl_new:N \l_fnpct_multiple_footnotes_delimiter_tl
 \tl_set:Nn \l_fnpct_multiple_footnotes_delimiter_tl { ; }
 \tl_new:N \l_fnpct_multiple_footnote_separator_tl
-% check for KOMA-Script's or anyone's \multfootsep:
-\cs_if_exist:NTF \multfootsep
+% check for KOMA-Script's \multfootsep:
+\cs_if_exist:NTF \KOMAClassName
   { \tl_set:Nn \l_fnpct_multiple_footnote_separator_tl { \multfootsep } }
   { \tl_set:Nn \l_fnpct_multiple_footnote_separator_tl { , } }
 
@@ -816,12 +816,13 @@
         %% the `sidenotes' package:
         \fnpct_treatment:nn { sidenotes }
           {
-            \AdaptNote \sidenote \multsidenote
+            \AdaptNoteOpt \sidenote \multsidenote
             \AdaptNoteMark \sidenotemark
-            \AdaptNoteOpt \sidecite \multsidecite
+%             \AdaptNoteOpt \sidecite \multsidecite
           }
         %% the `parnotes' package:
-        \fnpct_treatment:nn { parnotes } { \AdaptNote \parnote \multparnote }
+        \fnpct_treatment:nn { parnotes }
+          { \AdaptNote \parnote \multparnote }
         %% the `pagenote' package:
         \fnpct_treatment:nn { pagenote }
           {
@@ -845,10 +846,10 @@
               }
             \prop_if_in:NnT \l_fnpct_footnote_class_prop { default }
               {
-            % re-set basics:
-            \cs_set_eq:NN \footnote \footnotedefault
-            \cs_set_eq:NN \footnotemark \footnotemarkdefault
-            \cs_set_eq:NN \multfootnote \multfootnotedefault
+                % re-set basics:
+                \cs_set_eq:NN \footnote \footnotedefault
+                \cs_set_eq:NN \footnotemark \footnotemarkdefault
+                \cs_set_eq:NN \multfootnote \multfootnotedefault
               }
           }
         %% the `fixfoot' package:
@@ -991,6 +992,9 @@
 2012/07/24 v0.2e      - improved scanning ahead for punctuation marks, adapted
                         to deprecated functions in l3kernel and l3packages
 2012/08/27 v0.2f      - switched to internal scratch variables
+2012/11/14 v0.2g      - adapt changes in `sidenotes' package
+2013/01/18 v0.2h      - bug fixed: \l_fnpct_multiple_footnote_separator_tl
+                        should be { , } when `memoir' is loaded
 
 % --------------------------------------------------------------------------
 % NOTES:
