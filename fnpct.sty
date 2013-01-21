@@ -31,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2013/01/18}
-  {0.2h}
+  {2013/01/21}
+  {0.2i}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -484,14 +484,15 @@
   }
 \cs_generate_variant:Nn \fnpct_mult_note:Nnn { cnn }
 
+\int_new:N \l_fnpct_multiple_notes_int
 % #1: original note command
 \cs_new_protected:Npn \fnpct_write_notes:N #1
   {
-    \int_zero:N \l_fnpct_tmpa_int
+    \int_zero:N \l_fnpct_multiple_notes_int
     \seq_map_inline:Nn \l_fnpct_multiple_footnotes_seq
       {
         \fnpct_read_note_with_option:w ##1 \q_stop { #1 }
-        \int_incr:N \l_fnpct_tmpa_int
+        \int_incr:N \l_fnpct_multiple_notes_int
       }
   }
 
@@ -507,10 +508,14 @@
   {
     \bool_if:nT
       {
-        \int_compare_p:n { \l_fnpct_tmpa_int > 0 }
+        \int_compare_p:n { \l_fnpct_multiple_notes_int > 0 }
          &&
          \int_compare_p:n
-           { \l_fnpct_tmpa_int < \seq_count:N \l_fnpct_multiple_footnotes_seq }
+           {
+             \l_fnpct_multiple_notes_int
+               <
+             \seq_count:N \l_fnpct_multiple_footnotes_seq
+           }
       }
       {
         \IfBooleanTF { #1 }
@@ -663,7 +668,10 @@
       { \cs_set_eq:NN #1 #3 }
       {
         \RenewDocumentCommand #1 { s+m }
-          { \fnpct_handle_note:Nnnnn #2 { \q_no_value } { \q_no_value } { ##2 } { ##1 } }
+          {
+            \fnpct_handle_note:Nnnnn #2 { \q_no_value } { \q_no_value }
+              { ##2 } { ##1 }
+          }
       }
   }
 \cs_generate_variant:Nn \fnpct_renew_and_mult_no_opt:NNN { ccc }
@@ -931,20 +939,30 @@
 % aaand... the `sepfootnotes' package:
 \prop_new:N \l_fnpct_sepfootnote_foot_classes_prop
 \prop_new:N \l_fnpct_sepfootnote_end_classes_prop
+\prop_new:N \l_fnpct_sepfootnote_symbol_classes_prop
 \fnpct_special_treatment:nn { sepfootnotes }
   {
-    \cs_new_eq:NN \fnpct_orig_new_footnotes:n \newfootnotes
+    \cs_new_eq:NN \fnpct_orig_new_footnotes:w \newfootnotes
     \cs_new_eq:NN \fnpct_orig_new_endnotes:n \newendnotes
     \cs_new_eq:NN \fnpct_orig_new_symbolnotes:w \newsymbolfootnotes
-    \RenewDocumentCommand \newfootnotes { m }
+    \RenewDocumentCommand \newfootnotes { sm }
       {
-        \prop_put:Nnn \l_fnpct_sepfootnote_foot_classes_prop { #1 } { #1 }
-        \fnpct_orig_new_footnotes:n { #1 }
+        \prop_put:Nnn \l_fnpct_sepfootnote_foot_classes_prop { #2 } { #2 }
+        \IfBooleanTF { #1 }
+          { \fnpct_orig_new_footnotes:w * { #2 } }
+          { \fnpct_orig_new_footnotes:w { #2 } }
       }
     \RenewDocumentCommand \newendnotes { m }
       {
         \prop_put:Nnn \l_fnpct_sepfootnote_end_classes_prop { #1 } { #1 }
         \fnpct_orig_new_endnotes:n { #1 }
+      }
+    \RenewDocumentCommand \newsymbolfootnotes { om }
+      {
+        \prop_put:Nnn \l_fnpct_sepfootnote_symbol_classes_prop { #2 } { #2 }
+        \IfNoValueTF { #1 }
+          { \fnpct_orig_new_symbolnotes:w { #2 } }
+          { \fnpct_orig_new_symbolnotes:w [ #1 ] { #2 } }
       }
   }
 
@@ -995,6 +1013,8 @@
 2012/11/14 v0.2g      - adapt changes in `sidenotes' package
 2013/01/18 v0.2h      - bug fixed: \l_fnpct_multiple_footnote_separator_tl
                         should be { , } when `memoir' is loaded
+2013/01/21 v0.2i      - adapted to changes of sepfootnotes, bug fix in reading
+                        of multiple notes
 
 % --------------------------------------------------------------------------
 % NOTES:
