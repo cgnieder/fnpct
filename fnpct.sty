@@ -31,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2013/01/21}
-  {0.2i}
+  {2013/02/22}
+  {0.2j}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -821,6 +821,9 @@
             \AdaptNote \endnote \multendnote
             \AdaptNoteMark \endnotemark
           }
+        %% the `enotez' package:
+        \fnpct_treatment:nn { enotez }
+          { \AdaptNote \endnote \multendnote }
         %% the `sidenotes' package:
         \fnpct_treatment:nn { sidenotes }
           {
@@ -1015,6 +1018,7 @@
                         should be { , } when `memoir' is loaded
 2013/01/21 v0.2i      - adapted to changes of sepfootnotes, bug fix in reading
                         of multiple notes
+2013/02/22 v0.2j      - adaption of `enotez' \endnote command
 
 % --------------------------------------------------------------------------
 % NOTES:
