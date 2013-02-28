@@ -42,7 +42,7 @@
 \docsetup{
   pkg      = fnpct ,
   code-box = {
-    backgroundcolor  = gray!7!white ,
+    backgroundcolor  = gray!3!white ,
     skipbelow        = .5\baselineskip ,
     skipabove        = .5\baselineskip ,
     roundcorner      = 3pt
@@ -52,8 +52,9 @@
 \usepackage[biblatex]{embrac}[2012/06/29] % v0.1a
 \ChangeEmph{[}[,.02em]{]}[.055em,-.08em]
 \ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
+\usepackage{libertinehologopatch}
 
-\usepackage{libertine}
+\usepackage{array,booktabs}
 
 \cnpkgcolors{
   main   => cnpkgred ,
@@ -67,8 +68,6 @@
 \renewcommand*\partformat{%
   \textcolor{main}{\partname~\thepart\autodot}}
 
-\KOMAoptions{captions=nooneline}
-\setcapindent{1.5em}
 \setkomafont{caption}{\normalfont\footnotesize\sffamily}
 \setkomafont{captionlabel}{\normalfont\footnotesize\sffamily\scshape}
 
@@ -148,6 +147,13 @@
   authortype = {current maintainer},
   date    = {2012-01-15},
   url     = {http://www.ctan.org/pkg/endnotes}
+}
+@software{enotez,
+  title   = {enotez},
+  author  = {Clemens Niederberger},
+  version = {0.4},
+  date    = {2012-12-30},
+  url     = {http://www.ctan.org/pkg/enotez}
 }
 @software{fixfoot,
   title   = {fixfoot},
@@ -248,6 +254,16 @@ of footnote and punctuation mark is reversed and the kerning gets adjusted. As a
 side effect a new method of creating multiple footnotes and some other features are
 provided.}}
 
+\newcommand*\Default[1]{%
+  \hfill\llap
+    {%
+      \ifblank{#1}%
+        {(initially~empty)}%
+        {Default:~\code{#1}}%
+    }%
+  \newline
+}
+
 \makeindex
 \begin{document}
 
@@ -323,28 +339,25 @@ The order-switching can be prevented using a package option since not all countr
 and languages have the same typographic conventions. In this case the full stop
 and the comma are moved a bit back.
 
-\bigskip\hfil
-\begin{minipage}{.25\linewidth}
-\setlength\parindent{0pt}%
-without \fnpct:\\
-{\setfnpct{dont-mess-around}%
-\null\quad text.\footnotemark[1]\\
-\null\quad text\footnotemark[1]}.
-
-with \fnpct:\\
-\null\quad text\footnotemark[1].\\
-\setfnpct{punct-after}%
-\null\quad text\footnotemark[1].
-\end{minipage}\hfil
+\begin{figure}[ht]
+ \centering
+ \begin{tabular}{>{\setfnpct{dont-mess-around}}ll}
+   without \fnpct                    & with \fnpct \\
+   \strut\quad text.\footnotemark[1] & \strut\quad text\footnotemark[1]. \\
+   \strut\quad text\footnotemark[1]. & \setfnpct{punct-after}\strut\quad text\footnotemark[1].
+ \end{tabular}
+ \caption{The effect of \fnpct.}
+\end{figure}
 
 \begin{beschreibung}
- \option{punct-after}{\default{true}|false} when \code{true} the punctuation sign
- will be placed \emph{after} the footnote. Default = \code{false}
+ \Option{punct-after}{\default{true}|false}\Default{false}
+   When \code{true} the punctuation sign will be placed \emph{after} the footnote.
 \end{beschreibung}
 Like all options it can also be set using the setup command.
 \begin{beschreibung}
- \befehl{setfnpct}{<options>} set up options. Can be used anywhere in the document.
- Some options can only be set in the preamble, though.
+ \Befehl{setfnpct}{<options>}
+   Set up options. Can be used anywhere in the document. Some options can only
+   be set in the preamble, though.
 \end{beschreibung}
 \begin{beispiel}
  \setfnpct{punct-after}
@@ -363,11 +376,12 @@ after, for example because the first one describes a single word but the second
 one a whole sentence. For this purpose \fnpct adds a \code{*} argument to \cmd{footnote}
 and \cmd{footnotemark}. The complete new syntax now is as follows:
 \begin{beschreibung}
- \Befehl{footnote}*[<num>]{<footnote text>}\code{<tpunct>} \cnpkgdocarrow\ new
- \code{*} argument added. \code{<tpunct>} is the optional trailing punctuation
- mark.
- \Befehl{footnotemark}*[<num>]\code{<tpunct>} \cnpkgdocarrow\ new \code{*} argument
- added. \code{<tpunct>} is the optional trailing punctuation mark.
+ \Befehl{footnote}*[<num>]{<footnote text>}\code{<tpunct>}\newline
+   new \code{*} argument added. \code{<tpunct>} is the optional trailing
+   punctuation mark.
+ \Befehl{footnotemark}*[<num>]\code{<tpunct>}\newline
+   new \code{*} argument added. \code{<tpunct>} is the optional trailing
+   punctuation mark.
 \end{beschreibung}
 The \code{*} argument temporarily turns off the punctuation/footnote switching.
 In case you set \key{punct-after}{true} the \code{*} argument temporarily
@@ -395,69 +409,67 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
 
 \default{Underlined} values are set if the option is used without value.
 \begin{beschreibung}
- \option{add-punct-marks}{<mark>[<space after>][<space before>]}
- add another punctuation mark for the position switching and spacify kerning if
- necessary. An existing entry will be overwritten. This option accepts a list of
- marks.
+ \Option{add-punct-marks}{<mark>[<space after>][<space before>]}\newline
+   add another punctuation mark for the position switching and spacify kerning
+   if necessary. An existing entry will be overwritten. This option accepts a
+   list of marks.
  %
- \option{remove-punct-marks}{<mark>}
- remove punctuation mark from the kerning/position switching behaviour. This
- option accepts a list of marks.
+ \Option{remove-punct-marks}{<mark>}\newline
+   remove punctuation mark from the kerning/position switching behaviour. This
+   option accepts a list of marks.
  %
- \option{after-dot-space}{<dim>}
- space to be inserted after a footnote mark and before the full stop
- (``footnote \emph{after} dot''). A negative space will move the full stop
- further to the footnote mark. Default = \code{-.06em}
+ \Option{after-dot-space}{<dim>}\Default{-.06em}
+   space to be inserted after a footnote mark and before the full stop
+   (``footnote \emph{after} dot''). A negative space will move the full stop
+   further to the footnote mark.
  %
- \option{after-comma-space}{<dim>}
- space to be inserted after a footnote mark and before the comma
- (``footnote \emph{after} comma''). A negative space will move the comma further
- to the footnote mark. Default = \code{-.06em}
+ \Option{after-comma-space}{<dim>}\Default{-.06em}
+   space to be inserted after a footnote mark and before the comma
+   (``footnote \emph{after} comma''). A negative space will move the comma further
+   to the footnote mark.
  %
- \option{after-punct-space}{<dim>}
- set \emph{all} spaces, \ie also the ones for marks you've added with
- \key{add-punct-marks}.
+ \Option{after-punct-space}{<dim>}\newline
+   set \emph{all} spaces, \ie also the ones for marks you've added with
+   \key{add-punct-marks}.
  %
- \option{punct-after}{\default{true}|false}
- when \code{true} the punctuation sign will be placed \emph{after} the footnote.
- Default = \code{false}.
+ \Option{punct-after}{\default{true}|false}\Default{false}
+   when \code{true} the punctuation sign will be placed \emph{after} the footnote.
  %
- \option{before-dot-space}{<dim>}
- space to be inserted after a footnote mark and before the full stop (``footnote
- \emph{before} dot''), \ie with \key{punct-after}{true}. Default = \code{-.16em}
+ \Option{before-dot-space}{<dim>}\Default{-.16em}
+   space to be inserted after a footnote mark and before the full stop (``footnote
+   \emph{before} dot''), \ie with \key{punct-after}{true}.
  %
- \option{before-comma-space}{<dim>}
- space to be inserted after a footnote mark and before the comma (``footnote
- \emph{before} comma''), \ie with \key{punct-after}{true}. Default = \code{-.16em}
+ \Option{before-comma-space}{<dim>}\Default{-.16em}
+   space to be inserted after a footnote mark and before the comma (``footnote
+   \emph{before} comma''), \ie with \key{punct-after}{true}.
  %
- \option{before-punct-space}{<dim>}
- set \emph{all} spaces, \ie also the ones for marks you've added with
- \key{add-punct-marks}.
+ \Option{before-punct-space}{<dim>}\newline
+   set \emph{all} spaces, \ie also the ones for marks you've added with
+   \key{add-punct-marks}.
  %
- \option{before-footnote-space}{<dim>}
- space to be inserted between a word and the following footnote mark. Default =
- \code{.06em}
+ \Option{before-footnote-space}{<dim>}\Default{.06em}
+   space to be inserted between a word and the following footnote mark.
  %
- \option{dont-mess-around}{\default{true}|false}
- sets all mentioned lengths to \code{0pt} and \key{punct-after}{true}. Basically
- this seems as if you hadn't loaded \fnpct except the multiple footnote commands
- and \cmd{innernote} are still available, see sections~\ref{sec:multiple}
- and~\ref{sec:nested}, respectively. Default = \code{false}
+ \Option{dont-mess-around}{\default{true}|false}\Default{false}
+   sets all mentioned lengths to \code{0pt} and \key{punct-after}{true}. Basically
+   this seems as if you hadn't loaded \fnpct except the multiple footnote commands
+   and \cmd{innernote} are still available, see sections~\ref{sec:multiple}
+   and~\ref{sec:nested}, respectively.
  %
- \option{multiple}{\default{true}|false}
- lets \cmd{footnote} be equal to \cmd{multfootnote}. Default = \code{false}
+ \Option{multiple}{\default{true}|false}\Default{false}
+   lets \cmd{footnote} be equal to \cmd{multfootnote}.
  %
- \option{mult-fn-delim}{<delimiter>}
- sets the delimiter for the \cmd{multfootnote} command. Default = \code{;}
+ \Option{mult-fn-delim}{<delimiter>}\Default{;}
+   sets the delimiter for the \cmd{multfootnote} command.
  %
- \option{mult-fn-sep}{<separator>}
- sets the separator between multiple footnote marks. Default = \code{,}
+ \Option{mult-fn-sep}{<separator>}\Default{,}
+   sets the separator between multiple footnote marks.
  %
- \option{normal-marks}{\default{true}|false}
- sets the footnote marks in the foot not as superscripts but as normal font. If
- you're not using a \paket[koma-script]{KOMA-Script} class this option will load
- the package \paket*{scrextend}. See section~\ref{sec:normal} for more information.
- \emph{This option can only be set in the preamble}. Default = \code{false}
+ \Option{normal-marks}{\default{true}|false}\Default{false}
+   sets the footnote marks in the foot not as superscripts but as normal font. If
+   you're not using a \paket[koma-script]{KOMA-Script} class this option will load
+   the package \paket*{scrextend}. See section~\ref{sec:normal} for more information.
+   \emph{This option can only be set in the preamble}.
 \end{beschreibung}
 
 So if you want to extend the punctuation switching and kerning to other punctuation
@@ -510,10 +522,12 @@ And now the same with switched order:
 In case the automatic kerning doesn't work for whatever reason the spaces are
 available as user commands as well:
 \begin{beschreibung}
- \befehl{kfp} insert the \key{after-dot-space} or (if \key{punct-after}{true})
- the \key{before-dot-space}.
- \befehl{kfc} insert the \key{after-comma-space} or (if \key{punct-after}{true})
- the \key{before-comma-space}.
+ \Befehl{kfp}\newline
+   insert the \key{after-dot-space} or (if \key{punct-after}{true}) the
+   \key{before-dot-space}.
+ \Befehl{kfc}\newline
+   insert the \key{after-comma-space} or (if \key{punct-after}{true}) the
+   \key{before-comma-space}.
 \end{beschreibung}
 
 Some of the options are explained in a bit more detail in the next sections.
@@ -524,9 +538,9 @@ Some of the options are explained in a bit more detail in the next sections.
 Since multiple footnotes have to be treated differently\footnote{see these footnotes;%
 for an example}, \fnpct provides an extra command for that:
 \begin{beschreibung}
- \Befehl{multfootnote}*{<list>;<of>;<footnotes>}\code{<tpunct>} \cnpkgdocarrow\
- different footnotes are separated with a semicolon. The \code{*} turns the
- footnote/punctuation switching temporarily off.
+ \Befehl{multfootnote}*{<list>;<of>;<footnotes>}\code{<tpunct>}\newline
+   different footnotes are separated with a semicolon. The \code{*} turns the
+   footnote/punctuation switching temporarily off.
 \end{beschreibung}
 \begin{beispiel}
  \begin{minipage}{.4\linewidth}
@@ -598,10 +612,10 @@ But there are ways around. Maybe try enclosing it in braces:
 There also are options which lets you choose the (input) delimiter and the (output)
 separator:
 \begin{beschreibung}
- \option{mult-fn-delim}{<delimiter>} choose delimiter for the \cmd{multfootnote}.
- Default = \code{;}
- \option{mult-fn-sep}{<separator>} choose the separator that is put between footnote
- marks. Default = \code{,}
+ \Option{mult-fn-delim}{<delimiter>}\Default{;}
+   choose delimiter for the \cmd{multfootnote}.
+ \Option{mult-fn-sep}{<separator>}\Default{,}
+   choose the separator that is put between footnote marks.
 \end{beschreibung}
 \begin{beispiel}
  \setfnpct{mult-fn-delim=//,mult-fn-sep=;}
@@ -626,8 +640,9 @@ separator:
 \subsection{Automagic}\secidx[automagic]{multiple footnotes}
 If you want you can turn all footnotes into \cmd{multfootnote}s.
 \begin{beschreibung}
- \option{multiple}{\default{true}|false} let \cmd{footnote} behave like \cmd{multfootnote}.
- \emph{This option can only be set in the preamble}. Default = \code{false}
+ \Option{multiple}{\default{true}|false}\Default{false}
+   let \cmd{footnote} behave like \cmd{multfootnote}. \emph{This option can only
+   be set in the preamble}.
 \end{beschreibung}
 \begin{beispiel}
  % in preamble: \setfnpct{multiple}
@@ -648,7 +663,8 @@ though. The command below can be used inside \cmd{footnote} and \cmd{multfootnot
 but not inside another \cmd{innernote}. \cmd{innernote} really is a ``inner
 footnote'', it doesn't work with endnotes, for example.
 \begin{beschreibung}
- \Befehl{innernote}*[<mark>]{<text>}\code{<tpunct>} \cnpkgdocarrow\ a nested footnote.
+ \Befehl{innernote}*[<mark>]{<text>}\code{<tpunct>}\newline
+   a nested footnote.
 \end{beschreibung}
 The inner node uses a \cmd{footnotemark} internally and the mark will be set with
 the definition it has at begin document.
@@ -674,9 +690,9 @@ The output of the following code can be seen in figure~\ref{fig:nested:a}.
 \end{beispiel}
 
 \begin{figure}[h]
- \begin{captionbeside}{\cmd{innernote} example (a)}
-  \fbox{\includegraphics{nested_ex_a.pdf}} 
- \end{captionbeside}
+ \centering
+ \fbox{\includegraphics{nested_ex_a.pdf}} 
+ \caption{\cmd{innernote} example (a)}
  \label{fig:nested:a}
 \end{figure}
 
@@ -704,9 +720,9 @@ the output of this code:
 \end{beispiel}
 
 \begin{figure}[h]
- \begin{captionbeside}{\cmd{innernote} example (b)}
-  \fbox{\includegraphics{nested_ex_b.pdf}} 
- \end{captionbeside}
+ \centering
+ \fbox{\includegraphics{nested_ex_b.pdf}} 
+ \caption{\cmd{innernote} example (b)}
  \label{fig:nested:b}
 \end{figure}
 
@@ -714,9 +730,10 @@ the output of this code:
 \cmd{innernote} as a replacement for \cmd{footnote} and call this command
 later:
 \begin{beschreibung}
- \befehl{writeinnernotes} writes all \cmd{footnotetext}s to the inner footnotes
- when invoked. This is usually done automatically by the \cmd{footnote} command
- but there are possible needs for it.
+ \Befehl{writeinnernotes}\newline
+   writes all \cmd{footnotetext}s to the inner footnotes when invoked. This is
+   usually done automatically by the \cmd{footnote} command but there are
+   possible needs for it.
 \end{beschreibung}
 See figure~\ref{fig:nested:c} for the output of the following code:
 \begin{beispiel}[code only]
@@ -741,9 +758,9 @@ See figure~\ref{fig:nested:c} for the output of the following code:
 \end{document}
 \end{beispiel}
 \begin{figure}[h]
- \begin{captionbeside}{\cmd{innernote} example (c)}
-  \fbox{\includegraphics{nested_ex_c.pdf}} 
- \end{captionbeside}
+ \centering
+ \fbox{\includegraphics{nested_ex_c.pdf}} 
+ \caption{\cmd{innernote} example (c)}
  \label{fig:nested:c}
 \end{figure}
 \secidx*{nested footnotes}
@@ -776,20 +793,20 @@ and bricks\footnote{probably fired clay bricks}.
 \end{beispiel}
 
 \begin{figure}[h]
- \begin{captionbeside}{Demonstration of the \key{normal-marks} option.}
-  \fbox{\includegraphics{normal_ex.pdf}}
- \end{captionbeside}
+ \centering
+ \fbox{\includegraphics{normal_ex.pdf}}
+ \caption{Demonstration of the \key{normal-marks} option.}
  \label{fig:normal}
 \end{figure}
 
 The three indent values used by \fnpct can be changed with the following options:
 \begin{beschreibung}
- \option{normal-mark-width}{<dim>} The width of the box within which the marks are
- set. Default = \code{1em}
- \option{normal-indent}{<dim>} The indent of each footnote line \emph{except} the
- first. Default = \code{1.5em}
- \option{normal-par-indent}{<dim>} Additional indent of a new paragraph inside the
- footnote text. Default = \code{1em}
+ \Option{normal-mark-width}{<dim>}\Default{1em}
+   The width of the box within which the marks are set.
+ \Option{normal-indent}{<dim>}\Default{1.5em}
+   The indent of each footnote line \emph{except} the first.
+ \Option{normal-par-indent}{<dim>}\Default{1em}
+   Additional indent of a new paragraph inside the footnote text.
 \end{beschreibung}
 \secidx*{normal notes}
 
@@ -856,9 +873,9 @@ lumber according to some sources} and bricks%
 \end{beispiel}
 
 \begin{figure}[h]
- \begin{captionbeside}{\paket*{bigfoot} example}
-  \fbox{\includegraphics{bigfoot_ex.pdf}}
- \end{captionbeside}
+ \centering
+ \fbox{\includegraphics{bigfoot_ex.pdf}}
+ \caption{\paket*{bigfoot} example}
  \label{fig:bigfoot}
 \end{figure}
 
@@ -894,6 +911,17 @@ Everything else stays the same:
   
   \theendnotes
  \end{minipage}
+\end{beispiel}
+
+\subsection{enotez}\secidx[enotez]{other packages}
+The \paket{enotez}~\cite{enotez} package povides the command \cmd{endnote}
+which can be used to output all notes at the end of a chapter, say.
+
+If the package is loaded the command is adapted\footnote*{see section~\ref{sec:adapt}
+on manual adaption}:
+\begin{beispiel}[code only]
+ % `fnpct' does this for you:
+ \AdaptNote\endnote\multendnote
 \end{beispiel}
 
 \subsection{fixfoot}\secidx[fixfoot]{other packages}
@@ -938,9 +966,9 @@ bricks}.
 \end{beispiel}
 
 \begin{figure}[h]
- \begin{captionbeside}{\paket*{fixfoot} example}
-  \fbox{\includegraphics{fixfoot_ex.pdf}}
- \end{captionbeside}
+ \centering
+ \fbox{\includegraphics{fixfoot_ex.pdf}}
+ \caption{\paket*{fixfoot} example}
  \label{fig:fixfoot}
 \end{figure}
 
@@ -1099,13 +1127,13 @@ text in a sidenote.;A second sidenote.}.
 \end{beispiel}
 
 \begin{figure}[h]
- \begin{captionbeside}{Adapt {tufte-latex}.}
-  \fbox{\includegraphics[trim=2.5cm 24.5cm 2cm 1cm,scale=.65]{tufte_ex.pdf}}
- \end{captionbeside}
+ \centering
+ \fbox{\includegraphics[trim=2.5cm 24.5cm 2cm 1cm,scale=.65]{tufte_ex.pdf}}
+ \caption{Adapt {tufte-latex}.}
  \label{fig:tufte}
 \end{figure}
 
-\subsection{Adapting \code{\textbackslash\textcolor{code}{footcite}} and siblings}
+\subsection{Adapting \cmd*{footcite} and siblings}
 \secidx[biblatex]{adapting notes}\label{ssec:adapt:footcite}
 If you're willing to sacrifice \cmd{footcite}'s \code{*} argument (which it has
 in some styles) you can adapt the commands provided by \paket{biblatex} as well:
