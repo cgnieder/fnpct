@@ -31,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2013/02/28}
-  {0.2j}
+  {2013/04/07}
+  {0.2k}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -379,16 +379,21 @@
           {
             \tl_use:N \l_fnpct_current_punct_mark_tl
             \fnpct_no_break:
-            \prop_get:NVNT \l_fnpct_punctuation_marks_after_prop
-              \l_fnpct_current_punct_mark_tl \l_fnpct_tmpa_dim
+            \prop_get:NVNT
+              \l_fnpct_punctuation_marks_after_prop
+              \l_fnpct_current_punct_mark_tl
+              \l_fnpct_tmpa_dim
               { \skip_horizontal:N \l_fnpct_tmpa_dim }
           }
         \fnpct_write_note:Nnnn #1 { #2 } { #3 } { #4 }
         \fnpct_write_inner:N #1
         \fnpct_punct_if_after:T
           {
-            \prop_get:NVNT \l_fnpct_punctuation_marks_before_prop
-              \l_fnpct_current_punct_mark_tl \l_fnpct_tmpa_dim
+            \fnpct_no_break:
+            \prop_get:NVNT
+              \l_fnpct_punctuation_marks_before_prop
+              \l_fnpct_current_punct_mark_tl
+              \l_fnpct_tmpa_dim
               { \skip_horizontal:N \l_fnpct_tmpa_dim }
             \fnpct_no_break:
             \tl_use:N \l_fnpct_current_punct_mark_tl
@@ -824,6 +829,12 @@
         %% the `enotez' package:
         \fnpct_treatment:nn { enotez }
           { \AdaptNote \endnote \multendnote }
+        %% the `snotez' package:
+        \fnpct_treatment:nn { snotez }
+          {
+            \AdaptNoteOpt \sidenote \multsidenote
+            \AdaptNoteMark \sidenotemark
+          }
         %% the `sidenotes' package:
         \fnpct_treatment:nn { sidenotes }
           {
@@ -1019,6 +1030,9 @@
 2013/01/21 v0.2i      - adapted to changes of sepfootnotes, bug fix in reading
                         of multiple notes
 2013/02/22 v0.2j      - adaption of `enotez' \endnote command
+2013/04/07 v0.2k      - bug fix: suppress possible break point between footnote
+                        mark and punctuation mark if `punct-after=true' has
+                        been set
 
 % --------------------------------------------------------------------------
 % NOTES:

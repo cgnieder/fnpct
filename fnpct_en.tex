@@ -230,17 +230,21 @@
 
 \AdaptNoteOpt\footcite\multfootcite
 
-\begin{filecontents}{\jobname.ist}
+\usepackage{imakeidx}
+\begin{filecontents*}{\jobname.ist}
  heading_prefix "{\\bfseries "
  heading_suffix "\\hfil}\\nopagebreak\n"
  headings_flag  1
- delim_0 "\\dotfill "
- delim_1 "\\dotfill "
- delim_2 "\\dotfill "
- delim_r "\\textendash"
+ delim_0 "\\dotfill\\hyperpage{"
+ delim_1 "\\dotfill\\hyperpage{"
+ delim_2 "\\dotfill\\hyperpage{"
+ delim_r "}\\textendash\\hyperpage{"
+ delim_t "}"
  suffix_2p "\\nohyperpage{\\,f.}"
  suffix_3p "\\nohyperpage{\\,ff.}"
-\end{filecontents}
+\end{filecontents*}
+\indexsetup{othercode=\footnotesize}
+\makeindex[options={-s \jobname.ist},intoc,columns=3]
 
 \newcommand\setapart[1]{%
   \begin{quote}
@@ -264,7 +268,6 @@ provided.}}
   \newline
 }
 
-\makeindex
 \begin{document}
 
 \section{License and Requirements}
@@ -1170,7 +1173,7 @@ Remember that the optional arguments then are inside the braces!
 \secidx*{adapting notes}
 
 \appendix
-{\EmbracOff\printbibliography}
+\printbibliography
 
 \setindexpreamble{Section titles are indicated \textbf{bold}, packages
 \textsf{sans serif}, commands \code{\textbackslash\textcolor{code}{brown}}
