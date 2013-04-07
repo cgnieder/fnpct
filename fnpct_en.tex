@@ -1,5 +1,4 @@
 % arara: pdflatex
-% arara: makeindex: { sort: true, style: fnpct_en.ist }
 % arara: biber
 % arara: pdflatex
 % arara: pdflatex
@@ -134,97 +133,104 @@
   isbn      = {978-0-88179-205-5},
   publisher = {Hartley \&\ Marks, Canada}
 }
-@software{bigfoot,
+@package{bigfoot,
   title   = {bigfoot},
   author  = {David Kastrup},
   date    = {2006-07-15},
   version = {1.25},
-  url     = {http://www.ctan.org/pkg/bigfoot}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/bigfoot}
 }
-@software{endnotes,
+@package{endnotes,
   title   = {endnotes},
   author  = {Robin Fairbairns},
   authortype = {current maintainer},
   date    = {2012-01-15},
-  url     = {http://www.ctan.org/pkg/endnotes}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/endnotes}
 }
-@software{enotez,
+@package{enotez,
   title   = {enotez},
   author  = {Clemens Niederberger},
   version = {0.4},
   date    = {2012-12-30},
-  url     = {http://www.ctan.org/pkg/enotez}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/enotez}
 }
-@software{fixfoot,
+@package{fixfoot,
   title   = {fixfoot},
   author  = {Robin Fairbairns},
   date    = {2007-12-12},
   version = {0.3a} ,
-  url     = {http://www.ctan.org/pkg/fixfoot}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/fixfoot}
 }
-@software{footmisc,
+@package{footmisc,
   title   = {footmisc},
   author  = {Robin Fairbairns},
   date    = {2011-06-06},
   version = {5.5b},
-  url     = {http://www.ctan.org/pkg/footmisc}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/footmisc}
 }
-@software{footnote,
+@package{footnote,
   title   = {footnote},
   author  = {Mark Wooding},
   date    = {1997-01-28},
   version = {1.13},
-  url     = {http://www.ctan.org/pkg/footnote}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/footnote}
 }
-@software{manyfoot,
+@package{manyfoot,
   title   = {manyfoot},
   author  = {Alexander I. Rozhenko},
   date    = {2005-09-11},
   version = {1.10},
-  url     = {http://www.ctan.org/pkg/manyfoot}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/manyfoot}
 }
-@software{parnotes,
+@package{parnotes,
   title   = {parnotes},
   author  = {Micheal Hughes},
   date    = {2012-03-01},
   version = {1},
-  url     = {http://www.ctan.org/pkg/parnotes}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/parnotes}
 }
-@software{pagenote,
+@package{pagenote,
   title   = {pagenote},
   author  = {Will Robertson},
   authortype = {current maintainer},
   date    = {2009-09-03},
   version = {1.1a},
-  url     = {http://www.ctan.org/pkg/pagenote}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/pagenote}
 }
-@software{sepfootnotes,
+@package{sepfootnotes,
   title   = {sepfootnotes},
   author  = {Eduardo C. Louren\c{c}o de Lima},
   date    = {2013-01-17},
   version = {0.2},
-  url     = {http://www.ctan.org/pkg/sepfootnotes}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/sepfootnotes}
 }
-@software{sidenotes,
+@package{sidenotes,
   title   = {sidenotes},
   author  = {Andy Thomas},
   date    = {2011-11-10},
   version = {0.80},
-  url     = {http://www.ctan.org/pkg/sidenotes}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/sidenotes}
 }
-@software{tablefootnote,
+@package{snotez,
+  title   = {snotez},
+  author  = {Clemens Niederberger},
+  version = {0.2},
+  date    = {2013-04-04},
+  url     = {https://www.bitbucket.org/cgnieder/snotez}
+}
+@package{tablefootnote,
   title   = {tablefootnote},
   author  = {H.-Martin M\"{u}nch},
   date    = {2012-01-14},
   version = {1.0g},
-  url     = {http://www.ctan.org/pkg/tablefootnote}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/tablefootnote}
 }
-@software{yafoot,
+@package{yafoot,
   title   = {yafoot},
   author  = {Hiroshi Nakashima},
   date    = {1999-07-14},
   version = {1.0},
-  url     = {http://www.ctan.org/pkg/yafoot}
+  url     = {http://mirror.ctan.org/macros/latex/contrib/yafoot}
 }
 \end{filecontents}
 
@@ -1065,10 +1071,17 @@ loading \fnpct.
 
 \subsection{sidenotes}\secidx[sidenotes]{other packages}
 The package \paket{sidenotes}~\cite{sidenotes} is supported and its commands
-\cmd{sidenote}, \cmd{sidenotemark} and \cmd{sidecite} are treated the same way
-as footnotes: they got an optional \code{*} argument and the additional
-\cmd{multsidenote} and \cmd{multsidecite} are created. The option \key{multiple}
-turns all note commands into their mult-variant.
+\cmd{sidenote} and \cmd{sidenotemark} are treated the same way as footnotes:
+they got an optional \code{*} argument and the additional \cmd{multsidenote}
+is created. The option \key{multiple} turns all note commands into their
+mult-variant.
+
+\subsection{snotez}\secidx[snotez]{other packages}
+The package \paket{snotez}~\cite{snotez} is supported and its commands
+\cmd{sidenote} and \cmd{sidenotemark} are treated the same way as footnotes:
+they got an optional \code{*} argument and the additional \cmd{multsidenote}
+is created. The option \key{multiple} turns all note commands into their
+mult-variant.
 
 \subsection{tablefootnote}\secidx[tablefootnote]{other packages}
 The package \paket{tablefootnote}~\cite{tablefootnote} is supported and its
