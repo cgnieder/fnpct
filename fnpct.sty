@@ -31,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2013/04/07}
-  {0.2k}
+  {2013/04/16}
+  {0.3}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -679,7 +679,7 @@
           }
       }
   }
-\cs_generate_variant:Nn \fnpct_renew_and_mult_no_opt:NNN { ccc }
+\cs_generate_variant:Nn \fnpct_renew_and_mult_no_opt:NNN { Nc, ccc }
 
 % renew but don't create mult-variant:
 \cs_new:Npn \fnpct_renew:NN #1#2
@@ -790,6 +790,20 @@
       { \fnpct_renew_opt:Nc #1 { fnpct_orig_ \cs_to_str:N #1 :w } }
   }
 
+\NewDocumentCommand \AdaptNoteNoOpt { mm }
+  {
+    \cs_if_exist:cTF { fnpct_orig_ \cs_to_str:N #1 :w }
+      { \fnpct_message:nx { already-adapted } { #1 } }
+      { \fnpct_renew_and_mult_no_opt:NcN #1 { fnpct_orig_ \cs_to_str:N #1 :w } #2 }
+  }
+
+\NewDocumentCommand \AdaptNoteNoOptNoMult { m }
+  {
+    \cs_if_exist:cTF { fnpct_orig_ \cs_to_str:N #1:w }
+      { \fnpct_message:nx { already-adapted } { #1 } }
+      { \fnpct_renew_no_opt:Nc #1 { fnpct_orig_ \cs_to_str:N #1:w } }
+  }
+
 \NewDocumentCommand \AdaptNoteMark { m }
   {
     \cs_if_exist:cTF { fnpct_orig_ \cs_to_str:N #1 :w }
@@ -819,6 +833,8 @@
       {
         \AdaptNote \footnote \multfootnote
         \AdaptNoteMark \footnotemark
+        \cs_if_exist:NT \footref
+          { \AdaptNoteNoOptNoMult \footref }
         \fnpct_new:NN \innernote \fnpct_inner_footnote:w
         %% the `endnotes' package:
         \fnpct_treatment:nn { endnotes }
@@ -840,7 +856,6 @@
           {
             \AdaptNoteOpt \sidenote \multsidenote
             \AdaptNoteMark \sidenotemark
-%             \AdaptNoteOpt \sidecite \multsidecite
           }
         %% the `parnotes' package:
         \fnpct_treatment:nn { parnotes }
@@ -1033,6 +1048,8 @@
 2013/04/07 v0.2k      - bug fix: suppress possible break point between footnote
                         mark and punctuation mark if `punct-after=true' has
                         been set
+                      - new: \AdaptNoteNoOpt, \AdaptNoteNoOptNoMult
+2013/04/16 v0.3       - adapt \footref if it exists
 
 % --------------------------------------------------------------------------
 % NOTES:

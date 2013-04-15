@@ -273,6 +273,21 @@ provided.}}
     }%
   \newline
 }
+\makeatletter
+\RequirePackage{marginnote,ragged2e}
+\providecommand*\sinceversion[1]{%
+  \@bsphack
+  \marginnote{%
+    \footnotesize\sffamily\RaggedRight
+    \textcolor{black!75}{Introduced in version~#1}}%
+  \@esphack}
+\providecommand*\changedversion[1]{%
+  \@bsphack
+  \marginnote{%
+    \footnotesize\sffamily\RaggedRight
+    \textcolor{black!75}{Changed in version~#1}}%
+  \@esphack}
+\makeatother
 
 \begin{document}
 
@@ -461,9 +476,9 @@ with the \cmd{setfnpct} command. Most of them are for adjusting the kerning.
  %
  \Option{dont-mess-around}{\default{true}|false}\Default{false}
    sets all mentioned lengths to \code{0pt} and \key{punct-after}{true}. Basically
-   this seems as if you hadn't loaded \fnpct except the multiple footnote commands
-   and \cmd{innernote} are still available, see sections~\ref{sec:multiple}
-   and~\ref{sec:nested}, respectively.
+   this should look like as if you hadn't loaded \fnpct except the multiple
+   footnote commands and \cmd{innernote} are still available, see
+   sections~\ref{sec:multiple} and~\ref{sec:nested}, respectively.
  %
  \Option{multiple}{\default{true}|false}\Default{false}
    lets \cmd{footnote} be equal to \cmd{multfootnote}.
@@ -1103,30 +1118,45 @@ afterwards. This can result in dummy arguments or an overwritten \code{*} argume
 
 \begin{beschreibung}
  % \AdaptNote
- \Befehl{AdaptNote}{\cmd{cs}}\ma{\cmd{multcs}} \cnpkgdocarrow\ this lets \cmd{cs}  adapt to
- the kerning behaviour and adds an optional \code{*}. It also creates a
- corresponding mult-variant. The package option \key{multiple} will now turn
- \cmd{cs} into its mult-variant. Required syntax: \cmd{cs}[<oarg>]{<marg>}
+ \Befehl{AdaptNote}{\cmd{cs}}\ma{\cmd{multcs}}\newline
+   this lets \cmd{cs}  adapt to the kerning behaviour and adds an optional
+   \code{*}. It also creates a corresponding mult-variant. The package option
+   \key{multiple} will now turn \cmd{cs} into its mult-variant. Required syntax:
+   \cmd{cs}[<oarg>]{<marg>}
  % \AdaptNoteNoMult
- \Befehl{AdaptNoteNoMult}{\cmd{cs}} \cnpkgdocarrow\ like \cmd{AdaptNote} but doesn't create a
- mult-variant and thus there is no change in behaviour when the option \key{multiple}
- is used. Required syntax: \cmd{cs}[<oarg>]{<marg>}
+ \Befehl{AdaptNoteNoMult}{\cmd{cs}}\newline
+   like \cmd{AdaptNote} but doesn't create a mult-variant and thus there is no
+   change in behaviour when the option \key{multiple} is used. Required syntax:
+   \cmd{cs}[<oarg>]{<marg>}
  % \AdaptNoteOpt
- \Befehl{AdaptNoteOpt}{\cmd{cs}}\ma{\cmd{multcs}} \cnpkgdocarrow\ this lets \cmd{cs}
- adapt to the kerning behaviour and adds an optional \code{*}. It also creates a
- corresponding mult-variant. The package option \key{multiple} will now turn
- \cmd{cs} into its mult-variant. Required syntax: \cmd{cs}[<oarg>]\oa{<oarg>}\ma{<marg>}
+ \Befehl{AdaptNoteOpt}{\cmd{cs}}\ma{\cmd{multcs}}\newline
+   this lets \cmd{cs} adapt to the kerning behaviour and adds an optional
+   \code{*}. It also creates a corresponding mult-variant. The package option
+   \key{multiple} will now turn \cmd{cs} into its mult-variant. Required syntax:
+   \cmd{cs}[<oarg>]\oa{<oarg>}\ma{<marg>}
  % \AdaptNoteOptNoMult
- \Befehl{AdaptNoteOptNoMult}{\cmd{cs}} \cnpkgdocarrow\ like \cmd{AdaptNoteOpt} but
- doesn't create a mult-variant and thus there is no change in behaviour when the
- option \key{multiple} is used. Required syntax: \cmd{cs}[<oarg>]\oa{<oarg>}\ma{<marg>}
+ \Befehl{AdaptNoteOptNoMult}{\cmd{cs}}\newline
+   like \cmd{AdaptNoteOpt} but doesn't create a mult-variant and thus there is
+   no change in behaviour when the option \key{multiple} is used. Required syntax:
+   \cmd{cs}[<oarg>]\oa{<oarg>}\ma{<marg>}
+ % \AdaptNoteNoOpt
+ \Befehl{AdaptNoteNoOpt}{\cmd{cs}}\ma{\cmd{multcs}}\newline
+   \sinceversion{0.3}like \cmd{AdaptNote} but requires \cmd{cs} not to have an
+   optional argument. If it had one it wouldn't have it any more after the adaption.
+   The package option \key{multiple} will now turn \cmd{cs} into its mult-variant.
+   Required syntax: \cmd{cs}{<marg>}
+ % \AdaptNoteNoOptNoMult
+ \Befehl{AdaptNoteNoOptNoMult}{\cmd{cs}}\newline
+   \sinceversion{0.3}like \cmd{AdaptNoteNoOpt} but doesn't create a mult-variant.
+   Required syntax: \cmd{cs}{<marg>}
  % \AdaptNoteMark
- \Befehl{AdaptNoteMark}{\cmd{cs}} \cnpkgdocarrow\ this lets \cmd{cs} adapt to the
- kerning behaviour and adds an optional \code{*}. Required syntax: \cmd{cs}[<oarg>]
+ \Befehl{AdaptNoteMark}{\cmd{cs}}\newline
+   this lets \cmd{cs} adapt to the kerning behaviour and adds an optional
+   \code{*}. Required syntax: \cmd{cs}[<oarg>]
  % strict
- \option{strict}{\default{true}|false} when \code{true} \cmd{AdaptNote} (and the
- others) will issue errors if the note command in question has already been
- adapted. Default = \code{false}
+ \Option{strict}{\default{true}|false}\Default{false}
+   when \code{true} \cmd{AdaptNote} (and the others) will issue errors if the
+   note command in question has already been adapted.
 \end{beschreibung}
 
 \subsection{tufte-latex's side notes}\secidx[tufte-latex]{adapting notes}
