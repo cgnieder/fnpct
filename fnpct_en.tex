@@ -259,6 +259,11 @@ In case you set \keyis{punct-after}{true} the \sarg\ argument temporarily
   \end{minipage}
 \end{example}
 
+\subsection{Language Specific Settings}
+Package \pkg{babel}'s~\cite{pkg:babel} French settings redefine
+\cs*{@footnotemark}.  \fnpct\ resets this redefinition but sets the
+\option{before-footnote-space} equal to a thin space (\code{.16667em}).
+
 \section{Options}\label{sec:options}
 Most package options are listed below.  They all can be set as a package
 option or with the \cs{setfnpct} command.  Most of them are for adjusting the
@@ -1014,3 +1019,6 @@ the braces!
 \appendix
 
 \end{document}
+
+% TODO: update documentation and explain what happens when babel's french is
+% used
