@@ -2,7 +2,6 @@
 % arara: biber
 % arara: pdflatex
 % arara: pdflatex
-% !arara: remove: { items: [ aux ] }
 % --------------------------------------------------------------------------
 % the FNPCT package
 % 
@@ -193,12 +192,17 @@ the full stop and the comma are moved a bit back.
 \begin{figure}[ht]
   \centering
   \begin{tabular}{>{\setfnpct{dont-mess-around}}ll}
-    without \fnpct &
-    with \fnpct \\
-    \strut\quad text.\footnotemark[1] &
-    \strut\quad text\footnotemark[1]. \\
-    \strut\quad text\footnotemark[1]. &
-    \setfnpct{punct-after}\strut\quad text\footnotemark[1].
+    \toprule
+      without \fnpct &
+      with \fnpct \\
+    \midrule
+      \strut\quad text.\footnotemark[1] &
+      \strut\quad text\footnotemark[1]. \\
+      \strut\quad text\footnotemark[1]. &
+      \setfnpct{punct-after}\strut\quad text\footnotemark[1]. \\
+      \strut\quad text\footnotemark[1] &
+      \strut\quad text\footnotemark[1] \\
+    \bottomrule
   \end{tabular}
   \caption{The effect of \fnpct.}
 \end{figure}
@@ -328,7 +332,7 @@ kerning.
   \keyval{mult-fn-sep}{separator}\Default{,}
     Sets the separator between multiple footnote marks.
   %
-  \keybool{normal-marks}\Default{false}
+  \keybool{normal-marks}\Default{false}\label{opt:normal-marks}
     Sets the footnote marks in the foot not as superscripts but as normal
     font.  If you're not using a \KOMAScript\ class this option will load
     the package \pkg{scrextend}.  See section~\ref{sec:normal} for more
@@ -599,7 +603,7 @@ See figure~\ref{fig:nested:c} for the output of the following code:
 \end{example}
 
 \section{Normal notes}\label{sec:normal}
-The package option \option{normal-marks} (see p.\,\pageref{key:normal-marks})
+The package option \option{normal-marks} (see p.\,\pageref{opt:normal-marks})
 changes the layout of the footnote marks in the foot by using \KOMAScript's
 \cs{deffootnote} command:
 \begin{commands}
