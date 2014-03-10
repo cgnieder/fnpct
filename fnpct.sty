@@ -8,7 +8,7 @@
 % Web:    https://bitbucket.org/cgnieder/fnpct/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
-% Copyright 2012-2013 Clemens Niederberger
+% Copyright 2012-2014 Clemens Niederberger
 % 
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -31,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2013/12/23}
-  {0.4a}
+  {2014/01/10}
+  {0.4b}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -106,6 +106,8 @@
 \dim_set:Nn \l__fnpct_normal_indent_dim     { 1.5em }
 \dim_new:N  \l__fnpct_normal_parindent_dim
 \dim_set:Nn \l__fnpct_normal_parindent_dim  { 1em }
+\dim_new:N  \l__fnpct_french_before_footnote_space_dim
+\dim_set:Nn \l__fnpct_french_before_footnote_space_dim { .16667em }
 
 % multiple footnote input and output variables:
 \tl_new:N \l__fnpct_multiple_footnotes_delimiter_tl
@@ -244,6 +246,8 @@
       \prop_map_inline:Nn \l__fnpct_punctuation_marks_before_prop
         { \fnpct_set_punctuation_dim:nnn { before } { ##1 } { #1 } } ,
     before-footnote-space .dim_set:N  = \l__fnpct_before_footnote_dim ,
+    french-before-footnote-space .dim_set:N =
+      \l__fnpct_french_before_footnote_space_dim ,
     punct-after           .bool_set:N = \l__fnpct_punct_after_bool ,
     punct-after           .default:n  = true ,
     dont-mess-around      .code:n     =
@@ -399,6 +403,7 @@
               \l__fnpct_tmpa_tl
               {
                 \dim_set:Nn \l__fnpct_tmpa_dim { \l__fnpct_tmpa_tl }
+                \fnpct_no_break:
                 \skip_horizontal:N \l__fnpct_tmpa_dim
                 \fnpct_no_break:
                 \skip_horizontal:N \c_zero_skip
@@ -415,6 +420,7 @@
               \l__fnpct_tmpa_tl
               {
                 \dim_set:Nn \l__fnpct_tmpa_dim { \l__fnpct_tmpa_tl }
+                \fnpct_no_break:
                 \skip_horizontal:N \l__fnpct_tmpa_dim
                 \fnpct_no_break:
                 \skip_horizontal:N \c_zero_skip
@@ -887,10 +893,7 @@
           }
         %% the `tablefootnote' package:
         \fnpct_treatment:nn { tablefootnote }
-          {
-            \fnpct_renew_and_mult_no_opt:NNN \tablefootnote
-              \fnpct_orig_tablefootnote:w \multtablefootnote
-          }
+          { \AdaptNote \tablefootnote \multtablefootnote }
         %% the `bigfoot' package:
         \fnpct_treatment:nn { bigfoot }
           {
@@ -1019,17 +1022,18 @@
   }
 
 % --------------------------------------------------------------------------
-\RequirePackage{translations}
+\RequirePackage{translations}[2014/01/10]
 \AtBeginDocument{
-  \tl_set:Nx \l__fnpct_tmpa_tl { \baselanguage{French} }
-  \tl_set:Nx \l__fnpct_tmpb_tl { \baselanguage{\languagename} }
-  \tl_if_eq:NNT \l__fnpct_tmpa_tl \l__fnpct_tmpb_tl
+  \ifcurrentbaselanguage{French}
     {
       \AfterBeginDocument{
         \let\@footnotemark\@footnotemarkORI
-        \setfnpct{ before-footnote-space = .16667em }
+        \setfnpct{
+          before-footnote-space =
+            \l__fnpct_french_before_footnote_space_dim
+        }
       }
-    }
+    }{}
 }
 
 % --------------------------------------------------------------------------
@@ -1096,6 +1100,11 @@
                       - clearer distinction between internal commands and
                         document commands
 2013/12/23 v0.4a      - fix bug introcuded in v0.4 due to a typo
+2014/03/10 v0.4b      - adapt to version 1.2 of package `translations'
+                      - adapt to update to `tablefootnote'
+                      - bug fix: add missing penalty that caused a footnote
+                        marker to be placed on the following line in some
+                        instances
 
 % --------------------------------------------------------------------------
 % NOTES:
@@ -1104,6 +1113,9 @@
 
 % --------------------------------------------------------------------------
 % TODO:
+- localization: should there be different defaults for different languages?
+  And who might provide enough information about conventions in other
+  languages?
 - solve incompatibility with the `footnote' package
 - get this working (??) => http://tex.stackexchange.com/questions/54288/nested-endnotes
 - the `bigfoot' package provides \footnote+ and \footnote- -- let's see if we
