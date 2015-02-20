@@ -8,7 +8,7 @@
 % Web:    https://bitbucket.org/cgnieder/fnpct/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
-% Copyright 2012-2014 Clemens Niederberger
+% Copyright 2012-2015 Clemens Niederberger
 % 
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -31,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2014/01/10}
-  {0.4b}
+  {2015/02/20}
+  {0.4c}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -345,6 +345,7 @@
   {
     \tl_set:Nn \l__fnpct_multiple_true_tl  { #1 }
     \tl_set:Nn \l__fnpct_multiple_false_tl { #2 }
+    \bool_gset_false:N \g__fnpct_after_punctuation_bool
     \peek_after:Nw \__fnpct_check_multiple:
   }
 
@@ -353,8 +354,7 @@
     \prop_map_inline:Nn \g__fnpct_adapted_notes_prop
       {
         \prop_get:NnN \g__fnpct_adapted_notes_prop { ##1 } \l__fnpct_tmpb_tl
-        \exp_after:wN
-        \token_if_eq_meaning:NNTF \l__fnpct_tmpb_tl \l_peek_token
+        \token_if_eq_meaning:VNTF \l__fnpct_tmpb_tl \l_peek_token
           {
             \bool_set_true:N \l__fnpct_multiple_footnotes_bool
             \prop_map_break:
@@ -365,6 +365,8 @@
       { \tl_use:N \l__fnpct_multiple_true_tl }
       { \tl_use:N \l__fnpct_multiple_false_tl }
   }
+
+\cs_generate_variant:Nn \token_if_eq_meaning:NNTF {V}
 
 % check which mode is active:
 \prg_new_conditional:Npnn \fnpct_punct_if_after: { T, TF }
@@ -457,7 +459,7 @@
             #1
             \bool_set_false:N \l__fnpct_reverse_switch_bool
           }
-        \bool_gset_false:N \g__fnpct_after_punctuation_bool
+        % \bool_gset_false:N \g__fnpct_after_punctuation_bool
       }
   }
  
@@ -689,6 +691,7 @@
   }
 \cs_generate_variant:Nn \fnpct_renew_and_mult:NNN { ccc , NcN }
 
+% \footnote{<text>} like:
 \cs_new_protected:Npn \fnpct_renew_and_mult_no_opt:NNN #1#2#3
   {
     \prop_gput:Nxn \g__fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
@@ -707,6 +710,7 @@
 \cs_generate_variant:Nn \fnpct_renew_and_mult_no_opt:NNN { Nc, ccc }
 
 % renew but don't create mult-variant:
+% \footnote[<mark>]{<text>} like:
 \cs_new_protected:Npn \fnpct_renew:NN #1#2
   {
     \prop_gput:Nxn \g__fnpct_adapted_notes_prop { \cs_to_str:N #2 } { #1 }
@@ -924,6 +928,8 @@
               {
                 \fnpct_renew_and_mult_no_opt:ccc { #2note }
                   { fnpct_orig_sep_#2:w } { #2multnote }
+                \fnpct_renew_and_mult_no_opt:ccc { #2quicknote }
+                  { fnpct_orig_sep_#2_quick:w } { #2multquicknote }
                 \fnpct_renew_no_opt:cc { #2notemark } { fnpct_orig_sep_#2_mark:w }
               }
             \prop_map_inline:Nn \l__fnpct_sepfootnote_end_classes_prop
@@ -1105,6 +1111,9 @@
                       - bug fix: add missing penalty that caused a footnote
                         marker to be placed on the following line in some
                         instances
+2015/02/20 v0.4c      - adapt to update to `sepfootnotes' (quicknotes)
+                      - bug fix (looking ahead for known note commands works
+                        again)
 
 % --------------------------------------------------------------------------
 % NOTES:
