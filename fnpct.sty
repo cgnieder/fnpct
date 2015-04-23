@@ -31,23 +31,9 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2015/02/20}
-  {0.4c}
+  {2015/04/23}
+  {0.4d}
   {footnote kerning}
-
-% --------------------------------------------------------------------------
-% check expl3 version:
-\@ifpackagelater { expl3 } { 2012/11/21 }
-  { }
-  {
-    \PackageError { fnpct } { Support~package~expl3~too~old }
-      {
-        You~need~to~update~your~installation~of~the~bundles~'l3kernel'~and~
-        'l3packages'.\MessageBreak
-        Loading~fnpct~will~abort!
-      }
-    \tex_endinput:D
-  }
 
 % --------------------------------------------------------------------------
 % SETTING THINGS UP:
@@ -1033,11 +1019,14 @@
   \ifcurrentbaselanguage{French}
     {
       \AfterBeginDocument{
-        \let\@footnotemark\@footnotemarkORI
-        \setfnpct{
-          before-footnote-space =
-            \l__fnpct_french_before_footnote_space_dim
-        }
+        \cs_if_exist:NT \@footnotemarkORI
+          {
+            \let\@footnotemark\@footnotemarkORI
+            \setfnpct{
+              before-footnote-space =
+                \l__fnpct_french_before_footnote_space_dim
+            }
+          }
       }
     }{}
 }
@@ -1114,6 +1103,7 @@
 2015/02/20 v0.4c      - adapt to update to `sepfootnotes' (quicknotes)
                       - bug fix (looking ahead for known note commands works
                         again)
+2015/04/23 v0.4d      - fix for issue #7: polyglossia and french
 
 % --------------------------------------------------------------------------
 % NOTES:
