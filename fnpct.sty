@@ -31,8 +31,8 @@
 \RequirePackage { xparse , l3keys2e , scrlfile }
 \ProvidesExplPackage
   {fnpct}
-  {2019/02/17}
-  {0.4f}
+  {2019/09/30}
+  {0.4g}
   {footnote kerning}
 
 % --------------------------------------------------------------------------
@@ -874,11 +874,11 @@
             \AdaptNoteMark \sidenotemark
           }
         %% the `sidenotes' package:
-        \fnpct_treatment:nn { sidenotes }
-          {
-            \AdaptNoteOpt \sidenote \multsidenote
-            \AdaptNoteMark \sidenotemark
-          }
+        % \fnpct_treatment:nn { sidenotes }
+        %   {
+        %     \AdaptNoteOpt \sidenote \multsidenote
+        %     \AdaptNoteMark \sidenotemark
+        %   }
         %% the `parnotes' package:
         \fnpct_treatment:nn { parnotes }
           { \AdaptNote \parnote \multparnote }
@@ -1043,7 +1043,7 @@
 \NewDocumentCommand \setfnpct { m }
   { \keys_set:nn { fnpct } { #1 } }
 
-\tex_endinput:D
+\file_input_stop:
 
 % --------------------------------------------------------------------------
 % HISTORY:
@@ -1113,18 +1113,10 @@
 2015/04/23 v0.4d      - fix for issue #7: polyglossia and french
 2016/03/25 v0.4e      - fix for issue #9
 2019/02/17 v0.4f      - fix for issues #13 and #19
+2019/09/30 v0.4g      - update for expl3 deprecations
 
 % --------------------------------------------------------------------------
 % NOTES:
-- `footnote' package => not compatible => see todo
+- `footnote' package => not compatible
 - `ednotes' package  => not tested; who knows?
-
-% --------------------------------------------------------------------------
-% TODO:
-- localization: should there be different defaults for different languages?
-  And who might provide enough information about conventions in other
-  languages?
-- solve incompatibility with the `footnote' package
-- get this working (??) => http://tex.stackexchange.com/questions/54288/nested-endnotes
-- the `bigfoot' package provides \footnote+ and \footnote- -- let's see if we
-  can add those functionalities again
+- `sidenotes' package => mot easily patchable, see pull request #1
