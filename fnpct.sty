@@ -38,7 +38,7 @@
 % --------------------------------------------------------------------------
 % SETTING THINGS UP:
 % this is plain's \nobreak:
-\cs_new:Npn \fnpct_no_break: { \tex_penalty:D \c_ten_thousand }
+\cs_new:Npn \fnpct_no_break: { \tex_penalty:D 10000 \scan_stop: }
 
 % messages:
 \cs_new_protected:Npn \fnpct_dont_mess_around:
