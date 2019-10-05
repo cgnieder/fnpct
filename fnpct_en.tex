@@ -12,7 +12,7 @@
 % Web:    https://bitbucket.org/cgnieder/fnpct/
 % E-Mail: contact@mychemistry.eu
 % --------------------------------------------------------------------------
-% Copyright 2012-2019 Clemens Niederberger
+% Copyright 2012--2019 Clemens Niederberger
 % 
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -265,6 +265,13 @@ In case you set \keyis{punct-after}{true} the \sarg\ argument temporarily
 Package \pkg{babel}'s~\cite{pkg:babel} French settings redefine
 \cs*{@footnotemark}.  \fnpct\ resets this redefinition but sets the
 \option{before-footnote-space} equal to a thin space (\code{.16667em}).
+
+\subsection{Changes in v0.5}\label{ssec:news}
+
+\begin{itemize}
+  \item the option \option{bigfoot-default-top} has been removed
+  \item the \pkg{manyfoot} package is now supported
+\end{itemize}
 
 \section{Options}\label{sec:options}
 Most package options are listed below.  They all can be set as a package
@@ -650,34 +657,25 @@ packages\footnote{If you find some package missing please let me know.}.  Each
 of the following subsections is dedicated to one of these packages and if and
 how they work together with \fnpct.  Fortunately most of them do quite well.
 
-\subsection{bigfoot}\label{ssec:bigfoot}
+\subsection{bigfoot and manyfoot}\label{ssec:bigfoot}
 The \pkg{bigfoot}~\cite{pkg:bigfoot} package extends the possibilities of the
 \pkg{manyfoot} package~\cite{pkg:manyfoot} (see section~\ref{ssec:manyfoot}).
 The main visible feature is to use different classes of footnotes which are
 typeset in different apparatus on the bottom of the page.
 
-\fnpct\ is compatible with \pkg{bigfoot}. You need to be a bit cautious,
-though.  You need to \emph{declare footnotes with \cs*{DeclareNewFootnote}
-  \emph{after} loading \fnpct\ but in the document \emph{preamble}.}
+\fnpct\ is compatible with \pkg{bigfoot}.
 
-\emph{Also verbatim material won't work inside footnotes anymore}.  But you
-can of course use \lefloch's \pkg{cprotect}~\cite{pkg:cprotect} if you really
-need verbatim material in footnotes \emph{and} want to use \fnpct.  Since
-\fnpct\ does not redefine any \cs{footnotetext} like command it will still
-work inside one of them.
+You need to be a bit cautious, though: \emph{verbatim material won't work
+  inside footnotes anymore}.  You can of course use \lefloch's
+\pkg{cprotect}~\cite{pkg:cprotect} if you really need verbatim material in
+footnotes \emph{and} want to use \fnpct.  Since \fnpct\ does not redefine any
+\cs{footnotetext} like command it will still work inside one of them.
 
 For every footnote class defined with \cs*{DeclareNewFootnote} the commands
 \cs*{footnote\meta{class}} and \cs*{footnotemark\meta{class}} are redefined
 with the starred variant and a \cs*{multfootnote\meta{class}} is defined. The
 \option{multiple} option will turn all \cs*{footnote\meta{class}} commands
 into the corresponding \cs*{multfootnote\meta{class}}.
-
-\fnpct\ has an additional package option which \emph{cannot} be set with
-\cs{setfnpct} and only has any effects if \pkg{bigfoot} has been loaded:
-\begin{options}
-  \keybool{bigfoot-default-top}\Default{false}
-    Sets the \code{default} footnote class as top layer.
-\end{options}
 
 Since this document cannot easily combine \emph{every} footnote package at the
 same time for demonstration purposes the following code is shown in
@@ -691,8 +689,9 @@ figure~\ref{fig:bigfoot}:
     bottom=1.5cm]{geometry}
   
   \usepackage{bigfoot}
-  \usepackage[bigfoot-default-top]{fnpct}
+  \usepackage{fnpct}
   \setfnpct{multiple}
+  \DeclareNewFootnote{default}
   \DeclareNewFootnote[para]{B}[alph]
   
   \begin{document}
@@ -795,7 +794,7 @@ figure~\ref{fig:fixfoot}:
   \end{document}
 \end{example}
 
-\subsection{footmisc}\label{ssec:manyfoot}
+\subsection{footmisc}\label{ssec:footmisc}
 The \pkg{footmisc} package~\cite{pkg:footmisc} provides a range of options to
 customize footnotes, for example output them as margin notes or count
 footnotes per page.
@@ -803,34 +802,24 @@ footnotes per page.
 Testing showed no incompatibilities with \pkg{footmisc}.  The only thing is
 that you won't have to (and shouldn't) use its \option{multiple} option.
 
-\subsection{footnote}
+\subsection{footnote}\label{ssec:footnote}
 Unfortunately \fnpct\ is not compatible with the \pkg{footnote}
 package~\cite{pkg:footnote}.  Or more precisely it is not compatible if the
 command pair \cs*{savenotes}/\cs*{spewnotes} is invoked.  This disables
 \pkg{footnote}'s environments as well as its environment escaping mechanism
 through \cs{makesavenoteenv}.
 
-\subsection{manyfoot}
-The \pkg{manyfoot} package~\cite{pkg:manyfoot} is not and will not directly be
-supported.  It is loaded by \pkg{bigfoot} (see section~\ref{ssec:bigfoot}), anyway.
-And since the latter states in its documentation
-\begin{cnltxquote}[David Kastrup~\textup{\cite{pkg:bigfoot}}]
-  Purpose of this package is to provide a one-stop solution to almost all
-  problems related to footnotes. You can use it as a drop-in replacement of
-  the `\pkg{manyfoot}' package, but without many of its shortcomings, and
-  quite a few features of its own.
-\end{cnltxquote}
-you should probably prefer it anyway.
+\subsection{manyfoot}\label{ssec:manyfoot}
+The package \pkg{manyfoot}~\cite{pkg:manyfoot} is supported.  See
+section~\ref{ssec:bigfoot} for more details.
 
-If it is \emph{really} wanted by users I might change my opinion, though \ldots
-
-\subsection{pagenote}
+\subsection{pagenote}\label{ssec:pagenote}
 The package \pkg{pagenote}~\cite{pkg:pagenote} is supported and its
 \cs*{pagenote} command is treated the same way as all other note commands: it
 got an optional \sarg\ argument and an additional \cs*{multpagenote} is
 defined.
 
-\subsection{parnotes}
+\subsection{parnotes}\label{ssec:parnotes}
 The function of the package \pkg{parnotes}~\cite{pkg:parnotes} is similar to the
 \pkg{endnotes} package.  basically it allows to output the footnote text after
 a paragraph, either by using a special environment or by invoking
@@ -861,7 +850,7 @@ Again the \option{multiple} option turns all \cs*{parnote}s into
   \end{minipage}
 \end{example}
 
-\subsection{sepfootnotes}
+\subsection{sepfootnotes}\label{ssec:sepfootnotes}
 \fnpct\ supports the \pkg{sepfootnotes} package~\cite{pkg:sepfootnotes}.  Each
 note type you have created with with one of the commands
 \begin{description}
@@ -896,21 +885,21 @@ loading \fnpct.
 % created.  The option \option{multiple} turns all note commands into their
 % mult-variant.
 
-\subsection{snotez}
+\subsection{snotez}\label{ssec:snotez}
 The package \pkg{snotez}~\cite{pkg:snotez} is supported and its commands
 \cs*{sidenote} and \cs*{sidenotemark} are treated the same way as footnotes:
 they got an optional \sarg\ argument and the additional \cs*{multsidenote} is
 created.  The option \option{multiple} turns all note commands into their
 mult-variant.
 
-\subsection{tablefootnote}
+\subsection{tablefootnote}\label{ssec:tablefootnote}
 The package \pkg{tablefootnote}~\cite{pkg:tablefootnote} is supported and its
 \cs*{tablefootnote} command is treated the same way as all other note
 commands: it got an optional \sarg\ argument and an additional
 \cs*{multtablefootnote} is defined.  The option \option{multiple} turns all
 note commands into their mult-variant.
 
-\subsection{yafoot}
+\subsection{yafoot}\label{ssec:yafoot}
 Currently no issues are known when using \fnpct\ with one or all of the
 packages of the \bnd{yafoot}~\cite{bnd:yafoot} bundle.  Just for reference:
 these packages are \pkg*{pfnote}, \pkg*{fnpos} and \pkg*{dblfnote}.
