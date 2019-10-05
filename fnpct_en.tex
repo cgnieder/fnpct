@@ -878,12 +878,41 @@ loading \fnpct.
   \end{minipage}
 \end{example}
 
-% \subsection{sidenotes}
-% The package \pkg{sidenotes}~\cite{pkg:sidenotes} is supported and its commands
-% \cs*{sidenote} and \cs*{sidenotemark} are treated the same way as footnotes:
-% they got an optional \sarg\ argument and the additional \cs*{multsidenote} is
-% created.  The option \option{multiple} turns all note commands into their
-% mult-variant.
+\subsection{sidenotes}\label{ssec:sidenotes}
+The package \pkg{sidenotes}~\cite{pkg:sidenotes} is \emph{not} supported.
+For the time being users can use the following code\footnote{Since the code
+  depends on the implementation of \pkg{sidenotes} this may break with each
+  update of \pkg{sidenotes}.;Thanks to Marijn van Vliet for
+  providing it!}:
+\begin{sourcecode}
+  \ExplSyntaxOn
+  \makeatletter
+  \NewDocumentCommand \origsidenotemark {o}
+    {
+      \@sidenotes@multichecker
+      \IfNoValueOrEmptyTF {#1}
+        { \@sidenotes@thesidenotemark { \thesidenote } }
+        { \@sidenotes@thesidenotemark {#1} }
+      \@sidenotes@multimarker
+    }
+
+  \NewDocumentCommand \origsidenote {oo+m}
+    {
+      \origsidenotemark [#1]
+      \sidenotetext [#1] [#2] {#3}
+      \@sidenotes@multimarker
+    }
+
+  \fnpct_create_mult_variant:NN \multsidenote \origsidenote
+
+  \RenewDocumentCommand \sidenote {soo+m}
+    { \fnpct_handle_note:Nnnnn \origsidenote {#2} {#3} {#4} {#1} }
+
+  \RenewDocumentCommand \sidenotemark {so}
+    { \fnpct_handle_note:Nnnnn \origsidenotemark {#2} { \q_no_value } { } {#1} }
+  \makeatother
+  \ExplSyntaxOff
+\end{sourcecode}
 
 \subsection{snotez}\label{ssec:snotez}
 The package \pkg{snotez}~\cite{pkg:snotez} is supported and its commands
