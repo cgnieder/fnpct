@@ -86,8 +86,8 @@
 \bool_new:N \l__fnpct_starred_bool
 \bool_new:N \l__fnpct_end_collection_bool
 \bool_new:N \l__fnpct_automatic_adaption_bool
+\bool_new:N \l__fnpct_punctuation_after_bool
 
-\tl_new:N \l_fnpct_note_text_tl
 \tl_new:N \l_fnpct_action_tl
 \tl_new:N \l_fnpct_last_action_tl
 \tl_new:N \l_fnpct_trailing_token_tl
@@ -111,28 +111,6 @@
 \int_new:N \l__fnpct_collection_int
 
 \dim_new:N \l__fnpct_before_footnote_dim
-
-% --------------------------------------------------------------------------
-% options
-\keys_define:nn {fnpct}
-  {
-    activate-trailing-tokens   .code:n =
-      \tl_map_inline:nn {#1} { \fnpct_activate_trailing_token:n {##1} } ,
-    deactivate-trailing-tokens .code:n =
-    \tl_map_inline:nn {#1} { \fnpct_deactivate_trailing_token:n {##1} } ,
-    before-footnote-space      .dim_set:N = \l__fnpct_before_footnote_dim ,
-    before-footnote-space      .initial:n =  .06em ,
-    ranges                     .bool_set:N = \l__fnpct_ranges_bool ,
-    ranges                     .initial:n  = false ,
-    dont-mess-around           .choice: ,
-    dont-mess-around / true    .code:n =
-      \bool_set_true:N \l__fnpct_dont_mess_around_bool
-      \msg_info:nn {fnpct} {dont-mess-around} ,
-    dont-mess-around / false   .code:n =
-      \bool_set_false:N \l__fnpct_dont_mess_around_bool ,
-    dont-mess-around           .default:n = true ,
-    dont-mess-around           .initial:n = false
-  }
 
 % --------------------------------------------------------------------------
 \msg_new:nnn {fnpct} {dont-mess-around}
@@ -438,14 +416,28 @@
   {
     \fnpct_if_collection:TF
       {
-        \bool_set_false:N \l__fnpct_starred_bool
-        #2 % the punctuation in a collection
-        \fnpct_before:
-        \fnpct_print_collection:
-        \fnpct_print_note:w #1
-        \fnpct_after:
+        \__fnpct_swap:nn
+          {
+            \fnpct_before:
+            \fnpct_print_collection:
+            \fnpct_print_note:w #1
+            \fnpct_after:
+          }
+          {#2}
       }
-      { \use_ii_i:nn {#1} {#2} }
+      { \__fnpct_swap:nn {#1} {#2} }
+  }
+
+\cs_new_protected:Npn \__fnpct_swap:nn #1#2
+  {
+    \fnpct_if_starred:TF
+      {
+        \skip_horizontal:N \l__fnpct_before_footnote_dim \hbox:n {}
+        \use:nn
+      }
+      { \use_ii_i:nn }
+      {#1}
+      {#2}
   }
 
 \cs_new:Npn \fnpct_print_note:w \fnpct_before: #1 \fnpct_after:
@@ -496,15 +488,6 @@
       }
   }
 
-\newcommand* \multfootrange {--}
-\tl_set:Nn \l__fnpct_range_tl { \textsuperscript { \multfootrange } }
-
-\hook_gput_code:nnn {begindocument} {fnpct}
-  {
-    \providecommand* \multfootsep {,}
-    \tl_set:Nn \l__fnpct_separate_tl { \textsuperscript { \multfootsep } }
-  }
-
 % --------------------------------------------------------------------------
 % define some classes and actions:
 \fnpct_new_class:n {punctuation}
@@ -516,8 +499,6 @@
 
 \fnpct_new_trailing_token:Nn . {dot}
 \fnpct_new_trailing_token:Nn , {comma}
-
-\keys_set:nn {fnpct} { activate-trailing-tokens = {.,} }
 
 % --------------------------------------------------------------------------
 % build up the frame for the adapted note commands:
@@ -542,22 +523,17 @@
       {
         \__fnpct_check_trail:NTF \l_peek_token
           {
-            % no trailing punctuation
-            \tl_set_eq:NN \l_fnpct_last_action_tl \l_fnpct_action_tl
-            \fnpct_if_starred:TF
-              {#1}
-              {
-                \prop_get:NVN \l__fnpct_trailing_actions_prop
-                  \l_fnpct_trailing_token_tl
-                  \l_fnpct_action_tl
-                \fnpct_do_action:Vnw \l_fnpct_action_tl {#1}
-              }
+            \prop_get:NVN \l__fnpct_trailing_actions_prop
+              \l_fnpct_trailing_token_tl
+              \l_fnpct_action_tl
+            \fnpct_do_action:Vnw \l_fnpct_action_tl {#1}
           }
           {
             % no trailing punctuation
             \fnpct_if_collection:T
               {
                 \skip_horizontal:N \l__fnpct_before_footnote_dim
+                \hbox:n {}
                 \fnpct_print_collection:
               }
               #1
@@ -573,11 +549,7 @@
   {
     \bool_if:NF \l__fnpct_dont_mess_around_bool 
       {
-        \bool_if:NTF \l__fnpct_starred_bool
-          { % starred footnote
-            \bool_if:NF \l__fnpct_end_collection_bool
-              { \skip_horizontal:N \l__fnpct_before_footnote_dim }
-          }
+        \fnpct_if_starred:F
           {
             \fnpct_if_class:nT {punctuation}
               {
@@ -590,7 +562,7 @@
                       }
                   }
               }
-            \bool_if:nT { !\l_fnpct_trailing_action_bool }
+            \bool_if:NF \l_fnpct_trailing_action_bool
               { % no punctiation following
                 \bool_if:NF \l__fnpct_end_collection_bool
                   { \skip_horizontal:N \l__fnpct_before_footnote_dim }
@@ -654,7 +626,10 @@
         \exp_not:n { \RenewDocumentCommand #1 {s#2} }
           {
             \exp_not:n {
-              \IfBooleanT {##1} { \bool_set_true:N \l__fnpct_starred_bool }
+              \bool_if:NTF \l__fnpct_punctuation_after_bool
+                { \IfBooleanF }
+                { \IfBooleanT }
+              {##1} { \bool_set_true:N \l__fnpct_starred_bool }
             }
             \tl_set:Nn \exp_not:N \l_fnpct_this_note_tl
               { \__fnpct_remove_backslash:N #1 }
@@ -663,10 +638,6 @@
       }
   }
 \cs_generate_variant:Nn \fnpct_adapt_note:Nnn {c}
-
-% #1: text
-\cs_new_protected:Npn \fnpct_text:n #1
-  { \tl_set:Nn \l_fnpct_note_text_tl {#1} }
 
 % #1: code
 \cs_new_protected:Npn \fnpct_start:w #1 \fnpct_stop:
@@ -686,6 +657,76 @@
 
 \NewDocumentCommand \AdaptNoteName {mmm}
   { \fnpct_adapt_note:cnn {#1} {#2} {#3} }
+
+% --------------------------------------------------------------------------
+% OPTIONS
+\NewDocumentCommand \setfnpct {m}
+  { \keys_set:nn {fnpct} {#1} }
+
+\keys_define:nn {fnpct}
+  {
+    activate-trailing-tokens   .code:n =
+      \tl_map_inline:nn {#1} { \fnpct_activate_trailing_token:n {##1} } ,
+    activate-trailing-tokens   .initial:n = {.,} ,
+    deactivate-trailing-tokens .code:n =
+      \tl_map_inline:nn {#1} { \fnpct_deactivate_trailing_token:n {##1} } ,
+    add-punct-marks            .code:n =
+      \fnpct_deprecate_option:n {activate-trailing-tokens}
+      \tl_map_inline:nn {#1} { \fnpct_activate_trailing_token:n {##1} } ,
+    remove-punct-marks         .code:n =
+      \fnpct_deprecate_option:n {deactivate-trailing-tokens}
+      \tl_map_inline:nn {#1} { \fnpct_deactivate_trailing_token:n {##1} } ,
+    before-footnote-space      .dim_set:N = \l__fnpct_before_footnote_dim ,
+    before-footnote-space      .initial:n =  .06em ,
+    ranges                     .bool_set:N = \l__fnpct_ranges_bool ,
+    ranges                     .initial:n  = false ,
+    dont-mess-around           .choice: ,
+    dont-mess-around / true    .code:n =
+      \bool_set_true:N \l__fnpct_dont_mess_around_bool
+      \msg_info:nn {fnpct} {dont-mess-around} ,
+    dont-mess-around / false   .code:n =
+      \bool_set_false:N \l__fnpct_dont_mess_around_bool ,
+    dont-mess-around           .default:n = true ,
+    dont-mess-around           .initial:n = false ,
+    mult-fn-delim              .code:n =
+      \fnpct_deprecate_option:
+      \tl_set:Nn \l__fnpct_multiple_footnotes_delimiter_tl ,
+    mult-fn-sep                .code:n =
+      \fnpct_deprecate_option:
+    \tl_set:Nn \l__fnpct_multiple_footnote_separator_tl ,
+    multiple                   .code:n = \fnpct_deprecate_option: ,
+    normal-marks               .code:n = \fnpct_deprecate_option: ,
+    normal-mark-width          .code:n = \fnpct_deprecate_option: ,
+    normal-indent              .code:n = \fnpct_deprecate_option: ,
+    normal-parindent           .code:n = \fnpct_deprecate_option: ,
+    verb-format                .code:n = \fnpct_deprecate_option: ,
+    french-before-footnote-space .code:n = \fnpct_deprecate_option: ,
+    punct-after                .bool_set:N = \l__fnpct_punctuation_after_bool
+  }
+  
+% --------------------------------------------------------------------------
+% TAKE CARE OF FRENCH SETTINGS  
+\RequirePackage {translations}
+\hook_gput_code:nnn {begindocument/end} {fnpct}
+  {
+    \ifcurrentbaselanguage {French}
+      {
+        \cs_set_eq:NN \@footnotemark \@footnotemarkORI
+        \StandardFootnotes
+        \keys_set:nn {fnpct} { before-footnote-space = .16667em }
+      }
+      {}
+  }
+
+% --------------------------------------------------------------------------
+
+\hook_gput_code:nnn {begindocument} {fnpct}
+  {
+    \providecommand* \multfootsep {,}
+    \tl_set:Nn \l__fnpct_separate_tl { \textsuperscript { \multfootsep } }
+    \providecommand* \multfootrange {--}
+    \tl_set:Nn \l__fnpct_range_tl { \textsuperscript { \multfootrange } }
+  }
 
 % --------------------------------------------------------------------------
 % DO THE REDEFINING:
@@ -850,24 +891,6 @@
               { \msg_warning:nn {fnpct} {pagenote} }
           }
       }
-  }
-
-% --------------------------------------------------------------------------
-% SETUP COMMAND:
-\NewDocumentCommand \setfnpct {m}
-  { \keys_set:nn {fnpct} {#1} }
-
-% --------------------------------------------------------------------------
-\RequirePackage {translations}
-\hook_gput_code:nnn {begindocument/end} {fnpct}
-  {
-    \ifcurrentbaselanguage {French}
-      {
-        \cs_set_eq:NN \@footnotemark \@footnotemarkORI
-        \StandardFootnotes
-        \keys_set:nn {fnpct} { before-footnote-space = .16667em }
-      }
-      {}
   }
   
 \file_input_stop:
