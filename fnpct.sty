@@ -26,10 +26,10 @@
 
 \DeclareHookRule {begindocument} {fnpct} {after} {hyperref}
 
-\tl_const:Nn \c_fnpct_date_tl                 {2020/12/23}
+\tl_const:Nn \c_fnpct_date_tl                 {2020/12/25}
 \tl_const:Nn \c_fnpct_version_major_number_tl {1}
 \tl_const:Nn \c_fnpct_version_minor_number_tl {0}
-\tl_const:Nn \c_fnpct_version_subrelease_tl   {beta}
+\tl_const:Nn \c_fnpct_version_subrelease_tl   {}
 \tl_const:Nx \c_fnpct_version_number_tl
   {
     \c_fnpct_version_major_number_tl .
@@ -66,6 +66,7 @@
 \seq_new:N \l__fnpct_tmpb_seq
 \seq_new:N \l__fnpct_tmpc_seq
 
+\cs_generate_variant:Nn \tl_remove_all:Nn {NV}
 \cs_generate_variant:Nn \prop_item:Nn {NV}
 \cs_generate_variant:Nn \prop_get:NnN {NV}
 \cs_generate_variant:Nn \prop_put:Nnn {Nx,Nnx,Nxx}
@@ -89,8 +90,12 @@
 \bool_new:N \l__fnpct_starred_bool
 \bool_new:N \l__fnpct_end_collection_bool
 \bool_new:N \l__fnpct_automatic_adaption_bool
-\bool_new:N \l__fnpct_punctuation_after_bool
+\bool_new:N \l__fnpct_reverse_bool
+
+% define \mult... variants for the time being
+% let's see, how the poll on github turns out...
 \bool_new:N \l__fnpct_multiple_bool
+\bool_set_true:N \l__fnpct_multiple_bool
 
 \tl_new:N \l_fnpct_action_tl
 \tl_new:N \l_fnpct_last_action_tl
@@ -104,15 +109,16 @@
 \prop_new:N \l__fnpct_trailing_tokens_prop
 \prop_new:N \l__fnpct_trailing_actions_prop
 \prop_new:N \l__fnpct_trailing_classes_prop
-\prop_new:N \l__fnpct_actions_prop
-\prop_new:N \l__fnpct_action_classes_prop
+\prop_new:N \g__fnpct_actions_prop
+\prop_new:N \g__fnpct_action_classes_prop
 \prop_new:N \l__fnpct_collection_prop
 
 \seq_new:N \l__fnpct_trailing_tokens_seq
 \seq_new:N \l__fnpct_classes_seq
-\seq_new:N \l__fnpct_actions_seq
+\seq_new:N \g__fnpct_actions_seq
 \seq_new:N \l__fnpct_footnote_class_seq
 \seq_new:N \l__fnpct_collection_seq
+\seq_new:N \l__fnpct_adapted_commands_seq
 
 \int_new:N \l__fnpct_collection_int
 
@@ -121,9 +127,9 @@
 % --------------------------------------------------------------------------
 \msg_new:nnn {fnpct} {dont-mess-around}
   {
-    All~ right,~ not~ messing~ around. \\
-    But~ I'd~ really~ love~ to! \\
-    (https://www.youtube.com/results?search_query=mess+around+ray+charles)
+    All~ right,~ not~ messing~ around.~ :( \\
+    I'd~ really~ love~ to,~ though! \\
+    https://www.youtube.com/results?search_query=mess+around+ray+charles
   }
 
 \msg_new:nnn {fnpct} {class-not-defined}
@@ -192,6 +198,15 @@
   }
 
 % --------------------------------------------------------------------------
+% #1: cs
+\prg_new_conditional:Npnn \fnpct_if_adapted:N #1 {T,F,TF}
+  {
+    \seq_if_in:NnTF \l__fnpct_adapted_commands_seq {#1}
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+
+% --------------------------------------------------------------------------
 % checking for trailing tokens - reuse an idea from acro
 % #1: name
 \cs_new_protected:Npn \fnpct_new_class:n #1
@@ -212,8 +227,8 @@
 % #3: peek token
 \cs_new_protected:Npn \fnpct_do_action:nnw #1#2 \fnpct_end:
   {
-    \prop_if_in:NnTF \l__fnpct_actions_prop {#1}
-      { \fnpct_end: \prop_item:Nn \l__fnpct_actions_prop {#1} }
+    \prop_if_in:NnTF \g__fnpct_actions_prop {#1}
+      { \fnpct_end: \prop_item:Nn \g__fnpct_actions_prop {#1} }
       { \fnpct_end: \use:n }
     {#2}
   }  
@@ -228,18 +243,28 @@
   {
     \fnpct_class_if_exist:nTF {#2}
       {
-        \seq_put_right:Nn \l__fnpct_actions_seq {#1}
-        \prop_put:Nnn \l__fnpct_action_classes_prop {#1} {#2}
-        \prop_put:Nnn \l__fnpct_actions_prop {#1} {#5}
-        \seq_put_right:cn {l__fnpct_class_#2_seq} {#1}
-        \dim_new:c {l__fnpct_before_#1_dim}
-        \dim_new:c {l__fnpct_after_#1_dim}
-        \keys_define:nn {fnpct}
+        \seq_if_in:NnTF \g__fnpct_actions_seq {#1}
           {
-            before-#1-space      .dim_set:c = {l__fnpct_before_#1_dim} ,
-            before-#1-space      .initial:n = #3 ,
-            after-#1-space       .dim_set:c = {l__fnpct_after_#1_dim} ,
-            after-#1-space       .initial:n = #4
+            \keys_set:nn {fnpct}
+              {
+                before-#1-space = #3 ,
+                after-#1-space  = #4
+              }
+          }
+          {
+            \seq_gput_right:Nn \g__fnpct_actions_seq {#1}
+            \prop_gput:Nnn \g__fnpct_action_classes_prop {#1} {#2}
+            \prop_gput:Nnn \g__fnpct_actions_prop {#1} {#5}
+            \seq_gput_right:cn {l__fnpct_class_#2_seq} {#1}
+            \dim_new:c {l__fnpct_before_#1_dim}
+            \dim_new:c {l__fnpct_after_#1_dim}
+            \keys_define:nn {fnpct}
+              {
+                before-#1-space      .dim_set:c = {l__fnpct_before_#1_dim} ,
+                before-#1-space      .initial:n = #3 ,
+                after-#1-space       .dim_set:c = {l__fnpct_after_#1_dim} ,
+                after-#1-space       .initial:n = #4
+              }
           }
       }
       { \msg_error:nnn {fnpct} {class-not-defined} {#2} }
@@ -247,7 +272,7 @@
 
 \prg_new_conditional:Npnn \fnpct_action_if_exist:n #1 {p,T,F,TF}
   {
-    \seq_if_in:NnTF \l__fnpct_action_seq {#1}
+    \seq_if_in:NnTF \g__fnpct_actions_seq {#1}
       { \prg_return_true: }
       { \prg_return_false: }
   }
@@ -260,7 +285,7 @@
     \prop_put:Nnn \l__fnpct_trailing_tokens_prop {#1} {#1}
     \prop_put:Nnn \l__fnpct_trailing_actions_prop {#1} {#2}
     \prop_put:Nnx \l__fnpct_trailing_classes_prop {#1}
-      { \prop_item:Nn \l__fnpct_action_classes_prop {#2} }
+      { \prop_item:Nn \g__fnpct_action_classes_prop {#2} }
     \seq_put_right:Nn \l__fnpct_trailing_tokens_seq {#1}
   }
 
@@ -390,16 +415,27 @@
           {\__fnpct_remove_backslash:N #1 ~ code}
       }
       { \cs_new_eq:cN {fnpct_original_ \__fnpct_remove_backslash:N #1 :w} #1 }
+    \seq_put_right:Nn \l__fnpct_adapted_commands_seq {#1}
+    \fnpct_set_counter_name:Nx #1 { \__fnpct_remove_backslash:N #1 }
   }
 
+\cs_new_protected:Npn \fnpct_set_counter_name:Nn #1#2
+  { \cs_set:cpn { fnpct_ \__fnpct_remove_backslash:N #1 _counter: } {#2} }
+\cs_generate_variant:Nn \fnpct_set_counter_name:Nn {c,Nx}
+  
+\cs_new:Npn \__fnpct_counter:N #1
+  { \use:c { fnpct_ \__fnpct_remove_backslash:N #1 _counter: } }
+  
 \cs_new_protected:Npn \fnpct_use_note_command:N #1
   {
     \cs_if_exist:cTF {fnpct_original_ \__fnpct_remove_backslash:N #1 :w}
       {
         \fnpct_inside_range:TF
           {
-            \refstepcounter { \__fnpct_remove_backslash:N #1 }
+            \refstepcounter { \__fnpct_counter:N #1 }
             % hack for enotez:
+            % TODO: add a mechanism that allows for hacks to be added if
+            % necessary?
             \cs_if_exist:cT
               {g__enotez_ \__fnpct_remove_backslash:N #1 _id_int}
               {
@@ -416,7 +452,7 @@
 
 % --------------------------------------------------------------------------
 % action macros
-\prg_new_conditional:Npnn \fnpct_if_collection: {T,F,TF}
+\prg_new_conditional:Npnn \fnpct_if_collection: {p,T,F,TF}
   {
     \bool_if:NTF \l__fnpct_collection_bool
       { \prg_return_true: }
@@ -460,12 +496,11 @@
   {
     \fnpct_if_starred:TF
       {
-        \skip_horizontal:N \l__fnpct_before_footnote_dim \hbox:n {}
         \use:nn
+        { \skip_horizontal:N \l__fnpct_before_footnote_dim \hbox:n {} #1 }
+        { \fnpct_add_punctuation_space:n {before} #2 }
       }
-      { \use_ii_i:nn }
-      {#1}
-      {#2}
+      { \use_ii_i:nn {#1} {#2} }
   }
 
 \cs_new:Npn \fnpct_print_note:w \fnpct_before: #1 \fnpct_after:
@@ -528,16 +563,21 @@
 \fnpct_new_trailing_token:Nn . {dot}
 \fnpct_new_trailing_token:Nn , {comma}
 
-\NewDocumentCommand \AddPunctuation {O{-.16em}mO{-0.06em}m}
+% #1: default before dim
+% #2: token
+% #3: default after dim
+% #4: name
+\NewDocumentCommand \AddPunctuation {O{0pt}mO{0pt}m}
   {
-    \fnpct_new_trailing_token:Nn #2 {#4}
     \fnpct_new_action:nnnnn {#4} {punctuation} {#1} {#3} { \fnpct_swap:nn }
+    \fnpct_new_trailing_token:Nn #2 {#4}
+    \keys_set:nn {fnpct} { activate-trailing-tokens = #2 }
   }
 
 % --------------------------------------------------------------------------
 % build up the frame for the adapted note commands:
 
-\prg_new_conditional:Npnn \fnpct_if_starred: {T,F,TF}
+\prg_new_conditional:Npnn \fnpct_if_starred: {p,T,F,TF}
   {
     \bool_if:NTF \l__fnpct_starred_bool
       { \prg_return_true: }
@@ -564,11 +604,13 @@
           }
           {
             % no trailing punctuation
-            \fnpct_if_collection:T
+            \bool_lazy_or:nnT
+              { \fnpct_if_collection_p: }
+              { \fnpct_if_starred_p: }
               {
                 \skip_horizontal:N \l__fnpct_before_footnote_dim
                 \hbox:n {}
-                \fnpct_print_collection:
+                \fnpct_if_collection:T { \fnpct_print_collection: }
               }
               #1
           }
@@ -584,27 +626,31 @@
     \bool_if:NF \l__fnpct_dont_mess_around_bool 
       {
         \fnpct_if_starred:F
+          { \fnpct_add_punctuation_space:n {after} }
+         \bool_if:NF \l_fnpct_trailing_action_bool
+           { % no punctiation following
+             \bool_if:NF \l__fnpct_end_collection_bool
+               { \skip_horizontal:N \l__fnpct_before_footnote_dim }
+           }
+      }
+  }
+
+\cs_new_protected:Npn \fnpct_add_punctuation_space:n #1
+  {
+    \fnpct_if_class:nT {punctuation}
+      {
+        \fnpct_foreach_action:nn {punctuation}
           {
-            \fnpct_if_class:nT {punctuation}
+            \fnpct_if_action:nT {##1}
               {
-                \fnpct_foreach_action:nn {punctuation}
-                  {
-                    \fnpct_if_action:nT {##1}
-                      {
-                        \skip_horizontal:c {l__fnpct_after_##1_dim}
-                        \fnpct_action_break:
-                      }
-                  }
-              }
-            \bool_if:NF \l_fnpct_trailing_action_bool
-              { % no punctiation following
-                \bool_if:NF \l__fnpct_end_collection_bool
-                  { \skip_horizontal:N \l__fnpct_before_footnote_dim }
+                \skip_horizontal:c {l__fnpct_#1_##1_dim}
+                \hbox:n {}
+                \fnpct_action_break:
               }
           }
       }
   }
-
+  
 \cs_new_protected:Npn \fnpct_after:
   {
     \bool_if:NF \l__fnpct_dont_mess_around_bool
@@ -634,9 +680,12 @@
 % #3: code where #NOTE refers to the original note
 \cs_new_protected:Npn \fnpct_adapt_note:Nnn #1#2#3
   {
-    \fnpct_save_note_command:N #1
-    \fnpct_new_trailing_token:Nn #1 {collect}
-    \keys_set:nn {fnpct} { activate-trailing-tokens = {#1} }
+    \fnpct_if_adapted:NF #1
+      {
+        \fnpct_save_note_command:N #1
+        \fnpct_new_trailing_token:Nn #1 {collect}
+        \keys_set:nn {fnpct} { activate-trailing-tokens = {#1} }
+      }
     \tl_set:Nn \l__fnpct_tmpa_tl {#3}
     \regex_replace_all:nnN {\cP\#8} {\cP\#9} \l__fnpct_tmpa_tl
     \regex_replace_all:nnN {\cP\#7} {\cP\#8} \l__fnpct_tmpa_tl
@@ -660,7 +709,7 @@
         \exp_not:n { \RenewDocumentCommand #1 {s#2} }
           {
             \exp_not:n {
-              \bool_if:NTF \l__fnpct_punctuation_after_bool
+              \bool_if:NTF \l__fnpct_reverse_bool
                 { \IfBooleanF }
                 { \IfBooleanT }
               {##1} { \bool_set_true:N \l__fnpct_starred_bool }
@@ -686,11 +735,19 @@
 % #1: note command
 % #2: arguments
 % #3: code
-\NewDocumentCommand \AdaptNote {mmm}
-  { \fnpct_adapt_note:Nnn #1 {#2} {#3} }
+\NewDocumentCommand \AdaptNote {ommm}
+  {
+    \fnpct_adapt_note:Nnn #2 {#3} {#4}
+    \IfNoValueF {#1}
+      { \fnpct_set_counter_name:Nn #2 {#1} }
+  }
 
-\NewDocumentCommand \AdaptNoteName {mmm}
-  { \fnpct_adapt_note:cnn {#1} {#2} {#3} }
+\NewDocumentCommand \AdaptNoteName {ommm}
+  {
+    \fnpct_adapt_note:cnn {#2} {#3} {#4}
+    \IfNoValueF {#1}
+      { \fnpct_set_counter_name:cn {#2} {#1} }
+  }
   
 % --------------------------------------------------------------------------
 % OPTIONS
@@ -705,6 +762,7 @@
   
 \keys_define:nn {fnpct}
   {
+    add-trailing-token         .code:n = \AddPunctuation #1 ,
     activate-trailing-tokens   .code:n =
       \tl_map_inline:nn {#1} { \fnpct_activate_trailing_token:n {##1} } ,
     activate-trailing-tokens   .initial:n = {.,} ,
@@ -726,14 +784,19 @@
       \tl_set:Nn \l__fnpct_multiple_footnotes_delimiter_tl {#1} ,
     separation-symbol          .code:n =
       \renewcommand* \multfootsep {#1} ,
-    range-symbol          .code:n =
+    range-symbol               .code:n =
       \renewcommand* \multfootrange {#1} ,
     print-separation           .tl_set:N = \l__fnpct_separate_tl ,
     print-separation           .initial:n = \textsuperscript { \multfootsep } ,
     print-range                .tl_set:N = \l__fnpct_range_tl ,
     print-range                .initial:n = \textsuperscript { \multfootrange } ,
-    multiple                   .bool_set:N = \l__fnpct_multiple_bool ,
-    punct-after                .bool_set:N = \l__fnpct_punctuation_after_bool
+    reverse                    .bool_set:N = \l__fnpct_reverse_bool ,
+    after-punct-space          .code:n =
+      \fnpct_foreach_action:nn {punctuation}
+        { \keys_set:nn {fnpct} { after-##1-space = #1 } } ,
+    before-punct-space         .code:n =
+      \fnpct_foreach_action:nn {punctuation}
+        { \keys_set:nn {fnpct} { before-##1-space = #1 } }
   }
 
 % deprecate options of earlier version unless it still exists:
@@ -774,17 +837,20 @@
   {
     \exp_args:Nc \NewDocumentCommand
       { mult \__fnpct_remove_backslash:N #1 }
-      { m }
+      { sm }
       {
         \exp_args:Nnnx
-        \msg_warning:nnn {fnpct} {command-deprecated}
-          { \exp_not:c {mult \__fnpct_remove_backslash:N #1} }
+        % \msg_warning:nnn {fnpct} {command-deprecated}
+        %   { \exp_not:c {mult \__fnpct_remove_backslash:N #1} }
         \seq_set_split:NVn \l_tmpa_seq
           \l__fnpct_multiple_footnotes_delimiter_tl
-          {##1}
+          {##2}
         \tl_clear:N \l_tmpa_tl
         \seq_map_inline:Nn \l_tmpa_seq
-          { \tl_put_right:Nn \l_tmpa_tl {#1{####1}} }
+          {
+            \tl_put_right:Nx \l_tmpa_tl
+              { \exp_not:n {#1} \IfBooleanT{##1}{*} \exp_not:n {{####1}} }
+          }
         \l_tmpa_tl
       }
   }
@@ -900,7 +966,7 @@
           }
       }
     %% LaTeX's defaults:
-    \AdaptNote \footnote {o+m}
+    \AdaptNote[\@mpfn] \footnote {o+m}
       { \IfNoValueTF {#1} {#NOTE{#2}} {#NOTE[#1]{#2}} }
     \AdaptNote \footnotemark {o}
       { \IfNoValueTF {#1} {#NOTE} {#NOTE[#1]} }
