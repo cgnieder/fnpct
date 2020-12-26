@@ -22,11 +22,13 @@
 % 
 % The Current Maintainer of this work is Clemens Niederberger.
 % --------------------------------------------------------------------------
+\RequirePackage {l3keys2e}
+
 \ExplSyntaxOn
 
 \DeclareHookRule {begindocument} {fnpct} {after} {hyperref}
 
-\tl_const:Nn \c_fnpct_date_tl                 {2020/12/25}
+\tl_const:Nn \c_fnpct_date_tl                 {2020/12/27}
 \tl_const:Nn \c_fnpct_version_major_number_tl {1}
 \tl_const:Nn \c_fnpct_version_minor_number_tl {0}
 \tl_const:Nn \c_fnpct_version_subrelease_tl   {}
@@ -76,6 +78,7 @@
 \cs_generate_variant:Nn \str_remove_once:Nn {NV}
 \cs_generate_variant:Nn \msg_warning:nnn {nnV}
 \cs_generate_variant:Nn \msg_warning:nnnn {nnV}
+\cs_generate_variant:Nn \msg_error:nnn {nnV}
 
 \prg_generate_conditional_variant:Nnn \tl_if_eq:nn {V} {T,F,TF}
 
@@ -87,15 +90,12 @@
 \bool_new:N \l__fnpct_ranges_bool
 \bool_new:N \l__fnpct_inside_range_bool
 \bool_new:N \l__fnpct_collection_bool
-\bool_new:N \l__fnpct_starred_bool
+\bool_new:N \l__fnpct_switched_bool
 \bool_new:N \l__fnpct_end_collection_bool
 \bool_new:N \l__fnpct_automatic_adaption_bool
 \bool_new:N \l__fnpct_reverse_bool
-
-% define \mult... variants for the time being
-% let's see, how the poll on github turns out...
-\bool_new:N \l__fnpct_multiple_bool
-\bool_set_true:N \l__fnpct_multiple_bool
+\bool_new:N \l__fnpct_keep_ranges_bool
+\bool_new:N \g__fnpct_multiple_bool
 
 \tl_new:N \l_fnpct_action_tl
 \tl_new:N \l_fnpct_last_action_tl
@@ -125,6 +125,21 @@
 \dim_new:N \l__fnpct_before_footnote_dim
 
 % --------------------------------------------------------------------------
+% messages:
+\msg_new:nnn {fnpct} {load-time-option}
+  {
+    `#1'~ is~ a~ load-time~ option! \\
+    You~ cannot~ set~ it~ with~ \token_to_str:N \setfnpct ! \\
+    You~ need~ to~ use~ \token_to_str:N \usepackage [#1] {fnpct} .
+  }
+
+\msg_new:nnn {fnpct} {unknown-option}
+  {
+    Unknown~ option~ `#1'! \\
+    I~ don't~ know~ the~ option~ `#1'.~ Please~ make~ sure~ there~ is~ no~
+    typo.~ Check~ the~ manual~ for~ help.
+  }
+
 \msg_new:nnn {fnpct} {dont-mess-around}
   {
     All~ right,~ not~ messing~ around.~ :( \\
@@ -154,11 +169,19 @@
 \msg_new:nnn {fnpct} {ranges-hyperref}
   {
     Using~ the~ option~ `ranges~ =~ true'~ together~ with~ package~
-    `hyperref'~ does~ not~ work~ well.~ Disabling~ ranges.
+    `hyperref'~ does~ not~ work~ well.~ Disabling~ ranges.~ If~ you~ insist~
+    then~ set~ `keep-ranges~ =~ true'.
+  }
+
+\msg_new:nnn {fnpct} {keep-ranges-hyperref}
+  {
+    Using~ the~ option~ `ranges~ =~ true'~ together~ with~ package~
+    `hyperref'~ does~ not~ work~ well.~ Keeping~ them~ anyway.~ But~ don't~
+    say~ you~ haven't~ been~ warned.
   }
 
 \msg_new:nnn {fnpct} {ranges-disabled}
-  { Using~ ranges~ is~ disabled. }
+  { Using~ ranges~ is~ disabled~ \msg_line_context: . }
   
 \msg_new:nnn {fnpct} {pagenote}
   {
@@ -181,10 +204,41 @@
     \msg_see_documentation_text:n {fnpct}
   }
 
+% --------------------------------------------------------------------------  
+\cs_new_protected:Npn \__fnpct_loadtime_error:n #1
+   { \msg_error:nnV {fnpct} {#1} \l_keys_key_str }
+
+\cs_new_protected:Npn \__fnpct_loadtime_warning:n #1
+   { \msg_warning:nnV {fnpct} {#1} \l_keys_key_str }
+
+\keys_define:nn {fnpct/package}
+  {
+    multiple                 .bool_set:N = \g__fnpct_multiple_bool ,
+    multiple                 .initial:n = false ,
+    dont-mess-around         .choice: ,
+    dont-mess-around / true  .code:n =
+      \bool_set_true:N \l__fnpct_dont_mess_around_bool
+      \msg_info:nn {fnpct} {dont-mess-around} ,
+    dont-mess-around / false .code:n =
+      \bool_set_false:N \l__fnpct_dont_mess_around_bool ,
+    dont-mess-around         .default:n = true ,
+    dont-mess-around         .initial:n = false ,
+    unknown                  .code:n =
+      \__fnpct_loadtime_warning:n {unknown-option}
+  }
+
+\ProcessKeysPackageOptions {fnpct/package}
+
+\keys_define:nn {fnpct/package}
+  {
+    multiple         .code:n = \__fnpct_loadtime_error:n {load-time-option} ,
+    dont-mess-around .code:n = \__fnpct_loadtime_error:n {load-time-option}
+  }
+
 % --------------------------------------------------------------------------
 \prg_new_conditional:Npnn \fnpct_if_multiple: {T,F,TF}
   {
-    \bool_if:NTF \l__fnpct_multiple_bool
+    \bool_if:NTF \g__fnpct_multiple_bool
       { \prg_return_true: }
       { \prg_return_false: }
   }
@@ -197,6 +251,13 @@
       { \prg_return_false: }
   }
 
+\prg_new_conditional:Npnn \fnpct_if_class_loaded:n #1 {p,T,F,TF}
+  {
+    \@ifclassloaded {#1}
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+  
 % --------------------------------------------------------------------------
 % #1: cs
 \prg_new_conditional:Npnn \fnpct_if_adapted:N #1 {T,F,TF}
@@ -205,6 +266,16 @@
       { \prg_return_true: }
       { \prg_return_false: }
   }
+
+% --------------------------------------------------------------------------
+\cs_new_protected:Npn \fnpct_nobreak: { \tex_penalty:D 10000 \scan_stop: }
+\cs_new_protected:Npn \fnpct_skip_nobreak:N #1
+  {
+    \fnpct_nobreak:
+    \skip_horizontal:N #1
+    \fnpct_nobreak:
+  }
+\cs_generate_variant:Nn \fnpct_skip_nobreak:N {c}
 
 % --------------------------------------------------------------------------
 % checking for trailing tokens - reuse an idea from acro
@@ -405,16 +476,26 @@
 \cs_new:Npn \__fnpct_remove_backslash:N #1
   { \exp_after:wN \use_none:n \token_to_str:N #1 }
 
+% this is dangerous - it relies on undocumented innards of xparse - however,
+% it should probably be rather safe, anyway:
 \cs_new_protected:Npn \fnpct_save_note_command:N #1
   {
     \cs_undefine:c {fnpct_original_ \__fnpct_remove_backslash:N #1 :w}
-    \cs_if_exist:cTF {\__fnpct_remove_backslash:N #1 ~ code}
-      {
+    \cs_if_exist:cTF { \__fnpct_remove_backslash:N #1 ~ code }
+      {% xparse command
         \cs_new_eq:cc
-          {fnpct_original_ \__fnpct_remove_backslash:N #1 :w}
-          {\__fnpct_remove_backslash:N #1 ~ code}
+          { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
+          { \__fnpct_remove_backslash:N #1 ~ code }
       }
-      { \cs_new_eq:cN {fnpct_original_ \__fnpct_remove_backslash:N #1 :w} #1 }
+      {
+        \cs_if_exist:cTF { \__fnpct_remove_backslash:N #1 ~ }
+          {% robust command
+            \cs_new_eq:cc
+              { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
+              { \__fnpct_remove_backslash:N #1 ~ }
+          }
+          { \cs_new_eq:cN { fnpct_original_ \__fnpct_remove_backslash:N #1 :w } #1 }
+      }
     \seq_put_right:Nn \l__fnpct_adapted_commands_seq {#1}
     \fnpct_set_counter_name:Nx #1 { \__fnpct_remove_backslash:N #1 }
   }
@@ -494,11 +575,11 @@
 
 \cs_new_protected:Npn \__fnpct_swap:nn #1#2
   {
-    \fnpct_if_starred:TF
+    \fnpct_if_switched:TF
       {
         \use:nn
-        { \skip_horizontal:N \l__fnpct_before_footnote_dim \hbox:n {} #1 }
-        { \fnpct_add_punctuation_space:n {before} #2 }
+          { \fnpct_skip_nobreak:N \l__fnpct_before_footnote_dim #1 }
+          { \fnpct_add_punctuation_space:n {before} #2 }
       }
       { \use_ii_i:nn {#1} {#2} }
   }
@@ -577,9 +658,9 @@
 % --------------------------------------------------------------------------
 % build up the frame for the adapted note commands:
 
-\prg_new_conditional:Npnn \fnpct_if_starred: {p,T,F,TF}
+\prg_new_conditional:Npnn \fnpct_if_switched: {p,T,F,TF}
   {
-    \bool_if:NTF \l__fnpct_starred_bool
+    \bool_if:NTF \l__fnpct_switched_bool
       { \prg_return_true: }
       { \prg_return_false: }
   }
@@ -606,10 +687,9 @@
             % no trailing punctuation
             \bool_lazy_or:nnT
               { \fnpct_if_collection_p: }
-              { \fnpct_if_starred_p: }
+              { \fnpct_if_switched_p: }
               {
-                \skip_horizontal:N \l__fnpct_before_footnote_dim
-                \hbox:n {}
+                \fnpct_skip_nobreak:N \l__fnpct_before_footnote_dim
                 \fnpct_if_collection:T { \fnpct_print_collection: }
               }
               #1
@@ -625,12 +705,12 @@
   {
     \bool_if:NF \l__fnpct_dont_mess_around_bool 
       {
-        \fnpct_if_starred:F
+        \fnpct_if_switched:F
           { \fnpct_add_punctuation_space:n {after} }
          \bool_if:NF \l_fnpct_trailing_action_bool
            { % no punctiation following
              \bool_if:NF \l__fnpct_end_collection_bool
-               { \skip_horizontal:N \l__fnpct_before_footnote_dim }
+               { \fnpct_skip_nobreak:N \l__fnpct_before_footnote_dim }
            }
       }
   }
@@ -643,8 +723,7 @@
           {
             \fnpct_if_action:nT {##1}
               {
-                \skip_horizontal:c {l__fnpct_#1_##1_dim}
-                \hbox:n {}
+                \fnpct_skip_nobreak:c {l__fnpct_#1_##1_dim}
                 \fnpct_action_break:
               }
           }
@@ -655,7 +734,7 @@
   {
     \bool_if:NF \l__fnpct_dont_mess_around_bool
       {
-        \fnpct_if_starred:T
+        \fnpct_if_switched:T
           {
             \fnpct_if_class:nT {punctuation}
               {
@@ -664,13 +743,13 @@
                   {
                     \fnpct_if_action:nT {##1}
                       {
-                        \skip_horizontal:c {l__fnpct_before_##1_dim}
+                        \fnpct_skip_nobreak:c {l__fnpct_before_##1_dim}
                         \fnpct_action_break:
                       }
                   }
               }
             \bool_set_false:N \l__fnpct_end_collection_bool
-            \bool_set_false:N \l__fnpct_starred_bool
+            \bool_set_false:N \l__fnpct_switched_bool
           }
       }
   }
@@ -678,6 +757,7 @@
 % #1: command
 % #2: argument spec
 % #3: code where #NOTE refers to the original note
+
 \cs_new_protected:Npn \fnpct_adapt_note:Nnn #1#2#3
   {
     \fnpct_if_adapted:NF #1
@@ -687,6 +767,7 @@
         \keys_set:nn {fnpct} { activate-trailing-tokens = {#1} }
       }
     \tl_set:Nn \l__fnpct_tmpa_tl {#3}
+    \regex_replace_all:nnN {\cP\#\cP\#} {$$$$} \l__fnpct_tmpa_tl
     \regex_replace_all:nnN {\cP\#8} {\cP\#9} \l__fnpct_tmpa_tl
     \regex_replace_all:nnN {\cP\#7} {\cP\#8} \l__fnpct_tmpa_tl
     \regex_replace_all:nnN {\cP\#6} {\cP\#7} \l__fnpct_tmpa_tl
@@ -702,25 +783,29 @@
         \exp_not:N \c{\__fnpct_remove_backslash:N #1}
       }
       \l__fnpct_tmpa_tl
+    % we need to double inner arguments yet one more, so it can appear inside
+    % the replacement text of \__fnpct_execute:
+    \regex_replace_all:nnN {\$\$\$\$} {\cP\#\cP\#\cP\#\cP\#} \l__fnpct_tmpa_tl
     \tl_put_left:Nn  \l__fnpct_tmpa_tl { \fnpct_start:w }
     \tl_put_right:Nn \l__fnpct_tmpa_tl { \fnpct_stop: }
     \use:x
       {
         \exp_not:n { \RenewDocumentCommand #1 {s#2} }
           {
-            \exp_not:n {
-              \bool_if:NTF \l__fnpct_reverse_bool
-                { \IfBooleanF }
-                { \IfBooleanT }
-              {##1} { \bool_set_true:N \l__fnpct_starred_bool }
-            }
-            \tl_set:Nn \exp_not:N \l_fnpct_this_note_tl
-              { \__fnpct_remove_backslash:N #1 }
+            \exp_not:n { \fnpct_reverse:n {##1} }
             \exp_not:V \l__fnpct_tmpa_tl
           }
       }
   }
 \cs_generate_variant:Nn \fnpct_adapt_note:Nnn {c}
+
+\cs_new_protected:Npn \fnpct_reverse:n #1
+  {
+    \bool_if:NTF \l__fnpct_reverse_bool
+      { \bool_if:nF }
+      { \bool_if:NT }
+    {#1} { \bool_set_true:N \l__fnpct_switched_bool }
+  }
 
 % #1: code
 \cs_new_protected:Npn \fnpct_start:w #1 \fnpct_stop:
@@ -735,18 +820,18 @@
 % #1: note command
 % #2: arguments
 % #3: code
-\NewDocumentCommand \AdaptNote {ommm}
+\NewDocumentCommand \AdaptNote {mmom}
   {
-    \fnpct_adapt_note:Nnn #2 {#3} {#4}
-    \IfNoValueF {#1}
-      { \fnpct_set_counter_name:Nn #2 {#1} }
+    \fnpct_adapt_note:Nnn #1 {#2} {#4}
+    \IfNoValueF {#3}
+      { \fnpct_set_counter_name:Nn #1 {#3} }
   }
 
-\NewDocumentCommand \AdaptNoteName {ommm}
+\NewDocumentCommand \AdaptNoteName {mmom}
   {
-    \fnpct_adapt_note:cnn {#2} {#3} {#4}
-    \IfNoValueF {#1}
-      { \fnpct_set_counter_name:cn {#2} {#1} }
+    \fnpct_adapt_note:cnn {#1} {#2} {#4}
+    \IfNoValueF {#3}
+      { \fnpct_set_counter_name:cn {#1} {#3} }
   }
   
 % --------------------------------------------------------------------------
@@ -771,14 +856,10 @@
     before-footnote-space      .dim_set:N = \l__fnpct_before_footnote_dim ,
     before-footnote-space      .initial:n =  .06em ,
     ranges                     .bool_set:N = \l__fnpct_ranges_bool ,
-    ranges                     .initial:n  = false ,
-    dont-mess-around           .choice: ,
-    dont-mess-around / true    .code:n =
-      \bool_set_true:N \l__fnpct_dont_mess_around_bool
-      \msg_info:nn {fnpct} {dont-mess-around} ,
-    dont-mess-around / false   .code:n =
-      \bool_set_false:N \l__fnpct_dont_mess_around_bool ,
-    dont-mess-around           .default:n = true ,
+    ranges                     .initial:n = false ,
+    keep-ranges                .bool_set:N = \l__fnpct_keep_ranges_bool ,
+    keep-ranges                .initial:n = false ,
+    dont-mess-around           .bool_set:N = \l__fnpct_dont_mess_around_bool ,
     dont-mess-around           .initial:n = false ,
     mult-fn-delim              .code:n =
       \tl_set:Nn \l__fnpct_multiple_footnotes_delimiter_tl {#1} ,
@@ -880,8 +961,10 @@
 
 \hook_gput_code:nnn {begindocument} {fnpct}
   {
-    \providecommand* \multfootsep {,}
-    \tl_set:Nn \l__fnpct_separate_tl { \textsuperscript { \multfootsep } }
+    \fnpct_if_class_loaded:nTF {memoir}
+      { \renewcommand* }
+      { \providecommand* }
+    \multfootsep {,}
     \providecommand* \multfootrange {--}
     \tl_set:Nn \l__fnpct_range_tl { \textsuperscript { \multfootrange } }
   }
@@ -959,18 +1042,25 @@
       {
         \fnpct_if_ranges:T
           {
-            \msg_warning:nn {fnpct} {ranges-hyperref}
-            \bool_set_false:N \l__fnpct_ranges_bool
-            \keys_define:nn {fnpct}
-              { ranges .code:n = \msg_warning:nn {fnpct} {ranges-disabled} }
+            \bool_if:NTF \l__fnpct_keep_ranges_bool
+              { \msg_warning:nn {fnpct} {keep-ranges-hyperref} }
+              {
+                \msg_warning:nn {fnpct} {ranges-hyperref}
+                \bool_set_false:N \l__fnpct_ranges_bool
+                \keys_define:nn {fnpct}
+                  { ranges .code:n = \msg_warning:nn {fnpct} {ranges-disabled} }
+              }
           }
       }
     %% LaTeX's defaults:
-    \AdaptNote[\@mpfn] \footnote {o+m}
+    \AdaptNote  \footnote {o+m} [\@mpfn]
       { \IfNoValueTF {#1} {#NOTE{#2}} {#NOTE[#1]{#2}} }
     \AdaptNote \footnotemark {o}
       { \IfNoValueTF {#1} {#NOTE} {#NOTE[#1]} }
     \fnpct_if_multiple:T { \MultVariant \footnote }
+    % TODO: should we do this?
+    % Not with memoir, though:
+    % \AdaptNote \thanks {m} { \cs_set_eq:NN \rlap \use:n #NOTE{#1} }
     %% KOMA-Script and memoir:
     \cs_if_exist:NT \footref
       { \AdaptNote \footref {m} { #NOTE{#1} } }
@@ -998,6 +1088,17 @@
         % commands \sidenotemark and \sidenotetext; this makes it quite
         % difficult if not impossible to adapt its commands
         \msg_warning:nnn {fnpct} {cannot-adapt} {sidenotes}
+      }
+    \bool_lazy_or:nnT
+      { \fnpct_if_class_loaded_p:n {tufte-handout} }
+      { \fnpct_if_class_loaded_p:n {tufte-book} }
+      {
+        \AdaptNote \sidenote {oo+m}
+          {
+            \IfNoValueTF {#1}
+              {#NOTE{#3}}
+              { \IfNoValueTF {#2} {#NOTE[#1]{#3}} {#NOTE[#1][#2]{#3}} }
+          }
       }
     %% endnotes:
     \fnpct_treatment:nn {endnotes}
