@@ -1,0 +1,600 @@
+% arara: pdflatex: { shell: on , interaction: nonstopmode }
+% !arara: biber
+% !arara: pdflatex
+% !arara: pdflatex
+% --------------------------------------------------------------------------
+% the FNPCT package
+% 
+%   footnote kerning
+% 
+% --------------------------------------------------------------------------
+% Clemens Niederberger
+% Web:    https://github.com/cgnieder/fnpct/
+% E-Mail: contact@mychemistry.eu
+% --------------------------------------------------------------------------
+% Copyright 2012--2021 Clemens Niederberger
+% 
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2008/05/04 or later.
+% 
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainer of this work is Clemens Niederberger.
+% --------------------------------------------------------------------------
+\documentclass{fnpct-manual}
+
+\setfnpct{
+  add-trailing-token = [0pt]:[-.05em]{colon} ,
+  after-comma-space = -0.1em ,
+  after-dot-space =  -0.1em ,
+  before-comma-space = -0.05em ,
+  before-dot-space =  -0.05em ,
+  before-footnote-space = 0.05em
+}
+
+\addbibresource{cnltx.bib}
+\addbibresource{\jobname.bib}
+\addbibresource{biblatex-examples.bib}
+\begin{filecontents*}{\jobname.bib}
+@book{bringhurst04,
+  title     = {The Elements of Typographic Style},
+  author    = {Robert Bringhurst},
+  year      = {2004},
+  version   = {3.2},
+  isbn      = {978-0-88179-205-5},
+  publisher = {Hartley \&\ Marks, Canada}
+}
+\end{filecontents*}
+
+\AdaptNote\footcite{m}{#NOTE{#1}}
+
+\newname\bringhurst{Robert Bringhurst}
+\newname\lefloch{Bruno Le Floch}
+
+\setlength\parfillskip{0pt plus .8\textwidth}
+
+\begin{document}
+
+\begin{bewareofthedog}
+  For those upgrading from versions~0 to version~1: a number of options have
+  been dropped or renamed. Please have a close look at your log file for
+  warnings.  Also, the way commands are adapted and hence the syntax of
+  \cs{AdaptNote} has changed completely. In many if not all cases leaving them
+  as they were will lead to errors. \par
+  The \cs*{mult...} variants are not defined by default anymore. They can be
+  retained through the load-time option \option{multiple} if needed.  Letting
+  the note commands behave as their \cs*{mult...} variants is not supported
+  any more. \par
+  \cs{innernote} is not provided anymore. Depending on user feedback I might
+  try to add it again to \fnpct. \par
+  Please read this manual carefully so you detect all changes. \par
+  \emph{I am sorry for the inconvenience but I am convinced that the new
+    syntax is more powerful and more flexible in the long run.}
+\end{bewareofthedog}
+
+\section{License and Requirements}
+\license
+
+\section{What's it all about?}
+\subsection{Introduction}
+The purpose of this package is to offer kerning for footnote marks, \ie\ the
+superscripts. This is not appropriate for all superscripts.  Symbols must be
+handled differently than numbers.  And of course the amount depends on the
+chosen font.  \bringhurst\ says in \citetitle{bringhurst04}:
+
+\begin{cnltxquote}[\emph{\citetitle{bringhurst04}} \cite{bringhurst04}]
+  Superscripts frequently come at the ends of phrases or sentences.  If they
+  are high above the line, they can be kerned over a comma or period, but this
+  may endanger readability, especially if the text is set in a modest size.
+\end{cnltxquote}
+
+\fnpct\ can not make these decisions for you.  It sets some initial values for
+the comma and the full stop which looked good to me with the tested fonts.
+Additionally it kerns the superscripts away from words when it follows
+directly.  The amounts of the kerning can be changed using options.
+
+\fnpct\ also switches the order of the superscript and the following comma or
+full stop.  Additional punctuation marks can be added to the switching
+behavior and the amount of kerning can be set for each punctuation mark
+individually.  This behavior can also be turned off.
+
+\subsection{Basics}
+The \fnpct\ package basically does two things to footnotes:
+\begin{itemize}
+  \item if footnote marks are followed by a comma or a full stop\footnote{More
+    punctuation marks can be added through a package option.} the order of
+  footnote and punctuation mark is reversed
+\item and the kerning gets adjusted.
+\end{itemize}
+As a side effect a new method of creating multiple
+footnotes\multfootnote{like;this} is provided.
+
+In what way is the kerning adjusted?  After being placed behind the
+punctuation mark the footnote mark is moved a little bit back, namely by the
+amount specified with the option \option{after-punct-space}.  If the footnote
+mark follows a word \emph{without} being followed by a
+punctuation\footnote{Well, it does not necessarily have to follow a
+  \emph{word}.  The important point is \emph{not being followed} by a
+  punctuation mark.}, there (obviously) is no order switching and a little
+space is inserted before the footnote mark, namely the amount specified by the
+option \option{before-footnote-space}.
+
+Now, let's see some action:
+\begin{example}
+  The three little pigs built their houses out of straw\footnote{not to be
+    confused with hay}, sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}.
+\end{example}
+
+To ensure that the kerning is set the right way the footnote \emph{must} be
+placed \emph{before} the full stop or the comma. \emph{The command can look
+  ahead but not look back}.  This means if you place the \cs{footnote} command
+after a full stop or a comma it is treated as if following a word, \ie\ a thin
+space is inserted: effectively the opposite of the desired behavior.  The
+effects are demonstrated in figure~\vref{fig:effects}.
+
+The order-switching can be prevented using the option \option{reverse} since
+not all countries and languages have the same typographic conventions.  In
+this case the full stop and the comma are moved a bit back, namely by the
+amount specified with the option \option{before-punct-space}.
+
+\begin{figure}
+  \centering
+  \begin{tabular}{>{\setfnpct{dont-mess-around}}ll}
+    \toprule
+      without \fnpct &
+      with \fnpct \\
+    \midrule
+      \strut\quad text.\footnotemark[1] &
+      \strut\quad text\footnotemark[1]. \\
+      \strut\quad text\footnotemark[1]. &
+      \setfnpct{reverse}\strut\quad text\footnotemark[1]. \\
+      \strut\quad text\footnotemark[1] &
+      \strut\quad text\footnotemark[1] \\
+    \bottomrule
+  \end{tabular}
+  \caption{The effect of \fnpct.}\label{fig:effects}
+\end{figure}
+
+\subsection{Temporarily disable (or enable) switching -- new syntax of the
+  \cs*{footnote} command}
+One maybe want to put some footnote marks \emph{before} the punctuation and
+some after, for example because the first one describes a single word but the
+second one a whole sentence.  For this purpose \fnpct\ adds a \sarg\ argument
+to \cs{footnote} and \cs{footnotemark}.  The complete new syntax now is as
+follows:
+\begin{commands}
+  \command{footnote}[\sarg\oarg{num>}\marg{footnote text}\meta{tpunct}]
+    new \sarg\ argument added.  \meta{tpunct} is the optional trailing
+    punctuation mark.
+  \command{footnotemark}[\sarg\oarg{num>}\meta{tpunct}]
+    new \sarg\ argument added.  \meta{tpunct} is the optional trailing
+    punctuation mark.
+\end{commands}
+The \sarg\ argument temporarily turns off the punctuation/footnote switching.
+In case you set \keyis{reverse}{true} the \sarg\ argument temporarily
+\emph{enables} the switching.
+
+\begin{example}
+  \begin{minipage}{.4\linewidth}
+    \noindent The three little pigs built their houses
+    out of straw\footnote*{not to be confused with hay},
+    sticks\footnote{or lumber according to some sources}
+    and bricks\footnote{probably fired clay bricks}.
+  \end{minipage}\hfil
+  \setfnpct{reverse}
+  \begin{minipage}{.4\linewidth}
+    \noindent The three little pigs built their houses
+    out of straw\footnote*{not to be confused with hay},
+    sticks\footnote{or lumber according to some sources}
+    and bricks\footnote{probably fired clay bricks}.
+  \end{minipage}
+\end{example}
+
+\section{Options}\label{sec:options}
+\begin{commands}
+  \command{setfnpct}[\marg{options}]
+    All available options are listed below. They are set with \cs{setfnpct}.
+    \default{Underlined} values are set if the option is used without value.
+\end{commands}
+\begin{options}
+  \keybool{dont-mess-around}\Default{false}
+    Switches of \fnpct's mechanism.
+  \keybool{reverse}\Default{false}
+    This option reverses the behavior of starred and un-starred footnotes.
+  \keybool{ranges}\Default{false}
+    Activates ranges for multiple footnotes.  This is not compatible with
+    \pkg{hyperref} and does not work for the marks of some packages.
+  \keylit{add-trailing-token}{\oarg{before}\meta{token}\oarg{after}\marg{name}}
+    Adds \meta{token} to \fnpct's mechanism and activates it. \meta{before}
+    sets the default value for the newly created option
+    \option{before-\meta{name}-space}. \meta{after} sets the default value for
+    the newly created option \option{after-\meta{name}-space}.
+    Instead of the option you can also use the command \cs*{AddPunctuation},
+    see section~\ref{sec:adapt}.
+  \keyval{activate-trailing-tokens}{tokenlist}\Default{.,}
+    Activates tokens that have been added with \option{add-trailing-token}.
+  \keyval{deactivate-trailing-tokens}{tokenlist}
+    Deactivates tokens that have been added with \option{add-trailing-token}.
+  \keyval{before-footnote-space}{dimension}\Default{.06em}
+    Sets the space that is inserted before a footnote that \emph{does not
+      follow a punctuation or other note} to \meta{dimension}.
+  \keyval{before-dot-space}{dimension}\Default{-.16em}
+    Sets the space that is inserted before a dot if the dot follows a footnote
+    mark to \meta{dimension}.
+  \keyval{before-comma-space}{dimension}\Default{-.16em}
+    Sets the space that is inserted before a comma if the dot follows a footnote
+    mark to \meta{dimension}.
+  \keyval{before-punct-space}{dimension}
+    Sets the space that is inserted before any punctuation mark known to
+    \fnpct\ if the punctuation mark follows a footnote mark to
+    \meta{dimension}.
+  \keyval{after-dot-space}{dimension}\Default{-.06em}
+    Sets the space that is inserted after a dot if the dot precedes a footnote
+    mark to \meta{dimension}.
+  \keyval{after-comma-space}{dimension}\Default{-.06em}
+    Sets the space that is inserted after a comma if the dot precedes a
+    footnote mark to \meta{dimension}.
+  \keyval{after-punct-space}{dimension}
+    Sets the space that is inserted after any punctuation mark known to
+    \fnpct\ if the punctuation mark precedes a footnote mark to
+    \meta{dimension}.
+  \keyval{mult-fn-delim}{code}\Default{\code{;}}
+    Sets the symbol that divides the seperate notes in the \cs*{mult...}
+    variants.
+  \keyval{separation-symbol}{value}\default{\code{,}}
+    Redefines \cs{multfootsep} to \meta{value}.  This symbol separates
+    multiple footnotes if \keyis{ranges}{false}.
+  \keyval{range-symbol}{value}\Default{\code{--}}
+    Redefines \cs{multfootrange} to \meta{value}.  This symbol separates
+    multiple footnotes if \keyis{ranges}{true}.
+  \keyval{print-separation}{code}\Default{\cs*{textsuperscript}\Marg{\cs*{multfootsep}}}
+    The actual code placed between multiple footnotes if \keyis{ranges}{false}.
+  \keyval{print-range}{code}\Default{\cs*{textsuperscript}\Marg{\cs*{multfootrange}}}
+    The actual code placed between multiple footnotes if \keyis{ranges}{true}.
+\end{options}
+
+% \subsection{Language Specific Settings}
+% Package \pkg{babel}'s~\cite{pkg:babel} French settings redefine
+% \cs*{@footnotemark}.  \fnpct\ resets this redefinition but sets the
+% \option{before-footnote-space} equal to a thin space (\code{.16667em}).
+
+% In case the automatic kerning doesn't work for whatever reason the spaces are
+% available as user commands as well:
+% \begin{commands}
+%   \command{kfp}
+%     Insert \option{after-dot-space} or (if \keyis{punct-after}{true})
+%     \option{before-dot-space}. 
+%   \command{kfc}
+%     Insert \option{after-comma-space} or (if \keyis{punct-after}{true})
+%     \option{before-comma-space}.
+% \end{commands}
+
+\section{Multiple footnotes}\label{sec:multiple}
+\subsection{Basics}
+Since multiple footnotes have to be treated differently\footnote{see these
+  footnotes}\footnote{for an example}, \fnpct\ recognizes if \cs*{footnote} is
+used multiple times in a row:
+
+\begin{example}
+  The three little pigs built their houses out of straw\footnote{not to be
+    confused with hay}, sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}\footnote{or something else}.
+\end{example}
+
+\subsection{Ranges}
+Starting with a minimum number of three footnotes in a row \fnpct\ can also
+display the footnote marks as a range.
+\begin{example}
+  \setfnpct{ ranges = true }
+  The three little pigs built their houses out of straw\footnote{not to be
+    confused with hay}, sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}%
+  \footnote{or something else}\footnote{what do I know}.
+\end{example}
+It is important to note that this has limits: ranges do not work well with
+\pkg{hyperref}.  For that reason \fnpct' disables ranges if it detects that
+\pkg{hyperref} has been loaded.  If you insist on using ranges together with
+\pkg{hyperref} use
+\begin{options}
+  \keybool{keep-ranges}\Default{false}
+    to enable them again.
+\end{options}
+
+\subsection{The delimiter and separator}
+Some packages or classes like the \KOMAScript\ classes define
+\cs{multfootsep}.  If it is not predefined it is defined by \fnpct:
+\begin{commands}
+  \command{multfootsep}\Default{,}
+    In its default definition this command simply expands to a comma.
+  \command{multfootrange}\Default{--}
+    In its default definition this command simply expands to an endash.
+\end{commands}
+This commands can be redefined to adapt to your needs. You can do this with
+\cs*{renewcommand} or by using these options:
+\begin{options}
+  \keyval{separation-symbol}{value}\default{\code{,}}
+    Redefines \cs{multfootsep} to \meta{value}.  This symbol separates
+    multiple footnotes if \keyis{ranges}{false}.
+  \keyval{range-symbol}{value}\Default{\code{--}}
+    Redefines \cs{multfootrange} to \meta{value}.  This symbol separates
+    multiple footnotes if \keyis{ranges}{true}.
+\end{options}
+Both symbols are placed inside \cs*{textsuperscript}. This can also be
+redefined if necessary:
+\begin{options}
+  \keyval{print-separation}{code}\Default{\cs*{textsuperscript}\Marg{\cs*{multfootsep}}}
+    The actual code placed between multiple footnotes if \keyis{ranges}{false}.
+  \keyval{print-range}{code}\Default{\cs*{textsuperscript}\Marg{\cs*{multfootrange}}}
+    The actual code placed between multiple footnotes if \keyis{ranges}{true}.
+\end{options}
+
+\subsection{\cs*{mult...} variants}
+
+\begin{bewareofthedog}
+  The commands presented in this section are defined to keep some backwards
+  compatibility to versions of \fnpct\ prior to v1.0.  In order to use them
+  you have to call the package with
+  \cs*{usepackage}\Oarg{multiple}\Marg{fnpct}.
+\end{bewareofthedog}
+In earlier versions of \fnpct\ detecting following footnotes was not as
+reliable as it is now.  For that reason it defined the following command:
+\begin{commands}
+  \command{multfootnote}[\sarg\Marg{\meta{list};\meta{of};\meta{footnotes}}\meta{tpunct}]
+    Different footnotes are separated with a semicolon.  The \sarg\ turns the
+    footnote/punctuation switching temporarily off.
+\end{commands}
+\begin{example}
+  The three little pigs built their houses out of straw\footnote{not to be
+    confused with hay}, sticks\footnote{or lumber according to some sources}
+  and bricks\multfootnote{probably fired clay bricks;or something else}.
+\end{example}
+This command splits its content at every occurrence of \code{;} and creates a
+footnote for each.  This delimiter can be changed:
+\begin{options}
+  \keyval{mult-fn-delim}{code}\Default{;}
+    Sets the symbol that divides the seperate notes in the \cs*{mult...}
+    variants.
+\end{options}
+
+Since the semicolon might be part of the footnote text you might have some
+trouble.  Enclosing it in braces should work:
+\begin{example}
+  The three little pigs built their houses out of straw\footnote{not to be
+    confused with hay}, sticks\footnote{or lumber according to some sources}
+  and bricks\multfootnote{probably fired clay bricks{;} or something else;what
+    do I know}.
+\end{example}
+
+\section{Extend \fnpct}
+\subsection{Additional punctuation marks}
+So if you want to extend the punctuation switching and kerning to other punctuation
+marks you can do something like this:
+\begin{sourcecode}
+  \setfnpct{ add-trailing-token = !{bang} }
+\end{sourcecode}
+\setfnpct{ add-trailing-token = !{bang} }
+After that the bang is recognized and footnotes switch position:
+\begin{example}
+  The three little pigs built their houses out of straw\footnote{not to be
+    confused with hay}? Sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}!
+\end{example}
+
+New options have also been defined:
+\begin{example}
+  \setfnpct{ after-bang-space = .03em }
+  The three little pigs built their houses out of straw\footnote{not to be
+    confused with hay}? Sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}!
+\end{example}
+
+And option \option{after-punct-space} is obeyed:
+\begin{example}
+  \setfnpct{ after-punct-space = 2pt }
+  The three little pigs built their houses out of straw\footnote{not to be
+    confused with hay}? Sticks\footnote{or lumber according to some sources}
+  and bricks\footnote{probably fired clay bricks}!
+\end{example}
+
+\begin{bewareofthedog}
+  Please note that you should not use \option{add-trailing-token} inside a
+  group. Ideally it is used in the document preamble only.  Using it inside of
+  a group can lead to unwanted side effects and should not be attempted.
+\end{bewareofthedog}
+
+\setfnpct{ deactivate-trailing-tokens = ! }
+
+\subsection{Make note commands known to \fnpct}\label{sec:adapt}
+If a package is not natively supported you can try and adapt commands
+yourself.  Before you do so please check section~\vref{sec:other:packages}.
+\begin{commands}
+  % \AdaptNote
+  \command{AdaptNote}[\Marg{\cs*{cs}}\marg{arguments}\oarg{counter name}\marg{code}] 
+    This redefines \cs*{cs}.  How the redefinition works is best demonstrated
+    with an example. See below for an example.  The arguments \meta{arguments}
+    are defined with the same syntax as \pkg{xparse}'s
+    \cs*{NewDocumentCommand}.  See the \pkg{xparse} manual~\cite{pkg:xparse}
+    for a complete description.  Within \meta{code} \code{\#NOTE} is replaced
+    with the original command.  If the optional argument is not used the
+    counter name \code{cs} for a note command \cs*{cs} is assumed.
+
+    In addition to the arguments specified in \meta{arguments} an optional
+    star as first argument is defined which reverses \fnpct's behavior.
+    \meta{code} is also placed inside a group.
+  % \AdaptNoteName
+  \command{AdaptNoteName}[\marg{csname}\marg{arguments}\oarg{counter name}\marg{code}]
+    Like \cs{AdaptNote} but the first argument expects a csname instead of a
+    command sequence token.
+  % \MultVariant
+  \command{MultVariant}[\Marg{\cs*{cs}}]
+    Defines a command \cs*{multcs} which splits is argument at each occurence
+    of the token set by the option \option{mult-fn-delim} and turns it into a
+    series of calls of \cs*{cs}.  \cs*{multcs} also has a starred variant in
+    order to create a series of starred calls of \cs*{cs}.
+  % \MultVariantName
+  \command{MultVariantName}[\marg{csname}]
+    Like \cs{MultVariant} but the argument expects a csname instead of a
+    command sequence token.
+  % \AddPunctuation
+  \command*{AddPunctuation}[\oarg{before}\meta{token}\oarg{after}\marg{name}]
+    Adds \meta{token} to \fnpct's mechanism and activates it. \meta{before}
+    sets the default value for the newly created option
+    \option{before-\meta{name}-space}. \meta{after} sets the default value for
+    the newly created option \option{after-\meta{name}-space}.  This is the
+    same as using option \option{add-trailing-token}.
+\end{commands}
+
+\fnpct\ adapts \LaTeX's standard footnote commands the following
+way\footnote{Using \cs*{@mpfn} as counter name is essential to make ranges
+  work in minipages.}:
+\begin{sourcecode}
+  \AdaptNote\footnote{o+m}[\@mpfn]{\IfNoValueTF{#1}{#NOTE{#2}}{#NOTE[#1]{#2}}}
+  \AdaptNote\footnotemark{o}{\IfNoValueTF{#1}{#NOTE}{#NOTE[#1]}}
+  \MultVariant\footnote
+  % KOMA-Script's or memoir's \footref:
+  \AdaptNote\footref{m}{#NOTE{#1}}
+\end{sourcecode}
+You essentially have to rebuild the syntax of the original command and place
+\code{\#NOTE} in the code where it should be called.  This may seem cumbersome
+at first but allows to adapt commands with a more or less arbitrary kind of
+syntax.
+
+The command \cs{AdaptNote} can be used multiple times on the same command in
+order to change a previous redefinition.
+
+\section{Other packages}\label{sec:other:packages}
+\fnpct\ tries its best to support other footnote and related
+packages\footnote{If you find some package missing please let me know.}.  Each
+of the following subsections is dedicated to one of these packages and if and
+how they work together with \fnpct.  Fortunately most of them do quite well.
+
+\subsection{bigfoot}\label{sec:bigfoot}
+The package \pkg{bigfoot}~\cite{pkg:bigfoot} is supported.
+
+You need to be a bit cautious, though: \emph{verbatim material won't work
+  inside footnotes anymore}.  You might use \lefloch's \pkg{cprotect}
+package~\cite{pkg:cprotect} if you really need verbatim material in footnotes
+\emph{and} want to use \fnpct.  Since \fnpct\ does not redefine any
+\cs{footnotetext} like command it will still work inside one of them.
+
+\subsection{endnotes}\label{sec:endnotes}
+The package \pkg{endnotes}~\cite{pkg:endnotes} is supported.
+
+\subsection{enotez}\label{sec:enotez}
+The package \pkg{enotez}~\cite{pkg:enotez} is supported.
+
+\subsection{fixfoot}\label{sec:fixfoot}
+The \pkg{fixfoot}~\cite{pkg:fixfoot} package provides a possibility to create
+repeating footnotes.  \fnpct\ supports this package provided you take care of
+the following:
+
+\emph{Use \cs{DeclareFixedFootnote} only in the preamble but \emph{after}
+  loading \fnpct.}
+
+\cs*{DeclareFixedFootnote}\Marg{\cs*{cs}}\marg{footnote text} is used to store
+the \meta{footnote text} in \cs*{cs} which in turn creates a footnote mark for
+it but doesn't repeat the footnote text on the same page in the bottom.  The
+document needs several runs to get all the numbers and footnotes right.
+
+Every fixed footnote declared with \cs{DeclareFixedFootnote} gets an optional
+\sarg\ to prevent the punctuation switching.
+
+\begin{bewareofthedog}
+  \pkg{fixfoot} cannot be used together with \keyis{ranges}{true}.
+\end{bewareofthedog}
+
+\subsection{footmisc}\label{sec:footmisc}
+The \pkg{footmisc} package~\cite{pkg:footmisc} provides a range of options to
+customize footnotes, for example output them as margin notes or count
+footnotes per page.
+
+Testing showed no incompatibilities with \pkg{footmisc}.  The only thing is
+that you won't have to (and shouldn't) use its \option{multiple} option.
+
+\subsection{footnote}\label{sec:footnote}
+
+Testing showed no incompatibilities with \pkg{footnote}.  It cannot adapt its
+environment \env*{footnote}, though.
+
+\subsection{manyfoot}\label{sec:manyfoot}
+The package \pkg{manyfoot}~\cite{pkg:manyfoot} is supported.
+
+\subsection{pagenote}\label{sec:pagenote}
+The package \pkg{pagenote}~\cite{pkg:pagenote} is supported.
+
+\subsection{parnotes}\label{sec:parnotes}
+The package \pkg{parnotes}~\cite{pkg:parnotes} is supported.
+
+\subsection{sepfootnotes}\label{sec:sepfootnotes}
+The package \pkg{sepfootnotes}~\cite{pkg:sepfootnotes} is supported.  Define
+new footnote types \emph{after} \fnpct\ has been loaded.
+
+\subsection{sidenotes}\label{sec:sidenotes}
+\begin{bewareofthedog}
+  The package \pkg{sidenotes}~\cite{pkg:sidenotes} is \emph{not} supported!
+\end{bewareofthedog}
+\fnpct\ is not able to adapt \pkg{sidenotes}' commands due to the current
+implementation of \pkg{sidenotes}.
+
+\subsection{snotez}\label{sec:snotez}
+The package \pkg{snotes}~\cite{pkg:snotez} is supported.
+
+\subsection{tablefootnote}\label{sec:tablefootnote}
+The package \pkg{tablefootnote}~\cite{pkg:tablefootnote} is supported.
+
+\subsection{tufte-latex's \cs*{sidenote}}\label{sec:tufte}
+The \cs*{sidenote} command from the \pkg*{tufte-latex} classes
+\cls{tufte-book} and \cls{tufte-handout} is supported.
+
+\subsection{biblatex's \cs*{footcite}}\label{sec:biblatex}
+If you're willing to sacrifice \cs*{footcite}'s \sarg\ argument (which it has
+in some styles) you can adapt the commands provided by
+\pkg{biblatex}~\cite{pkg:biblatex} as well:
+\begin{sourcecode}
+  \AdaptNote\footcite{oo+m}{%
+    \setfnpct{dont-mess-around}%
+    \IfNoValueTF{#1}
+      {#NOTE{#3}}
+      {\IfNoValueTF{#2}{#NOTE[#1]{#3}}{#NOTE[#1][#2]{#3}}}%
+  }
+\end{sourcecode}
+You could use another token for the star, though, if needed:
+\begin{sourcecode}
+  \AdaptNote\footcite{t+oo+m}{%
+    \setfnpct{dont-mess-around}%
+    \IfBooleanTF{#1}{%
+      \IfNoValueTF{#2}
+        {#NOTE{#4}}
+        {\IfNoValueTF{#3}{#NOTE[#2]{#4}}{#NOTE[#2][#3]{#4}}}%
+    }{%
+      \IfNoValueTF{#2}
+        {#NOTE*{#4}}
+        {\IfNoValueTF{#3}{#NOTE*[#2]{#4}}{#NOTE*[#2][#3]{#4}}}%
+  }
+\end{sourcecode}
+Testing showed no problems whatsoever but \fnpct\ does not adapt the command
+itself.
+
+\begin{bewareofthedog}
+  Turning \fnpct\ off inside of \cs*{footcite} is advised as shown in above
+  examples.  \cs*{footcite} calls \cs*{footnote} internally which else might
+  lead to inconsistent and unwanted spaces.
+\end{bewareofthedog}
+
+
+\appendix
+
+\printbibliography
+
+\end{document}
+TODO:
+- memoir, \mutfootsep
+- \thanks
+- French
+- nested notes and \AdaptText\footnotetext{om}{\IfNoValueTF{#1}{#NOTE{#2}}{#NOTE[#1]{#2}}}
