@@ -27,7 +27,7 @@
 
 \DeclareHookRule {begindocument} {fnpct} {after} {hyperref}
 
-\tl_const:Nn \c_fnpct_date_tl                 {2021/01/17}
+\tl_const:Nn \c_fnpct_date_tl                 {2021/01/21}
 \tl_const:Nn \c_fnpct_version_major_number_tl {1}
 \tl_const:Nn \c_fnpct_version_minor_number_tl {0}
 \tl_const:Nn \c_fnpct_version_subrelease_tl   {}
@@ -153,7 +153,7 @@
   {
     Due~ to~ the~ implementation~ of~ the~ `#1'~ package~ I~ am~ not~ yet~
     able~ to~ adapt~ its~ commands~ while~ also~ using~ the~ option~ `ranges~
-    =~ true'.
+    =~ true'.~ #2
   }
 
 \msg_new:nnn {fnpct} {ranges-hyperref}
@@ -188,14 +188,8 @@
     \c_space_tl \msg_line_context: .
   }
 
-\msg_new:nnn {fnpct} {command-deprecated}
-  {
-    The~ command~ #1 is~ deprecated.~
-    \msg_see_documentation_text:n {fnpct}
-  }
-
-% \msg_new:nnn {fnpct} {innernote}
-%   { Command~ used~ outside~ note~ or~ outer~ note~ not~ adapted. }
+\msg_new:nnn {fnpct} {command-removed}
+  { The~ command~ #1~ has~ been~ removed~ from~ fnpct. }
 
 % --------------------------------------------------------------------------  
 \cs_new_protected:Npn \__fnpct_loadtime_error:n #1
@@ -595,20 +589,9 @@
   }
 
 \cs_new:Npn \fnpct_print_note:w \fnpct_before: #1 \fnpct_after:
-  {
-    \exp_not:n
-      {
-        #1
-        % \seq_if_empty:NF \g__fnpct_inner_seq
-        %   {
-        %     \seq_map_inline:Nn \g__fnpct_inner_seq
-        %       { \use:c {fnpct_original_ \g__fnpct_this_note_tl :w} {##1} }
-        %   }
-        % \seq_gclear:N \g__fnpct_inner_seq
-      }
-  }
-% multiple footnotes and ranges:
+{ \exp_not:n { #1 } }
 
+% multiple footnotes and ranges:
 \cs_new_protected:Npn \__fnpct_collect:n #1
   {
     \int_incr:N \l__fnpct_collection_int
@@ -853,17 +836,6 @@
     \bool_gset_true:N \g__fnpct_text_bool
   }
 
-% \cs_new_protected:Npn \fnpct_innernote:n #1
-%   {
-%     \fnpct_if_adapted:cTF { \g__fnpct_this_note_tl }
-%       {
-%         \show \g__fnpct_this_note_tl
-%         \use:c { \g__fnpct_this_note_tl mark }
-%         \seq_gput_right:Nn \g__fnpct_inner_seq {#1}
-%       }
-%       { \msg_error:nn {fnpct} {innernote} }
-%   }
-
 % --------------------------------------------------------------------------
 % #1: note command
 % #2: arguments
@@ -889,8 +861,8 @@
       { \fnpct_text: #3 }
   }
 
-% \NewDocumentCommand \innernote {+m}
-%   { \fnpct_innernote:n {#1} }
+\NewDocumentCommand \innernote {+m}
+  { \msg_warning:nn {fnpct} {command-removed} \use:n {#1} }
 
 \NewExpandableDocumentCommand \ifcurrentnoteTF {m}
   { \fnpct_if_current:NTF #1 }
@@ -1118,10 +1090,23 @@
           }
       }
     %% LaTeX's defaults:
-    \AdaptNote  \footnote {o+m} [\@mpfn]
-      { \IfNoValueTF {#1} {#NOTE{#2}} {#NOTE[#1]{#2}} }
-    \AdaptNote \footnotemark {o} [\@mpfn]
-      { \IfNoValueTF {#1} {#NOTE} {#NOTE[#1]} }
+    \fnpct_if_class_loaded:nTF {beamer}
+      {
+        \AdaptNote \footnote{d<>o+m} [\beamer@mpfn]
+          {
+            \IfNoValueTF{#1}
+              {\IfNoValueTF{#2}{#NOTE{#3}}{#NOTE[#2]{#3}}}
+              {\IfNoValueTF{#2}{#NOTE<#1>{#3}}{#NOTE<#1>[#2]{#3}}}
+          }
+        \AdaptNote \footnotemark {o} [\beamer@mpfn]
+          { \IfNoValueTF {#1} {#NOTE} {#NOTE[#1]} }
+      }
+      {
+        \AdaptNote  \footnote {o+m} [\@mpfn]
+          { \IfNoValueTF {#1} {#NOTE{#2}} {#NOTE[#1]{#2}} }
+        \AdaptNote \footnotemark {o} [\@mpfn]
+          { \IfNoValueTF {#1} {#NOTE} {#NOTE[#1]} }
+      }
     \fnpct_if_multiple:T { \MultVariant \footnote }
     % TODO: should we adapt \thanks? Not with memoir, though...
     % \AdaptNote \thanks {+m} { \cs_set_eq:NN \rlap \use:n #NOTE{#1} }
@@ -1157,11 +1142,22 @@
       { \fnpct_if_class_loaded_p:n {tufte-handout} }
       { \fnpct_if_class_loaded_p:n {tufte-book} }
       {
-        \AdaptNote \sidenote {oo+m}
+        \fnpct_if_ranges:TF
           {
-            \IfNoValueTF {#1}
-              {#NOTE{#3}}
-              { \IfNoValueTF {#2} {#NOTE[#1]{#3}} {#NOTE[#1][#2]{#3}} }
+            \msg_warning:nnnn {fnpct} {cannot-adapt-with-ranges}
+              {tufte-latex}
+              {
+                The~ command~ \sidenote~ misses~ a~ suitable~ \sidenotetext~
+                version.
+              }
+          }
+          {
+            \AdaptNote \sidenote {oo+m} [\@mpfn]
+              {
+                \IfNoValueTF {#1}
+                  {#NOTE{#3}}
+                  { \IfNoValueTF {#2} {#NOTE[#1]{#3}} {#NOTE[#1][#2]{#3}} }
+              }
           }
       }
     %% endnotes:
@@ -1215,7 +1211,14 @@
     \fnpct_treatment:nn {fixfoot}
       {
         \fnpct_if_ranges:TF
-          { \msg_warning:nnn {fnpct} {cannot-adapt-with-ranges} {fixfoot} }
+          {
+            \msg_warning:nnnn {fnpct} {cannot-adapt-with-ranges}
+              {fixfoot}
+              {
+                There~ cannot~ be~ suitable~ \..text~ versions~ for~ the~
+                fixed~ notes.
+              }
+          }
           {
             \seq_map_inline:Nn \l__fnpct_footnote_fixfoot_seq
               { \AdaptNote #1 {} { ##NOTE } }
@@ -1225,7 +1228,14 @@
     \fnpct_treatment:nn {pagenote}
       {
         \fnpct_if_ranges:TF
-          { \msg_warning:nnn {fnpct} {cannot-adapt-with-ranges} {pagenote} }
+          {
+            \msg_warning:nnnn {fnpct} {cannot-adapt-with-ranges}
+              {pagenote}
+              {
+                The~ command~ \pagenote~ misses~ a~ suitable~ \pagenotetext~
+                version.
+              }
+          }
           {
             \bool_if:NTF \l__fnpct_makepagenote_bool
               {
@@ -1240,7 +1250,14 @@
     \fnpct_treatment:nn {parnotes}
       {
         \fnpct_if_ranges:TF
-          { \msg_warning:nnn {fnpct} {cannot-adapt-with-ranges} {parnotes} }
+          {
+            \msg_warning:nnnn {fnpct} {cannot-adapt-with-ranges}
+              {parnotes}
+              {
+                The~ command~ \parnote~ misses~ a~ suitable~ \parnotetext~
+                version.
+              }
+          }
           {
             \AdaptNote \parnote {o+m}
               { \IfNoValueTF {#1} {#NOTE{#2}} {#NOTE[#1]{#2}} }
@@ -1251,9 +1268,16 @@
     \fnpct_treatment:nn {tablefootnote}
       {
         \fnpct_if_ranges:TF
-          { \msg_warning:nnn {fnpct} {cannot-adapt-with-ranges} {tablefootnote} }
           {
-            \AdaptNote \tablefootnote {o+m}
+            \msg_warning:nnnn {fnpct} {cannot-adapt-with-ranges}
+              {tablefootnote}
+              {
+                The~ command~ \tablefootnote~ misses~ a~ suitable~
+                \tablefootnotetext~ version.
+              }
+          }
+          {
+            \AdaptNote \tablefootnote {o+m} [footnote]
               { \IfNoValueTF {#1} {#NOTE{#2}} {#NOTE[#1]{#2}} }
           }
       }
@@ -1370,7 +1394,7 @@ tablefootnote
                       - remove option `bigfoot-default-top'
                       - support `manyfoot' package
 2020/01/12 v0.5a      - support `snotez' with `dblrg=false'
-2021/01/17 v1.0       - new implementation:
+2021/01/21 v1.0       - new implementation:
                         * support footnote ranges when possible
                         * support more packages
                         * more flexible way to adapt unknown note commands

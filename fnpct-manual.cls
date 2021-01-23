@@ -57,6 +57,7 @@
     arabic,
     DeclareNewFootnote,
     endnote,
+    footcite
     footnoteB,
     footref,
     IfBooleanTF,
@@ -262,6 +263,13 @@
 \ChangeEmph{[}[,.02em]{]}[.055em,-.08em]
 \ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
 
+\NewDocumentCommand\noranges{sm}{%
+  \begin{bewareofthedog}
+    \IfBooleanTF{#1}{\pkg*}{\pkg}{#2} cannot be used together with
+    \keyis{ranges}{true}.
+  \end{bewareofthedog}
+}
+
 \RequirePackage{hyperref}
 
 % additional packages:
@@ -318,6 +326,6 @@
 \fnpct@add@version{2019-09-30}{0.4g}
 \fnpct@add@version{2019-10-05}{0.5}
 \fnpct@add@version{2020-01-12}{0.5a}
-\fnpct@add@version{2021-01-17}{1.0}
+\fnpct@add@version{2021-01-21}{1.0}
 
 \endinput
