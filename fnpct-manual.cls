@@ -1,12 +1,12 @@
 % --------------------------------------------------------------------------
 % the FNPCT package
 % 
-%   footnote kerning
+%   footnotes' interaction with punctuation
 % 
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://github.com/cgnieder/fnpct/
-% E-Mail: contact@mychemistry.eu
+% E-Mail: clemens@cnltx.de
 % --------------------------------------------------------------------------
 % Copyright 2012--2022 Clemens Niederberger
 % 
@@ -30,9 +30,9 @@
 
 \setcnltx{
   package  = {fnpct} ,
-  info     = {Footnote kerning and multiple footnotes} ,
+  info     = {footnotes' interaction with punctuation} ,
   authors  = Clemens Niederberger ,
-  email    = contact@mychemistry.eu ,
+  email    = clemens@cnltx.de ,
   url      = https://github.com/cgnieder/fnpct/ ,
   abstract = {%
       The \fnpct\ package basically does two things to footnotes: if footnote

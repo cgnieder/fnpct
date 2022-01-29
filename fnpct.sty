@@ -1,12 +1,12 @@
 % --------------------------------------------------------------------------
 % the FNPCT package
 % 
-%   footnote kerning
+%   footnotes' interaction with punctuation
 % 
 % --------------------------------------------------------------------------
 % Clemens Niederberger
 % Web:    https://github.com/cgnieder/fnpct/
-% E-Mail: contact@mychemistry.eu
+% E-Mail: clemens@cnltx.de
 % --------------------------------------------------------------------------
 % Copyright 2012--2022 Clemens Niederberger
 % 
@@ -27,10 +27,10 @@
 
 \DeclareHookRule {begindocument} {fnpct} {after} {hyperref}
 
-\tl_const:Nn \c_fnpct_date_tl                 {2022/01/04}
+\tl_const:Nn \c_fnpct_date_tl                 {2022/01/29}
 \tl_const:Nn \c_fnpct_version_major_number_tl {1}
 \tl_const:Nn \c_fnpct_version_minor_number_tl {0}
-\tl_const:Nn \c_fnpct_version_subrelease_tl   {a}
+\tl_const:Nn \c_fnpct_version_subrelease_tl   {b}
 \tl_const:Nx \c_fnpct_version_number_tl
   {
     \c_fnpct_version_major_number_tl .
@@ -41,7 +41,7 @@
     \c_fnpct_version_number_tl
     \c_fnpct_version_subrelease_tl
   }
-\tl_const:Nn \c_fnpct_info_tl {footnote~ kerning}
+\tl_const:Nn \c_fnpct_info_tl {footnotes'~ interaction~ with~ punctuation}
 
 \ProvidesExplPackage
   {fnpct}
@@ -748,17 +748,7 @@
         \fnpct_if_switched:T
           {
             \fnpct_if_class:nT {punctuation}
-              {
-                \bool_set_false:N \l__fnpct_collection_bool
-                \fnpct_foreach_action:nn {punctuation}
-                  {
-                    \fnpct_if_action:nT {##1}
-                      {
-                        \fnpct_skip_nobreak:c {l__fnpct_before_##1_dim}
-                        \fnpct_action_break:
-                      }
-                  }
-              }
+              { \bool_set_false:N \l__fnpct_collection_bool }
             \bool_set_false:N \l__fnpct_end_collection_bool
             \bool_set_false:N \l__fnpct_switched_bool
           }
@@ -1405,3 +1395,4 @@ tablefootnote
                         * drop support of \innernote (maybe re-implement it in
                           future versions, depending on user feedback)
 2022/01/04 v1.0a      - correct file hooks
+2022/01/29 v1.0b      - remove erroneously inserted horizontal skip
