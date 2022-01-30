@@ -29,8 +29,8 @@
 
 \tl_const:Nn \c_fnpct_date_tl                 {2022/01/29}
 \tl_const:Nn \c_fnpct_version_major_number_tl {1}
-\tl_const:Nn \c_fnpct_version_minor_number_tl {0}
-\tl_const:Nn \c_fnpct_version_subrelease_tl   {b}
+\tl_const:Nn \c_fnpct_version_minor_number_tl {1}
+\tl_const:Nn \c_fnpct_version_subrelease_tl   {}
 \tl_const:Nx \c_fnpct_version_number_tl
   {
     \c_fnpct_version_major_number_tl .
@@ -93,7 +93,7 @@
 \tl_new:N \l__fnpct_range_tl
 \tl_new:N \l__fnpct_separate_tl
 \tl_new:N \l__fnpct_multiple_footnotes_delimiter_tl
-\tl_set:Nn \l__fnpct_multiple_footnotes_delimiter_tl {;}
+\tl_new:N \l__fnpct_mult_variant_prefix_tl
 \tl_new:N \g__fnpct_this_note_tl
 
 \prop_new:N \l__fnpct_trailing_tokens_prop
@@ -123,11 +123,12 @@
     You~ need~ to~ use~ \token_to_str:N \usepackage [#1] {fnpct} .
   }
 
-\msg_new:nnn {fnpct} {unknown-option}
+\msg_new:nnn {fnpct} {unknown-load-time-option}
   {
     Unknown~ option~ `#1'! \\
     I~ don't~ know~ the~ option~ `#1'.~ Please~ make~ sure~ there~ is~ no~
-    typo.~ Check~ the~ manual~ for~ help.
+    typo.~ Check~ the~ manual~ for~ help.~ Did~ you~ mean~ to~ use~ it~ in~
+    \token_to_str:N \setfnpct ?
   }
 
 \msg_new:nnn {fnpct} {dont-mess-around}
@@ -198,7 +199,7 @@
 \cs_new_protected:Npn \__fnpct_loadtime_warning:n #1
    { \msg_warning:nnV {fnpct} {#1} \l_keys_key_str }
 
-\keys_define:nn {fnpct/package}
+\keys_define:nn {fnpct/load-time}
   {
     multiple                 .bool_gset:N = \g__fnpct_multiple_bool ,
     multiple                 .initial:n = false ,
@@ -213,12 +214,12 @@
     dont-mess-around         .default:n = true ,
     dont-mess-around         .initial:n = false ,
     unknown                  .code:n =
-      \__fnpct_loadtime_warning:n {unknown-option}
+      \__fnpct_loadtime_warning:n {unknown-load-time-option}
   }
 
-\ProcessKeysPackageOptions {fnpct/package}
+\ProcessKeysPackageOptions {fnpct/load-time}
 
-\keys_define:nn {fnpct/package}
+\keys_define:nn {fnpct/load-time}
   {
     multiple         .code:n = \__fnpct_loadtime_error:n {load-time-option} ,
     debug            .code:n = \__fnpct_loadtime_error:n {load-time-option} ,
@@ -678,9 +679,22 @@
 
 \cs_new_protected:Npn \__fnpct_execute: {}
 
+\cs_new_protected:Npn \fnpct_unspace:
+  {
+    \mode_if_horizontal:T
+      {
+        \dim_compare:nNnTF \lastskip > {0pt}
+          { \unskip \fnpct_unspace: }
+          {
+            \int_compare:nNnT \lastpenalty > {0pt}
+              { \unpenalty \fnpct_unspace: }
+          }
+      }
+  }
+
 % #1: boolean
 \cs_new_protected:Npn \fnpct_begin:
-  { \__fnpct_check_after_end:w }
+  { \fnpct_unspace: \__fnpct_check_after_end:w }
 
 % #1: code
 \cs_new_protected:Npn \__fnpct_check_after_end:w #1 \fnpct_end:
@@ -890,17 +904,18 @@
     keep-ranges                .initial:n = false ,
     dont-mess-around           .bool_set:N = \l__fnpct_dont_mess_around_bool ,
     dont-mess-around           .initial:n = false ,
-    mult-fn-delim              .code:n =
-      \tl_set:Nn \l__fnpct_multiple_footnotes_delimiter_tl {#1} ,
-    separation-symbol          .code:n =
-      \renewcommand* \multfootsep {#1} ,
-    range-symbol               .code:n =
-      \renewcommand* \multfootrange {#1} ,
+    mult-fn-delim              .tl_set:N = \l__fnpct_multiple_footnotes_delimiter_tl ,
+    mult-fn-delim              .initial:n = {;} ,
+    mult-variant-prefix        .tl_set:N  = \l__fnpct_mult_variant_prefix_tl ,
+    mult-variant-prefix        .initial:n = mult ,
+    separation-symbol          .code:n = \renewcommand* \multfootsep {#1} ,
+    range-symbol               .code:n = \renewcommand* \multfootrange {#1} ,
     print-separation           .tl_set:N = \l__fnpct_separate_tl ,
     print-separation           .initial:n = \textsuperscript { \multfootsep } ,
     print-range                .tl_set:N = \l__fnpct_range_tl ,
     print-range                .initial:n = \textsuperscript { \multfootrange } ,
     reverse                    .bool_set:N = \l__fnpct_reverse_bool ,
+    punct-after                .code:n = \fnpct_deprecate_option:n {reverse} ,
     after-punct-space          .code:n =
       \fnpct_foreach_action:nn {punctuation}
         { \keys_set:nn {fnpct} { after-##1-space = #1 } } ,
@@ -946,7 +961,7 @@
 \cs_new_protected:Npn \fnpct_create_mult_variant:N #1
   {
     \exp_args:Nc \NewDocumentCommand
-      { mult \__fnpct_remove_backslash:N #1 }
+      { \l__fnpct_mult_variant_prefix_tl \__fnpct_remove_backslash:N #1 }
       { sm }
       {
         \seq_set_split:NVn \l__fnpct_tmpa_seq
@@ -1396,3 +1411,6 @@ tablefootnote
                           future versions, depending on user feedback)
 2022/01/04 v1.0a      - correct file hooks
 2022/01/29 v1.0b      - remove erroneously inserted horizontal skip
+2022/??/?? v1.1       - add \fnpct_unspace: (similar to biblatex's \unspace),
+                        see https://tex.stackexchange.com/questions/467561/
+                      - new option `mult-variant-prefix'

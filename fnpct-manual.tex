@@ -356,6 +356,14 @@ reliable as it is now.  For that reason it defined the following command:
     confused with hay}, sticks\footnote{or lumber according to some sources}
   and bricks\multfootnote{probably fired clay bricks;or something else}.
 \end{example}
+\begin{options}
+  \keyval{mult-variant-prefix}{letters}\Default{mult}
+    \sinceversion{1.1}Determines how the variant commands created by the
+    \option{multiple} option are named.  Choosing
+    \keyis{mult-variant-prefix}{m} would create \cs*{mfootnote} etc.\@ instead
+    of \cs{multfootnote}.
+\end{options}
+  
 This command splits its content at every occurrence of \code{;} and creates a
 footnote for each.  This delimiter can be changed:
 \begin{options}
