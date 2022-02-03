@@ -599,6 +599,7 @@ You could use another token for the star, though, if needed:
       \IfNoValueTF{#2}
         {#NOTE*{#4}}
         {\IfNoValueTF{#3}{#NOTE*[#2]{#4}}{#NOTE*[#2][#3]{#4}}}%
+    }%
   }
 \end{sourcecode}
 Testing showed no problems whatsoever but \fnpct\ does not adapt the command

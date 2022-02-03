@@ -23,7 +23,7 @@
 % The Current Maintainer of this work is Clemens Niederberger.
 % --------------------------------------------------------------------------
 \RequirePackage[multiple]{fnpct}
-\ProvidesClass{fnpct-manual}[2021/01/17]
+\ProvidesClass{fnpct-manual}[2022/02/03]
 
 \LoadClass[load-preamble,add-index]{cnltx-doc}
 \RequirePackage{imakeidx}
@@ -329,6 +329,6 @@
 \fnpct@add@version{2021-01-21}{1.0}
 \fnpct@add@version{2022-01-04}{1.0a}
 \fnpct@add@version{2022-01-29}{1.0b}
-% \fnpct@add@version{2022-??-??}{1.1}
+\fnpct@add@version{2022-02-03}{1.1}
 
 \endinput

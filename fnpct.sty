@@ -27,7 +27,7 @@
 
 \DeclareHookRule {begindocument} {fnpct} {after} {hyperref}
 
-\tl_const:Nn \c_fnpct_date_tl                 {2022/01/29}
+\tl_const:Nn \c_fnpct_date_tl                 {2022/02/03}
 \tl_const:Nn \c_fnpct_version_major_number_tl {1}
 \tl_const:Nn \c_fnpct_version_minor_number_tl {1}
 \tl_const:Nn \c_fnpct_version_subrelease_tl   {}
@@ -278,7 +278,7 @@
 \cs_generate_variant:Nn \fnpct_skip_nobreak:N {c}
 
 % --------------------------------------------------------------------------
-% checking for trailing tokens - reuse an idea from acro
+% checking for trailing tokens - reuse an idea from `acro'
 % #1: name
 \cs_new_protected:Npn \fnpct_new_class:n #1
   {
@@ -295,14 +295,14 @@
   
 % #1: name
 % #2: code
-\cs_new_protected:Npn \fnpct_do_action:nnw #1#2 \fnpct_end:
+\cs_new_protected:Npn \__fnpct_do_action:nnw #1#2 \fnpct_end:
   {
     \prop_if_in:NnTF \g__fnpct_actions_prop {#1}
       { \fnpct_end: \prop_item:Nn \g__fnpct_actions_prop {#1} }
       { \fnpct_end: \use:n }
     {#2}
   }  
-\cs_generate_variant:Nn \fnpct_do_action:nnw {V}
+\cs_generate_variant:Nn \__fnpct_do_action:nnw {V}
 
 % #1: name
 % #2: class
@@ -679,15 +679,24 @@
 
 \cs_new_protected:Npn \__fnpct_execute: {}
 
-\cs_new_protected:Npn \fnpct_unspace:
+\hook_gput_code:nnn {begindocument} {fnpct}
   {
-    \mode_if_horizontal:T
+    \bool_lazy_or:nnTF
+      { \fnpct_if_package_loaded_p:n {biblatex} }
+      { \fnpct_if_package_loaded_p:n {csquotes} }
+      { \cs_new_eq:NN \fnpct_unspace: \unspace }
       {
-        \dim_compare:nNnTF \lastskip > {0pt}
-          { \unskip \fnpct_unspace: }
+        \cs_new_protected:Npn \fnpct_unspace:
           {
-            \int_compare:nNnT \lastpenalty > {0pt}
-              { \unpenalty \fnpct_unspace: }
+            \mode_if_horizontal:T
+              {
+                \dim_compare:nNnTF \lastskip > {0pt}
+                  { \unskip \fnpct_unspace: }
+                  {
+                    \int_compare:nNnT \lastpenalty > {0pt}
+                      { \unpenalty \fnpct_unspace: }
+                  }
+              }
           }
       }
   }
@@ -706,7 +715,7 @@
             \prop_get:NVN \l__fnpct_trailing_actions_prop
               \l_fnpct_trailing_token_tl
               \l_fnpct_action_tl
-            \fnpct_do_action:Vnw \l_fnpct_action_tl {#1}
+            \__fnpct_do_action:Vnw \l_fnpct_action_tl {#1}
           }
           {
             % no trailing punctuation
@@ -730,8 +739,7 @@
   {
     \bool_if:NF \l__fnpct_dont_mess_around_bool 
       {
-        \fnpct_if_switched:F
-          { \fnpct_add_punctuation_space:n {after} }
+        \fnpct_if_switched:F { \fnpct_add_punctuation_space:n {after} }
          \bool_if:NF \l_fnpct_trailing_action_bool
            { % no punctiation following
              \bool_if:NF \l__fnpct_end_collection_bool
@@ -772,7 +780,6 @@
 % #1: command
 % #2: argument spec
 % #3: code where #NOTE refers to the original note
-
 \cs_new_protected:Npn \fnpct_adapt_note:Nnn #1#2#3
   {
     \fnpct_if_adapted:NF #1
@@ -818,7 +825,7 @@
   {
     \bool_if:NTF \l__fnpct_reverse_bool
       { \bool_if:nF }
-      { \bool_if:NT }
+      { \bool_if:nT }
     {#1} { \bool_set_true:N \l__fnpct_switched_bool }
   }
 
@@ -848,22 +855,17 @@
 \NewDocumentCommand \AdaptNote {mmom}
   {
     \fnpct_adapt_note:Nnn #1 {#2} {#4}
-    \IfNoValueF {#3}
-      { \fnpct_set_counter_name:Nn #1 {#3} }
+    \IfNoValueF {#3} { \fnpct_set_counter_name:Nn #1 {#3} }
   }
 
 \NewDocumentCommand \AdaptNoteName {mmom}
   {
     \fnpct_adapt_note:cnn {#1} {#2} {#4}
-    \IfNoValueF {#3}
-      { \fnpct_set_counter_name:cn {#1} {#3} }
+    \IfNoValueF {#3} { \fnpct_set_counter_name:cn {#1} {#3} }
   }
 
 \NewDocumentCommand \AdaptText {mmm}
-  {
-    \fnpct_adapt_note:Nnn #1 {#2}
-      { \fnpct_text: #3 }
-  }
+  { \fnpct_adapt_note:Nnn #1 {#2} { \fnpct_text: #3 } }
 
 \NewDocumentCommand \innernote {+m}
   { \msg_warning:nn {fnpct} {command-removed} \use:n {#1} }
@@ -1071,6 +1073,7 @@
       { \bool_set_true:N \l__fnpct_makepagenote_bool }
   }
 
+% `sepfootnotes' package:
 \fnpct_special_treatment:nn {sepfootnotes}
   {
     \cs_new_eq:NN \fnpct_sepfootnote_new:n \sep@new
@@ -1138,7 +1141,7 @@
           { \IfNoValueTF {#1} {#NOTE} {#NOTE[#1]} }
         \fnpct_if_multiple:T { \MultVariant \sidenote }
       }
-    % sidenotes:
+    %% sidenotes:
     \fnpct_treatment:nn {sidenotes}
       {
         % `sidenotes' implements its \sidenote in terms of the user
@@ -1146,6 +1149,7 @@
         % difficult if not impossible to adapt its commands
         \msg_warning:nnn {fnpct} {cannot-adapt} {sidenotes}
       }
+    %% tufte-latex:
     \bool_lazy_or:nnT
       { \fnpct_if_class_loaded_p:n {tufte-handout} }
       { \fnpct_if_class_loaded_p:n {tufte-book} }
@@ -1317,6 +1321,7 @@
           }
       }
   }
+
 \file_input_stop:
 
 % --------------------------------------------------------------------------
@@ -1411,6 +1416,6 @@ tablefootnote
                           future versions, depending on user feedback)
 2022/01/04 v1.0a      - correct file hooks
 2022/01/29 v1.0b      - remove erroneously inserted horizontal skip
-2022/??/?? v1.1       - add \fnpct_unspace: (similar to biblatex's \unspace),
+2022/02/03 v1.1       - add \fnpct_unspace: (similar/equal to biblatex's \unspace),
                         see https://tex.stackexchange.com/questions/467561/
                       - new option `mult-variant-prefix'
