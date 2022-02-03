@@ -85,6 +85,7 @@
 \bool_new:N \g__fnpct_multiple_bool
 \bool_new:N \g__fnpct_text_bool
 \bool_new:N \l__fnpct_debug_bool
+\bool_new:N \l__fnpct_unspace_bool
 
 \tl_new:N \l_fnpct_action_tl
 \tl_new:N \l_fnpct_last_action_tl
@@ -684,17 +685,23 @@
     \bool_lazy_or:nnTF
       { \fnpct_if_package_loaded_p:n {biblatex} }
       { \fnpct_if_package_loaded_p:n {csquotes} }
-      { \cs_new_eq:NN \fnpct_unspace: \unspace }
+      {
+        \cs_new_protected:Npn \fnpct_unspace:
+          { \bool_if:NT \l__fnpct_unspace_bool { \unspace } }
+      }
       {
         \cs_new_protected:Npn \fnpct_unspace:
           {
-            \mode_if_horizontal:T
+            \bool_if:NT \l__fnpct_unspace_bool
               {
-                \dim_compare:nNnTF \lastskip > {0pt}
-                  { \unskip \fnpct_unspace: }
+                \mode_if_horizontal:T
                   {
-                    \int_compare:nNnT \lastpenalty > {0pt}
-                      { \unpenalty \fnpct_unspace: }
+                    \dim_compare:nNnTF \lastskip > {0pt}
+                      { \unskip \fnpct_unspace: }
+                      {
+                        \int_compare:nNnT \lastpenalty > {0pt}
+                          { \unpenalty \fnpct_unspace: }
+                      }
                   }
               }
           }
@@ -906,6 +913,8 @@
     keep-ranges                .initial:n = false ,
     dont-mess-around           .bool_set:N = \l__fnpct_dont_mess_around_bool ,
     dont-mess-around           .initial:n = false ,
+    unspace                    .bool_set:N = \l__fnpct_unspace_bool ,
+    unspace                    .initial:n = true ,
     mult-fn-delim              .tl_set:N = \l__fnpct_multiple_footnotes_delimiter_tl ,
     mult-fn-delim              .initial:n = {;} ,
     mult-variant-prefix        .tl_set:N  = \l__fnpct_mult_variant_prefix_tl ,
@@ -1419,3 +1428,4 @@ tablefootnote
 2022/02/03 v1.1       - add \fnpct_unspace: (similar/equal to biblatex's \unspace),
                         see https://tex.stackexchange.com/questions/467561/
                       - new option `mult-variant-prefix'
+                      - new option `unspace'

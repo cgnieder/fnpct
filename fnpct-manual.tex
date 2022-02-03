@@ -105,7 +105,8 @@ full stop.  Additional punctuation marks can be added to the switching
 behavior and the amount of kerning can be set for each punctuation mark
 individually.  This behavior can also be turned off.
 
-\subsection{Basics}
+\subsection{New Behavior of \cs*{footnote}}
+\subsubsection{Interaction With Punctuation}
 The \fnpct\ package basically does two things to footnotes:
 \begin{itemize}
   \item if footnote marks are followed by a comma or a full stop\footnote{More
@@ -163,6 +164,20 @@ amount specified with the option \option{before-punct-space}.
   \caption{The effect of \fnpct.}\label{fig:effects}
 \end{figure}
 
+\subsubsection{Space Before Footnotes}\label{sec:space-before}
+\fnpct\sinceversion{1.1} tries to help you in one more way: it removes a
+possible space before a footnote command:
+
+\begin{example}
+  The three little pigs built their houses out of straw \footnote{not to be
+    confused with hay}, sticks  \footnote{or lumber according to some sources}
+  and bricks \footnote{probably fired clay bricks}.
+\end{example}
+
+For this behavior it uses \pkg{biblatex}'s (or \pkg{csquotes}') command
+\cs{unspace} if available.  Otherwise it defines the command for itself.  This
+behavior can be turned off by an option.
+
 \subsection{Temporarily disable (or enable) switching -- new syntax of the
   \cs*{footnote} command}
 One maybe want to put some footnote marks \emph{before} the punctuation and
@@ -209,6 +224,9 @@ In case you set \keyis{reverse}{true} the \sarg\ argument temporarily
     Switches of \fnpct's mechanism.
   \keybool{reverse}\Default{false}
     This option reverses the behavior of starred and un-starred footnotes.
+  \keybool{unspace}\Default{true}
+    \sinceversion{1.1}This option turns the behavior described in
+    section~\ref{sec:space-before} off or on.
   \keybool{ranges}\Default{false}
     Activates ranges for multiple footnotes.  This is not compatible with
     \pkg{hyperref} and does not work for the marks of some packages.
