@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------
-the FNPCT package v1.1 2022/02/03
+the FNPCT package v1.1a 2022/02/27
 
   footnotes' interaction with punctuation
 
@@ -23,8 +23,9 @@ This work has the LPPL maintenance status `maintained'.
 The Current Maintainer of this work is Clemens Niederberger.
 --------------------------------------------------------------------------
 The fnpct package consists of the files
- - fnpct.sty,
- - fnpct_en.tex and fnpct_en.pdf
+ - fnpct.sty, fnpct-2019-10-05.sty
+ - fnpct-check-packages.tex
+ - fnpct-manual.tex, fnpct-manual.cls fnpct-manual.pdf
  - README
 --------------------------------------------------------------------------
 the package is inspired by the following question on TeX.SE:

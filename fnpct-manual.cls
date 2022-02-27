@@ -23,7 +23,7 @@
 % The Current Maintainer of this work is Clemens Niederberger.
 % --------------------------------------------------------------------------
 \RequirePackage[multiple]{fnpct}
-\ProvidesClass{fnpct-manual}[2022/02/03]
+\ProvidesClass{fnpct-manual}[2022/02/27]
 
 \LoadClass[load-preamble,add-index]{cnltx-doc}
 \RequirePackage{imakeidx}
@@ -75,7 +75,8 @@
     thempfootnote
   } ,
   makeindex-setup = {options={-s cnltx.ist},columns=3,columnsep=1em} ,
-  index-setup = {othercode=\footnotesize,level=\addsec}
+  index-setup = {othercode=\footnotesize,level=\addsec},
+  quote-author-format = \upshape
 }
 
 \RequirePackage{array,booktabs}
@@ -330,5 +331,6 @@
 \fnpct@add@version{2022-01-04}{1.0a}
 \fnpct@add@version{2022-01-29}{1.0b}
 \fnpct@add@version{2022-02-03}{1.1}
+\fnpct@add@version{2022-02-27}{1.1a}
 
 \endinput

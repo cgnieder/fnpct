@@ -37,10 +37,14 @@
   before-footnote-space = 0.05em
 }
 
+\usepackage[biblatex]{embrac}
+\ChangeEmph{[}[,.02em]{]}[.055em,-.08em]
+\ChangeEmph{(}[-.01em,.04em]{)}[.04em,-.05em]
+
 \addbibresource{cnltx.bib}
 \addbibresource{\jobname.bib}
 \addbibresource{biblatex-examples.bib}
-\begin{filecontents*}{\jobname.bib}
+\begin{filecontents*}[overwrite]{\jobname.bib}
 @book{bringhurst04,
   title     = {The Elements of Typographic Style},
   author    = {Robert Bringhurst},
@@ -48,6 +52,14 @@
   version   = {3.2},
   isbn      = {978-0-88179-205-5},
   publisher = {Hartley \&\ Marks, Canada}
+}
+@online{tex.sx:56094,
+  title   = {Is there a way to automatically change kerning between
+    commas/full stops and footnote marks?} ,
+  author  = {Christian} ,
+  date    = {2012-05-16} ,
+  url     = {https://tex.stackexchange.com/q/56094/5049} ,
+  visited = {2022-03-27}
 }
 \end{filecontents*}
 
@@ -76,7 +88,9 @@
   try to add it again to \fnpct. \par
   Please read this manual carefully so you detect all changes. \par
   \emph{I am sorry for the inconvenience but I am convinced that the new
-    syntax is more powerful and more flexible in the long run.}
+    syntax is more powerful and more flexible in the long run.} \par
+  You can fall back to the last version~0 by saying
+  \cs*{usepackage}\Marg{fnpct}\Oarg{=v0}.
 \end{bewareofthedog}
 
 \section{License}
@@ -89,7 +103,7 @@ superscripts. This is not appropriate for all superscripts.  Symbols must be
 handled differently than numbers.  And of course the amount depends on the
 chosen font.  \bringhurst\ says in \citetitle{bringhurst04}:
 
-\begin{cnltxquote}[\emph{\citetitle{bringhurst04}} \cite{bringhurst04}]
+\begin{cnltxquote}[\citetitle{bringhurst04} \emph{\cite{bringhurst04}}]
   Superscripts frequently come at the ends of phrases or sentences.  If they
   are high above the line, they can be kerned over a comma or period, but this
   may endanger readability, especially if the text is set in a modest size.
@@ -103,7 +117,10 @@ directly.  The amounts of the kerning can be changed using options.
 \fnpct\ also switches the order of the superscript and the following comma or
 full stop.  Additional punctuation marks can be added to the switching
 behavior and the amount of kerning can be set for each punctuation mark
-individually.  This behavior can also be turned off.
+individually.  This behavior can be turned off.
+
+The package has been inspired by a question on the Q\&A site
+\url{tex.stackexchange.com}~\cite{tex.sx:56094}.
 
 \subsection{New Behavior of \cs*{footnote}}
 \subsubsection{Interaction With Punctuation}
@@ -485,7 +502,6 @@ way\footnote{Using \cs*{@mpfn} as counter name is essential to make ranges
   \AdaptNote\footnote{o+m}[\@mpfn]{\IfNoValueTF{#1}{#NOTE{#2}}{#NOTE[#1]{#2}}}
   \AdaptNote\footnotemark{o}{\IfNoValueTF{#1}{#NOTE}{#NOTE[#1]}}
   \MultVariant\footnote
-  % KOMA-Script's or memoir's \footref:
   \AdaptNote\footref{m}{#NOTE{#1}}
 \end{sourcecode}
 You essentially have to rebuild the syntax of the original command and place

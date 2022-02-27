@@ -25,9 +25,11 @@
 \RequirePackage {l3keys2e}
 \ExplSyntaxOn
 
+\DeclareRelease {v0} {2019-10-05} {fnpct-2019-10-05.sty}
+
 \DeclareHookRule {begindocument} {fnpct} {after} {hyperref}
 
-\tl_const:Nn \c_fnpct_date_tl                 {2022/02/26}
+\tl_const:Nn \c_fnpct_date_tl                 {2022/02/27}
 \tl_const:Nn \c_fnpct_version_major_number_tl {1}
 \tl_const:Nn \c_fnpct_version_minor_number_tl {1}
 \tl_const:Nn \c_fnpct_version_subrelease_tl   {a}
@@ -48,6 +50,8 @@
   {\c_fnpct_date_tl}
   {\c_fnpct_version_tl}
   {\c_fnpct_info_tl}
+
+\DeclareCurrentRelease {v1} {\c_fnpct_date_tl}
 
 % --------------------------------------------------------------------------
 % scratch variables and variants of kernel functions:
@@ -481,21 +485,6 @@
 \cs_new_protected:Npn \fnpct_save_note_command:N #1
   {
     \cs_undefine:c {fnpct_original_ \__fnpct_remove_backslash:N #1 :w}
-    % \cs_if_exist:cTF { \__fnpct_remove_backslash:N #1 ~ code }
-    %   {% xparse command
-    %     \cs_new_eq:cc
-    %       { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
-    %       { \__fnpct_remove_backslash:N #1 ~ code }
-    %   }
-    %   {
-    %     \cs_if_exist:cTF { \__fnpct_remove_backslash:N #1 ~ }
-    %       {% robust command
-    %         \cs_new_eq:cc
-    %           { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
-    %           { \__fnpct_remove_backslash:N #1 ~ }
-    %       }
-    %       { \cs_new_eq:cN { fnpct_original_ \__fnpct_remove_backslash:N #1 :w } #1 }
-    %     }
     \exp_args:Nc \DeclareCommandCopy
       { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
       #1
@@ -1133,9 +1122,7 @@
     \fnpct_if_multiple:T { \MultVariant \footnote }
     % TODO: should we adapt \thanks? Not with memoir, though...
     % \AdaptNote \thanks {+m} { \cs_set_eq:NN \rlap \use:n #NOTE{#1} }
-    %% KOMA-Script and memoir:
-    \cs_if_exist:NT \footref
-      { \AdaptNote \footref {m} { #NOTE{#1} } }
+    \AdaptNote \footref {m} { #NOTE{#1} }
     %% snotez:
     \fnpct_treatment:nn {snotez}
       {
@@ -1433,6 +1420,9 @@ tablefootnote
                         see https://tex.stackexchange.com/questions/467561/
                       - new option `mult-variant-prefix'
                       - new option `unspace'
-2022/02/26 v1.1a      - fix bug in \fnpct_unspace:
+2022/02/27 v1.1a      - fix bug in \fnpct_unspace:
                       - fix bug in sepfootnotes adaption
                       - add package check file
+                      - use \DeclareCommandCopy for saving the original note
+                        commands
+                      - use LaTeX's release mechanism
