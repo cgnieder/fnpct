@@ -1,0 +1,275 @@
+\long\def\StartPackageCheck#1#2\EndPackageCheck{%
+  \def\thispackagename{#1}%
+  \ifx\testpackagename\thispackagename
+  #2%
+  \else
+  \fi
+}
+\newcommand\CheckPackage[1]{\def\testpackagename{#1}}
+
+\CheckPackage{tablefootnote}
+
+% NONE
+\StartPackageCheck{none}
+\documentclass{article}
+\usepackage{fnpct}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \footnote{not to be
+  confused with hay}, sticks \footnote{or lumber according to some sources}
+and bricks \footnote{probably fired clay bricks}\footnote{who knows?}.
+
+\end{document}
+\EndPackageCheck
+
+% BIBLATEX
+\StartPackageCheck{biblatex}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage[style=authoryear]{biblatex}
+\addbibresource{biblatex-examples.bib}
+
+\AdaptNote\footcite{t+oo+m}[footnote]{%
+  \setfnpct{dont-mess-around}%
+  \IfBooleanTF{#1}{%
+    \IfNoValueTF{#2}
+      {#NOTE{#4}}
+      {\IfNoValueTF{#3}{#NOTE[#2]{#4}}{#NOTE[#2][#3]{#4}}}%
+  }{%
+  \IfNoValueTF{#2}
+    {#NOTE*{#4}}
+    {\IfNoValueTF{#3}{#NOTE*[#2]{#4}}{#NOTE*[#2][#3]{#4}}}%
+  }%
+}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \footcite{companion},
+sticks \footcite{knuth:ct:a} and bricks
+\footcite{knuth:ct:c}\footcite{knuth:ct:d}.
+
+\end{document}
+\EndPackageCheck
+
+% BIGFOOT
+\StartPackageCheck{bigfoot}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{bigfoot}
+\DeclareNewFootnote[para]{default}
+\DeclareNewFootnote[para]{B}[alph]
+
+\begin{document}
+
+The three little pigs built their houses out of straw \footnote{not to be
+  confused with hay}, sticks \footnote{or lumber according to some sources}
+and bricks \footnote{probably fired clay bricks}\footnote{who knows?}.
+
+The three little pigs built their houses out of straw \footnoteB{not to be
+  confused with hay}, sticks \footnoteB{or lumber according to some sources}
+and bricks \footnoteB{probably fired clay bricks}\footnoteB{who knows?}.
+
+\end{document}
+\EndPackageCheck
+
+% ENDNOTES
+\StartPackageCheck{endnotes}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{endnotes}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \endnote{not to be
+  confused with hay}, sticks \endnote{or lumber according to some sources}
+and bricks \endnote{probably fired clay bricks}\endnote{who knows?}.
+
+\theendnotes
+
+\end{document}
+\EndPackageCheck
+
+% ENOTEZ
+\StartPackageCheck{enotez}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{enotez}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \endnote{not to be
+  confused with hay}, sticks \endnote{or lumber according to some sources}
+and bricks \endnote{probably fired clay bricks}\endnote{who knows?}.
+
+\printendnotes
+
+\end{document}
+\EndPackageCheck
+
+% FIXFOOT
+\StartPackageCheck{fixfoot}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{fixfoot}
+\DeclareFixedFootnote\who{who knows?}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \footnote{not to be
+  confused with hay}\who, sticks \footnote{or lumber according to some
+  sources} and bricks \footnote{probably fired clay bricks}\who.
+
+\end{document}
+\EndPackageCheck
+
+% FOOTMISC
+\StartPackageCheck{footmisc}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage[para,symbol]{footmisc}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \footnote{not to be
+  confused with hay}, sticks \footnote{or lumber according to some sources}
+and bricks \footnote{probably fired clay bricks}\footnote{who knows?}.
+
+\end{document}
+\EndPackageCheck
+
+% FOOTNOTE
+\StartPackageCheck{footnote}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{footnote}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \footnote{not to be
+  confused with hay}, sticks \footnote{or lumber according to some sources}
+and bricks \footnote{probably fired clay bricks}\footnote{who knows?}.
+
+\end{document}
+\EndPackageCheck
+
+% MANYFOOT
+\StartPackageCheck{manyfoot}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage[para]{manyfoot}
+\DeclareNewFootnote{default}
+\DeclareNewFootnote[para]{B}[alph]
+
+\begin{document}
+
+The three little pigs built their houses out of straw \footnote{not to be
+  confused with hay}, sticks \footnote{or lumber according to some sources}
+and bricks \footnote{probably fired clay bricks}\footnote{who knows?}.
+
+The three little pigs built their houses out of straw \footnoteB{not to be
+  confused with hay}, sticks \footnoteB{or lumber according to some sources}
+and bricks \footnoteB{probably fired clay bricks}\footnoteB{who knows?}.
+
+\end{document}
+\EndPackageCheck
+
+% PAGENOTE
+\StartPackageCheck{pagenote}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{pagenote}
+\makepagenote
+
+\begin{document}
+
+\section{Three Little Pigs}
+The three little pigs built their houses out of straw \pagenote{not to be
+  confused with hay}, sticks \pagenote{or lumber according to some sources}
+and bricks \pagenote{probably fired clay bricks}\pagenote{who knows?}.
+
+\printnotes
+
+\end{document}
+\EndPackageCheck
+
+% PARNOTES
+\StartPackageCheck{parnotes}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{parnotes}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \parnote{not to be
+  confused with hay}, sticks \parnote{or lumber according to some sources} and
+bricks \parnote{probably fired clay bricks}\parnote{who knows?}.  \parnotes
+
+\end{document}
+\EndPackageCheck
+
+% SEPFOOTNOTES
+\StartPackageCheck{sepfootnotes}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{sepfootnotes}
+\sepfootnotecontent{one}{not to be confused with hay}
+\sepfootnotecontent{two}{or lumber according to some sources}
+\sepfootnotecontent{three}{probably fired clay bricks}
+\sepfootnotecontent{four}{who knows?}
+
+\begin{document}
+
+\show\unspace
+
+The three little pigs built their houses out of straw \sepfootnote{one},
+sticks \sepfootnote{two} and bricks\sepfootnote{three}\sepfootnote{four}.
+
+\end{document}
+\EndPackageCheck
+
+% SNOTEZ
+\StartPackageCheck{snotez}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{snotez}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \sidenote{not to be
+  confused with hay}, sticks \sidenote{or lumber according to some sources}
+and bricks \sidenote{probably fired clay bricks}\sidenote{who knows?}.
+
+\end{document}
+\EndPackageCheck
+
+% TABLEFOOTNOTE
+\StartPackageCheck{tablefootnote}
+\documentclass{article}
+\usepackage{fnpct}
+\usepackage{tablefootnote}
+
+\begin{document}
+
+\begin{tabular}{l}
+  The three little pigs built their houses out of straw \tablefootnote{not to be
+  confused with hay}, sticks \tablefootnote{or lumber according to some sources} and
+  bricks \tablefootnote{probably fired clay bricks}\tablefootnote{who knows?}.
+\end{tabular}
+
+\end{document}
+\EndPackageCheck
+
+% TUFTE
+\StartPackageCheck{tufte}
+\documentclass{tufte-handout}
+\usepackage{fnpct}
+
+\begin{document}
+
+The three little pigs built their houses out of straw \sidenote{not to be
+  confused with hay}, sticks \sidenote{or lumber according to some sources}
+and bricks \sidenote{probably fired clay bricks}\sidenote{who knows?}.
+
+\end{document}
+\EndPackageCheck
