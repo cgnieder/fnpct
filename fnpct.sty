@@ -27,10 +27,10 @@
 
 \DeclareHookRule {begindocument} {fnpct} {after} {hyperref}
 
-\tl_const:Nn \c_fnpct_date_tl                 {2022/02/03}
+\tl_const:Nn \c_fnpct_date_tl                 {2022/02/26}
 \tl_const:Nn \c_fnpct_version_major_number_tl {1}
 \tl_const:Nn \c_fnpct_version_minor_number_tl {1}
-\tl_const:Nn \c_fnpct_version_subrelease_tl   {}
+\tl_const:Nn \c_fnpct_version_subrelease_tl   {a}
 \tl_const:Nx \c_fnpct_version_number_tl
   {
     \c_fnpct_version_major_number_tl .
@@ -481,21 +481,24 @@
 \cs_new_protected:Npn \fnpct_save_note_command:N #1
   {
     \cs_undefine:c {fnpct_original_ \__fnpct_remove_backslash:N #1 :w}
-    \cs_if_exist:cTF { \__fnpct_remove_backslash:N #1 ~ code }
-      {% xparse command
-        \cs_new_eq:cc
-          { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
-          { \__fnpct_remove_backslash:N #1 ~ code }
-      }
-      {
-        \cs_if_exist:cTF { \__fnpct_remove_backslash:N #1 ~ }
-          {% robust command
-            \cs_new_eq:cc
-              { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
-              { \__fnpct_remove_backslash:N #1 ~ }
-          }
-          { \cs_new_eq:cN { fnpct_original_ \__fnpct_remove_backslash:N #1 :w } #1 }
-      }
+    % \cs_if_exist:cTF { \__fnpct_remove_backslash:N #1 ~ code }
+    %   {% xparse command
+    %     \cs_new_eq:cc
+    %       { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
+    %       { \__fnpct_remove_backslash:N #1 ~ code }
+    %   }
+    %   {
+    %     \cs_if_exist:cTF { \__fnpct_remove_backslash:N #1 ~ }
+    %       {% robust command
+    %         \cs_new_eq:cc
+    %           { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
+    %           { \__fnpct_remove_backslash:N #1 ~ }
+    %       }
+    %       { \cs_new_eq:cN { fnpct_original_ \__fnpct_remove_backslash:N #1 :w } #1 }
+    %     }
+    \exp_args:Nc \DeclareCommandCopy
+      { fnpct_original_ \__fnpct_remove_backslash:N #1 :w }
+      #1
     \seq_put_right:Nn \l__fnpct_adapted_commands_seq {#1}
     \fnpct_set_counter_name:Nx #1 { \__fnpct_remove_backslash:N #1 }
   }
@@ -696,11 +699,11 @@
               {
                 \mode_if_horizontal:T
                   {
-                    \dim_compare:nNnTF \lastskip > {0pt}
-                      { \unskip \fnpct_unspace: }
+                    \dim_compare:nNnTF {\lastskip} > {0pt}
+                      { \tex_unskip:D \fnpct_unspace: }
                       {
-                        \int_compare:nNnT \lastpenalty > {0pt}
-                          { \unpenalty \fnpct_unspace: }
+                        \int_compare:nNnT {\lastpenalty} > {0}
+                          { \tex_unpenalty:D \fnpct_unspace: }
                       }
                   }
               }
@@ -1092,8 +1095,8 @@
       \fnpct_sepfootnote_new:n {#1}
     }
   }
-  
-\hook_gput_code:nnn {begindocument} {fnpct}
+
+\hook_gput_code:nnn {begindocument/end} {fnpct}
   {
     \fnpct_if_package_loaded:nT {hyperref}
       {
@@ -1304,8 +1307,9 @@
       }
     %% sepfootnotes
     \fnpct_treatment:nn {sepfootnotes}
-    {
+      {
         \cs_set:Nn \__fnpct_sep_mark:n {\footnotemark}
+        \AdaptNote \sepfootnote {m} [\@mpfn] {#NOTE{#1}}
         \seq_map_inline:Nn \l__fnpct_sepfootnotes_seq
           {
             \cs_if_eq:cNTF {#1notemark} \__fnpct_sep_mark:n
@@ -1429,3 +1433,6 @@ tablefootnote
                         see https://tex.stackexchange.com/questions/467561/
                       - new option `mult-variant-prefix'
                       - new option `unspace'
+2022/02/26 v1.1a      - fix bug in \fnpct_unspace:
+                      - fix bug in sepfootnotes adaption
+                      - add package check file
